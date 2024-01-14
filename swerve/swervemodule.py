@@ -46,10 +46,12 @@ class SwerveModule():
         self.angle_motor_encoder = self.angle_motor.getEncoder()
 
         # Request specific angles from the PID controller 
-        self.angle_pid.setP(0.2)
-        #self.angle_pid.setI(0.01)
-        #self.angle_pid.setD(0.01)
+        self.angle_pid.setP(0.4)
+        self.angle_pid.setI(0)
+        self.angle_pid.setD(0.01)
 
+        #self.angle_pid.setFeedbackDevice(self.angle_absolute_encoder)
+        
         self.angle_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.angle) * math.pi * 2.0)        
         self.angle_absolute_encoder = self.angle_motor.getAbsoluteEncoder(encoderType=rev.SparkAbsoluteEncoder.Type.kDutyCycle)
         
