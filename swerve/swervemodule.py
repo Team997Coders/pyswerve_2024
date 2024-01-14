@@ -49,16 +49,17 @@ class SwerveModule():
         self.angle_pid.setP(0.4)
         self.angle_pid.setI(0)
         self.angle_pid.setD(0.01)
-
-        #self.angle_pid.setFeedbackDevice(self.angle_absolute_encoder)
         
-        self.angle_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.angle) * math.pi * 2.0)        
+        self.angle_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.angle) * math.pi * 2.0)    
         self.angle_absolute_encoder = self.angle_motor.getAbsoluteEncoder(encoderType=rev.SparkAbsoluteEncoder.Type.kDutyCycle)
         
         if module_config.encoder.conversion_factor is not None:
             self.angle_absolute_encoder.setPositionConversionFactor(module_config.encoder.conversion_factor)
 
-        #self.init_rotation(self.config)
+
+        self.angle_pid.setFeedbackDevice(self.angle_absolute_encoder)
+
+        self.init_rotation()
 
     def report_to_dashboard(self):
         sd.putNumber(f"Drive {self.id} Position", self.drive_motor_encoder.getPosition())
@@ -73,13 +74,17 @@ class SwerveModule():
 
     def set_angle(self, angle: float):
         '''Set the angle of the wheel in radians, travel the shortest distance to requested angle'''
-        
         pid_angle = angle + self.rel_to_corrected_angle_adjustment
+        self.angle_pid.setReference(self.clamp_angle(pid_angle), rev.CANSparkMax.ControlType.kPosition)
+        self.angle_pid_last_reference = self.clamp_angle(pid_angle + self.rel_to_corrected_angle_adjustment)
+
+        # ---------------------------------
+        #pid_angle = angle + self.rel_to_corrected_angle_adjustment
         
-        rel_position = self.angle_motor_encoder.getPosition() 
-        adjustment = shortest_angle_difference(rel_position + self.rel_to_corrected_angle_adjustment, pid_angle)
-        self.angle_pid.setReference(self.clamp_angle(rel_position + adjustment), rev.CANSparkMax.ControlType.kPosition)
-        self.angle_pid_last_reference = self.clamp_angle(rel_position + adjustment)
+        #rel_position = self.angle_motor_encoder.getPosition() 
+        #adjustment = shortest_angle_difference(rel_position + self.rel_to_corrected_angle_adjustment, pid_angle)
+        #self.angle_pid.setReference(self.clamp_angle(rel_position + adjustment), rev.CANSparkMax.ControlType.kPosition)
+        #self.angle_pid_last_reference = self.clamp_angle(rel_position + adjustment)
 
     @staticmethod
     def init_motor(motor: rev.CANSparkMax, config: MotorConfig):
@@ -95,8 +100,9 @@ class SwerveModule():
         '''Returns true if the wheel is in the correct position, false if it needs to be adjusted'''
         if self.config.encoder.offset is not None:
             required_absolute_adjustment = self.config.encoder.offset #shortest_angle_difference(self.angle_absolute_encoder.getPosition(), self.angle_absolute_encoder.getPosition() - self.config.encoder.offset)
-            self.rel_to_absolute_angle_adjustment = shortest_angle_difference(self.clamp_angle(self.angle_motor_encoder.getPosition()), self.angle_absolute_encoder.getPosition())
-
+            self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
+            #self.rel_to_absolute_angle_adjustment = shortest_angle_difference(self.clamp_angle(self.angle_motor_encoder.getPosition()), self.angle_absolute_encoder.getPosition())
+            self.rel_to_absolute_angle_adjustment = 0
             self.rel_to_corrected_angle_adjustment = self.rel_to_absolute_angle_adjustment + required_absolute_adjustment
         return True
     
