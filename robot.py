@@ -31,8 +31,7 @@ class MyRobot(wpilib.TimedRobot):
     def testInit(self) -> None:
         super().testInit()  
         self.swerve_drive.testInit()
-
-    
+ 
     def testPeriodic(self) -> None: 
         super().testPeriodic() 
         self.swerve_drive.testPeriodic()

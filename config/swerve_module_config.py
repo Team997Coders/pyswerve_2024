@@ -37,7 +37,7 @@ class MotorConfig():
 class EncoderConfig():
     '''Information to configure an encoder on the RoboRIO'''
     id: int | None # Encoder ID on the RoboRIO, if there is one
-    offset: float | None # Offset in radians
+    offset: float | None # Offset in radians.  Subtract this number from the absolute encoder value to get 0 degrees relative to robot chassis
     conversion_factor: float | None # Conversion factor from encoder ticks to radians
 
     def __init__(self, id: int | None = None, offset: float | None = None, conversion_factor: float | None = None):

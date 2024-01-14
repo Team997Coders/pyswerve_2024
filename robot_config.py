@@ -5,22 +5,22 @@ from config import *
 swerve_modules = {module_position.front_left: 
                     SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
                                        turn_motor=MotorConfig(id=1, inverted=False),
-                                        encoder=EncoderConfig(id=None, offset=3.054, conversion_factor=math.pi*2),
+                                        encoder=EncoderConfig(id=None, offset=1.112, conversion_factor=math.pi*2),
                                         location=(12, 12)),
                     module_position.front_right:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False),
                                        turn_motor=MotorConfig(id=7, inverted=False),
-                                        encoder=EncoderConfig(id=None, offset=-0.649, conversion_factor=math.pi*2),
+                                        encoder=EncoderConfig(id=None, offset=3.558, conversion_factor=math.pi*2),
                                         location=(-12, 12)),
                     module_position.back_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=2, inverted=False),
                                        turn_motor=MotorConfig(id=3, inverted=False),
-                                        encoder=EncoderConfig(id=None, offset=-1.97, conversion_factor=math.pi*2),
+                                        encoder=EncoderConfig(id=None, offset=3.547, conversion_factor=math.pi*2),
                                         location=(12, -12)),
                     module_position.back_right:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=4, inverted=False),
                                        turn_motor=MotorConfig(id=5, inverted=False),
-                                        encoder=EncoderConfig(id=None, offset=-0.4048, conversion_factor=math.pi*2),
+                                        encoder=EncoderConfig(id=None, offset=2.938, conversion_factor=math.pi*2),
                                         location=(-12, -12)) 
                  } # type: dict[module_position, SwerveModuleConfig]
 

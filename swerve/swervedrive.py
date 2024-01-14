@@ -54,19 +54,22 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
         self.start_time = time.monotonic() 
 
         self.tests = [
-            TestConfig(1, self.runDriveMotorTest, (module_position.front_left, 0.05)),
-            TestConfig(1, self.runDriveMotorTest, (module_position.front_right, 0.05)),
-            TestConfig(1, self.runDriveMotorTest, (module_position.back_left, 0.05)),
-            TestConfig(1, self.runDriveMotorTest, (module_position.back_right, 0.05)),
+            
 
-            TestConfig(1, self.runAngleMotorTest, (module_position.front_left, 0.05)),
-            TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.05)),
-            TestConfig(1, self.runAngleMotorTest, (module_position.back_left, 0.05)),
-            TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.05)),
+            #TestConfig(1, self.runAngleMotorTest, (module_position.front_left, 0.05)),
+            #TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.05)),
+            #TestConfig(1, self.runAngleMotorTest, (module_position.back_left, 0.05)),
+            #TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.05)), 
+           
             TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, 0)),
             TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, 0)),
             TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, 0)),
             TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, 0)),
+
+            TestConfig(1, self.runDriveMotorTest, (module_position.front_left, 0.05)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.front_right, 0.05)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.back_left, 0.05)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.back_right, 0.05)),
 
             TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, math.pi / 2)),
             TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, math.pi / 2)),
