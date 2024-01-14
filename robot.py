@@ -11,12 +11,14 @@ class MyRobot(wpilib.TimedRobot):
     swerve_drive: swerve.SwerveDriveBasicFunctionTest
 
     def robotInit(self):
-         self.swerve_drive = swerve.SwerveDriveBasicFunctionTest(robot_config.swerve_modules, robot_config.physical_properties)
+        self.swerve_drive = swerve.SwerveDriveBasicFunctionTest(robot_config.swerve_modules, robot_config.physical_properties)
+
+        self.swerve_drive.initialize()
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
         self.swerve_drive.report_to_dashboard()
-         
+  
     def teleopPeriodic(self):
         super().teleopPeriodic()
 
@@ -27,10 +29,10 @@ class MyRobot(wpilib.TimedRobot):
         super().autonomousPeriodic()
 
     def testInit(self) -> None:
-        super().testInit()
+        super().testInit()  
         self.swerve_drive.testInit()
 
     
     def testPeriodic(self) -> None: 
-        super().testPeriodic()
+        super().testPeriodic() 
         self.swerve_drive.testPeriodic()

@@ -1,4 +1,5 @@
 import enum
+import math
 
 class module_position(enum.IntEnum):
     front_left = 0
@@ -44,6 +45,10 @@ class EncoderConfig():
         self.offset = offset
         self.conversion_factor = conversion_factor
 
+        if self.offset is not None:
+            while self.offset <= 0: # The absolute encoder cannot be negative, so add 2*pi until it is positive
+                self.offset = self.offset + (math.pi * 2.0) 
+
 class SwerveModuleConfig():
     '''Information to configure a swerve module'''
     drive_motor: MotorConfig
@@ -56,3 +61,4 @@ class SwerveModuleConfig():
         self.angle_motor = turn_motor
         self.encoder = encoder
         self.location = location
+

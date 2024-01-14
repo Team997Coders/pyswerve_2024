@@ -1,29 +1,50 @@
-import abc
+import math
 import wpilib
 import rev
 from config import *
 from . import swervemodule
 from .swervemodule import SwerveModule
 import time
+from typing import NamedTuple, Callable, Any
 
-class SwerveDrive(abc.ABC):
+class SwerveDrive():
     '''Abstract base class for a sweve drive.'''
     modules: dict[module_position, SwerveModule]
+
+    initialized: bool = False # True if the swerve drive has been initialized at least once
     
     def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig):
         self.modules = {}    
         for position, module_config in swerve_config.items():
             self.modules[position] = SwerveModule(position, module_config, physical_config)
 
+        self.initialize()
+
     def report_to_dashboard(self):
         '''Write all module info to nettables'''
         for module in self.modules.values():
             module.report_to_dashboard()
 
+    def initialize(self):
+        '''Initialize the swerve drive.  Needs to be called repeatedly until it returns True.'''
+        results = [module.init_rotation() for module in self.modules.values()]
+        if all(results):
+            self.initialized = True
+            return True
+
+        return False
+           
+
+class TestConfig(NamedTuple):
+    '''A test configuration for a swerve module'''
+    duration: float
+    test: Callable[[module_position, Any], None]
+    args: tuple[module_position, Any]
+
 class SwerveDriveBasicFunctionTest(SwerveDrive):
 
     start_time: float
-    tests: list
+    tests: list[TestConfig]
     current_test: int = 0
 
     def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig):
@@ -33,26 +54,42 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
         self.start_time = time.monotonic() 
 
         self.tests = [
-            (self.runDriveMotorTest, (module_position.front_left, 0.05)),
-            (self.runDriveMotorTest, (module_position.front_right, 0.05)),
-            (self.runDriveMotorTest, (module_position.back_left, 0.05)),
-            (self.runDriveMotorTest, (module_position.back_right, 0.05)),
-            (self.runAngleMotorTest, (module_position.front_left, 0.05)),
-            (self.runAngleMotorTest, (module_position.front_right, 0.05)),
-            (self.runAngleMotorTest, (module_position.back_left, 0.05)),
-            (self.runAngleMotorTest, (module_position.back_right, 0.05)),
-            (self.runAngleMotorPIDTest, (module_position.front_left, 0)),
-            (self.runAngleMotorPIDTest, (module_position.front_right, 0)),
-            (self.runAngleMotorPIDTest, (module_position.back_left, 0)),
-            (self.runAngleMotorPIDTest, (module_position.back_right, 0)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.front_left, 0.05)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.front_right, 0.05)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.back_left, 0.05)),
+            TestConfig(1, self.runDriveMotorTest, (module_position.back_right, 0.05)),
+
+            TestConfig(1, self.runAngleMotorTest, (module_position.front_left, 0.05)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.05)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.back_left, 0.05)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.05)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, 0)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, 0)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, 0)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, 0)),
+
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, math.pi / 2)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, math.pi / 2)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, math.pi / 2)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, math.pi / 2)),
+
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, math.pi)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, math.pi)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, math.pi)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, math.pi)),
+
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, -math.pi / 2)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, -math.pi / 2)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, -math.pi / 2)),
+            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, -math.pi / 2))
         ]
 
-        test_data = self.tests[self.current_test]
-        test_data[0](*test_data[1])
+        test_config = self.tests[self.current_test]
+        test_config.test(*test_config.args)
 
     def testPeriodic(self): 
         elapsed_time = time.monotonic() - self.start_time
-        if elapsed_time > 1:
+        if elapsed_time > self.tests[self.current_test].duration:
             self.current_test += 1
             self.start_time = time.monotonic()
             if self.current_test >= len(self.tests):
@@ -60,10 +97,8 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
 
             self.stopMotors()
             
-            test_data = self.tests[self.current_test]
-            test_data[0](*test_data[1])
-        
-    
+            test_config = self.tests[self.current_test]
+            test_config.test(*test_config.args)
 
     def stopMotors(self):
         '''Turn off the motors to prepare for the next test'''
