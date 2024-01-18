@@ -1,3 +1,4 @@
+import abc
 import wpilib
 import rev
 import math
@@ -8,8 +9,66 @@ from math_help import shortest_angle_difference
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
 
+class ISwerveModule(abc.ABC):
+    @abc.abstractproperty
+    def location(self) -> geom.Translation2d:
+        '''Location of the module relative to robot center in meters'''
+        raise NotImplementedError()
 
-class SwerveModule():
+    @abc.abstractproperty
+    def velocity(self) -> float:
+        '''Velocity of the drive motor in meters per second'''
+        raise NotImplementedError()
+
+    @velocity.setter
+    @abc.abstractmethod
+    def velocity(self, meters_per_sec: float):
+        '''Velocity of the drive motor in meters per second'''
+        raise NotImplementedError()  
+    
+    @abc.abstractproperty
+    def angle(self) -> float:
+        '''Rotation of the module in radians'''
+        raise NotImplementedError()
+    
+    @angle.setter
+    @abc.abstractmethod
+    def angle(self, angle: float):
+        '''Rotation of the module in radians'''
+        raise NotImplementedError()
+    
+    @abc.abstractproperty
+    def position(self) -> kinematics.SwerveModulePosition:
+        raise NotImplementedError()
+    
+    @abc.abstractproperty
+    def rotation2d(self) -> geom.Rotation2d:
+        '''Current rotation of the module'''
+        raise NotImplementedError()
+    
+    @abc.abstractproperty
+    def desired_state(self) -> kinematics.SwerveModuleState:
+        '''The desired state of the module'''
+        raise NotImplementedError()
+    
+    @desired_state.setter
+    @abc.abstractmethod
+    def desired_state(self, value: kinematics.SwerveModuleState):
+        '''The desired state of the module'''
+        raise NotImplementedError()
+    
+    @abc.abstractproperty
+    def measured_state(self) -> kinematics.SwerveModuleState:
+        '''The measured state of the module based on sensor inputs'''
+        raise NotImplementedError() 
+    
+    @abc.abstractmethod
+    def initialize(self) -> bool:
+        '''Initialize the swerve module.  Can be called repeatedly until it returns True.
+           If no initialization is needed simply implement this method to return True.'''
+        raise NotImplementedError()
+
+class SwerveModule(ISwerveModule):
     id: module_position
 
     drive_motor: rev.CANSparkMax
@@ -66,8 +125,7 @@ class SwerveModule():
         self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive * (physical_config.wheel_diameter_cm / 100 * math.pi)) / 60.0) # convert from rpm to revolutions/sec
         self.drive_pid.setFeedbackDevice(self.drive_motor_encoder)
-        #self.drive_motor_encoder.setVelocityConversionFactor(1) #(1.0 / physical_config.gear_ratio.drive) * math.pi * physical_config.wheel_diameter_cm / 100.0)  
-
+        
         self.angle_motor_encoder.setPositionConversionFactor((2.0 * math.pi) / physical_config.gear_ratio.angle)
         self.angle_motor_encoder.setVelocityConversionFactor((2.0 * math.pi) / (physical_config.gear_ratio.angle * 60.0)) # convert from rpm to revolutions/sec
         self.angle_absolute_encoder = self.angle_motor.getAbsoluteEncoder(encoderType=rev.SparkAbsoluteEncoder.Type.kDutyCycle)
@@ -86,9 +144,7 @@ class SwerveModule():
 
         self.angle_motor.burnFlash()
         self.drive_motor.burnFlash()
-
-        self.init_rotation()
-
+  
     def __str__(self):
         return f"SwerveModule {str(self.id)}"
     
@@ -154,7 +210,7 @@ class SwerveModule():
         return geom.Rotation2d(self.angle)
      
     @property
-    def current_state(self) -> kinematics.SwerveModuleState:
+    def measured_state(self) -> kinematics.SwerveModuleState:
         return kinematics.SwerveModuleState(self.velocity, self.rotation2d)
     
     @property
@@ -208,7 +264,7 @@ class SwerveModule():
             self.angle_motor.setOpenLoopRampRate(physical_config.ramp_rate.angle)
             self.angle_motor.setClosedLoopRampRate(physical_config.ramp_rate.angle) 
     
-    def init_rotation(self) -> bool:
+    def initialize(self) -> bool:
         '''Returns true if the wheel is in the correct position, false if it needs to be adjusted'''
         if self.config.encoder.offset is not None:
             required_absolute_adjustment = self.config.encoder.offset #shortest_angle_difference(self.angle_absolute_encoder.getPosition(), self.angle_absolute_encoder.getPosition() - self.config.encoder.offset)
