@@ -91,6 +91,11 @@ class SwerveModule():
 
     def __str__(self):
         return f"SwerveModule {str(self.id)}"
+    
+    @property
+    def location(self) -> geom.Translation2d:
+        '''Get the location of the wheel in meters'''
+        return geom.Translation2d(self.config.location[0], self.config.location[1])
 
     @property
     def velocity(self) -> float:
@@ -112,7 +117,7 @@ class SwerveModule():
         '''Get the angle of the wheel in radians'''
         #angle = self.angle_absolute_encoder.getPosition()
         #if not self.drive_motor.getLastError() == rev.REVLibError.kOk:
-        angle = self.angle_motor_encoder.getPosition()
+        angle = self.angle_absolute_encoder.getPosition()
         #    self.logger.info(f"Absolute encoder read error on {str(self.id)} module")
         
         return angle
@@ -158,9 +163,9 @@ class SwerveModule():
     
     @desired_state.setter
     def desired_state(self, value: kinematics.SwerveModuleState):
-        '''Sets the desired state of the module, optimizing for shortest path'''
-        desired_state = value
-        self._desired_state = kinematics.SwerveModuleState.optimize(desired_state, self.rotation2d)
+        '''Sets the desired state of the module, optimizing for shortest path''' 
+        #self._desired_state = value
+        self._desired_state = kinematics.SwerveModuleState.optimize(value, self.rotation2d)
         
         self.angle = self._desired_state.angle.radians()
         self.velocity = self._desired_state.speed
@@ -179,15 +184,6 @@ class SwerveModule():
         sd.putNumber(f"Angle PID {int(self.id)} Reference", self.radians_to_degrees(self.angle_pid_last_reference))
         #sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
         #sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment))
-        
-
-    def set_angle(self, angle: float):
-        '''Set the angle of the wheel in radians, travel the shortest distance to requested angle''' 
-
-        
-
-        #self.angle_pid.setReference(self.clamp_angle(pid_angle), rev.CANSparkMax.ControlType.kPosition)
-        #self.angle_pid_last_reference = self.clamp_angle(pid_angle + self.rel_to_corrected_angle_adjustment)
  
 
     @staticmethod

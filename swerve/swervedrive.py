@@ -2,6 +2,8 @@ import math
 from collections.abc import Iterable
 import logging
 import wpilib
+import wpimath
+import wpimath.units
 import rev
 from config import *
 from . import swervemodule
@@ -9,6 +11,7 @@ from .swervemodule import SwerveModule
 import time
 from typing import NamedTuple, Callable, Any 
 import wpimath.kinematics._kinematics as kinematics
+import wpimath.geometry as geom
 
 
 class SwerveDrive():
@@ -17,7 +20,11 @@ class SwerveDrive():
 
     initialized: bool = False # True if the swerve drive has been initialized at least once
 
+    kinematics: kinematics.SwerveDrive4Kinematics # Kinematics object for the swerve drive
+
     logger: logging.Logger
+
+    module_order = list[module_position]
     
     def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
         self.logger = logger.getChild("swerve")
@@ -25,6 +32,10 @@ class SwerveDrive():
         for position, module_config in swerve_config.items():
             self.modules[position] = SwerveModule(position, module_config, physical_config, self.logger)
 
+        self.module_order = [position for position, module in self.modules.items()]
+        locations = [self.modules[position].location for position  in self.module_order]
+        self.kinematics = kinematics.SwerveDrive4Kinematics(*locations)
+         
         self.initialize()
  
 
@@ -41,7 +52,35 @@ class SwerveDrive():
             return True
 
         return False
-           
+    
+    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second):
+        '''Drive the robot using cartesian coordinates'''
+
+        chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(0))
+        module_states = self.kinematics.toSwerveModuleStates(chassis_speed)
+
+        num_modules = len(self.modules)
+        for i in range(num_modules):
+            position = self.module_order[i]
+            module = self.modules[position]
+            state = module_states[i] 
+            module.desired_state = state
+
+
+        pass
+
+    def lockWheels(self):
+        quarter_pi = math.pi / 4.0
+        self.modules[module_position.front_left].angle = quarter_pi
+        self.modules[module_position.front_right].angle = -quarter_pi
+        self.modules[module_position.back_left].angle = math.pi - quarter_pi
+        self.modules[module_position.back_right].angle = math.pi + quarter_pi
+
+        self.modules[module_position.front_left].velocity = 0
+        self.modules[module_position.front_right].velocity = 0
+        self.modules[module_position.back_left].velocity = 0
+        self.modules[module_position.back_right].velocity = 0
+   
 
 class TestConfig(NamedTuple):
     '''A test configuration for a swerve module'''
@@ -62,10 +101,10 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
         self.start_time = time.monotonic() 
 
         self.tests = [ 
-            TestConfig(1, self.runAngleMotorTest, (module_position.front_left, -0.05)),
-            TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.1)),
-            TestConfig(1, self.runAngleMotorTest, (module_position.back_left, -0.15)),
-            TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.2)), 
+            # TestConfig(1, self.runAngleMotorTest, (module_position.front_left, -0.05)),
+            # TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.1)),
+            # TestConfig(1, self.runAngleMotorTest, (module_position.back_left, -0.15)),
+            # TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.2)), 
            
             # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_left, 0)),
             # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_right, 0)),
@@ -124,7 +163,13 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
             # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_left, -math.pi / 2)),
             # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_right, -math.pi / 2)),
 
-            TestConfig(1.25, self.lockWheels, ())
+            TestConfig(1.25, self.lockWheels, ()),
+
+            TestConfig(3, self.runDriveTest, (0.5, 0, 0)),
+            TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
+            TestConfig(3, self.runDriveTest, (-0.5, 0, 0)),
+            TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
+           
         ]
 
         test_config = self.tests[self.current_test]
@@ -149,12 +194,7 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
             module.angle_motor.set(0)
             module.drive_motor.set(0)
 
-    def lockWheels(self):
-        quarter_pi = math.pi / 4.0
-        self.modules[module_position.front_left].angle = quarter_pi
-        self.modules[module_position.front_right].angle = -quarter_pi
-        self.modules[module_position.back_left].angle = math.pi - quarter_pi
-        self.modules[module_position.back_right].angle = math.pi + quarter_pi
+    
 
     def runDriveMotorTests(self, position: list[module_position], speed):
         for module in position:
@@ -191,6 +231,9 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
     def runAngleMotorPIDTest(self, position: module_position,
                           angle: float):
         self.modules[position].angle = angle
+
+    def runDriveTest(self, vx, vy, rotation):
+        self.drive(vx, vy, rotation)
 
 
     
