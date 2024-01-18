@@ -3,15 +3,17 @@ import rev
 import config 
 import robot_config
 import swerve
-
+import debug
 import time
+
 
 class MyRobot(wpilib.TimedRobot):
 
     swerve_drive: swerve.SwerveDriveBasicFunctionTest
 
     def robotInit(self):
-        self.swerve_drive = swerve.SwerveDriveBasicFunctionTest(robot_config.swerve_modules, robot_config.physical_properties)
+        super().robotInit()
+        self.swerve_drive = swerve.SwerveDriveBasicFunctionTest(robot_config.swerve_modules, robot_config.physical_properties, self.logger)
 
         self.swerve_drive.initialize()
 

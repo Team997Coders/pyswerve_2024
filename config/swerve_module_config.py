@@ -7,8 +7,20 @@ class module_position(enum.IntEnum):
     back_right = 2
     back_left = 3
 
+    def __str__(self):
+        return enum.Enum.__str__(self).replace("module_position.", "").replace("_", " ")
+    
+class OptionalSwerveModuleFloatProperty():
+    '''Stores an optional generic float value for drive & turn motors of a swerve module.  Use None to leave value unconfigured'''
+    drive: float | None
+    angle: float | None
+
+    def __init__(self, drive: float | None = None, angle: float | None = None):
+        self.drive = drive
+        self.angle = angle
+
 class SwerveModuleFloatProperty():
-    '''Stores a generic float value for drive & turn motors of a swerve module'''
+    '''Stores a required float value for drive & turn motors of a swerve module'''
     drive: float
     angle: float
 
@@ -16,8 +28,17 @@ class SwerveModuleFloatProperty():
         self.drive = drive
         self.angle = angle
 
+class OptionalSwerveModuleIntProperty():
+    '''Stores an optional generic int value for drive & turn motors of a swerve module.  Use None to leave value unconfigured'''
+    drive: int | None
+    angle: int | None
+
+    def __init__(self, drive: int | None = None, angle: int | None = None):
+        self.drive = drive
+        self.angle = angle
+
 class SwerveModuleIntProperty():
-    '''Stores a generic float value for drive & turn motors of a swerve module'''
+    '''Stores a required float value for drive & turn motors of a swerve module'''
     drive: int
     angle: int
 
@@ -37,7 +58,7 @@ class MotorConfig():
 class EncoderConfig():
     '''Information to configure an encoder on the RoboRIO'''
     id: int | None # Encoder ID on the RoboRIO, if there is one
-    offset: float | None # Offset in radians.  Subtract this number from the absolute encoder value to get 0 degrees relative to robot chassis
+    offset: float | None # Offset in radians.  Subtract this number from the absolute encoder value to get 0 degrees relative to robot chassis. Set to None if offset is configured in Rev Hardware Client
     conversion_factor: float | None # Conversion factor from encoder ticks to radians
 
     def __init__(self, id: int | None = None, offset: float | None = None, conversion_factor: float | None = None):

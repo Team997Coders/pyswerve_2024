@@ -1,24 +1,32 @@
 import math
+from collections.abc import Iterable
+import logging
 import wpilib
 import rev
 from config import *
 from . import swervemodule
 from .swervemodule import SwerveModule
 import time
-from typing import NamedTuple, Callable, Any
+from typing import NamedTuple, Callable, Any 
+import wpimath.kinematics._kinematics as kinematics
+
 
 class SwerveDrive():
     '''Abstract base class for a sweve drive.'''
     modules: dict[module_position, SwerveModule]
 
     initialized: bool = False # True if the swerve drive has been initialized at least once
+
+    logger: logging.Logger
     
-    def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig):
+    def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
+        self.logger = logger.getChild("swerve")
         self.modules = {}    
         for position, module_config in swerve_config.items():
-            self.modules[position] = SwerveModule(position, module_config, physical_config)
+            self.modules[position] = SwerveModule(position, module_config, physical_config, self.logger)
 
         self.initialize()
+ 
 
     def report_to_dashboard(self):
         '''Write all module info to nettables'''
@@ -38,8 +46,8 @@ class SwerveDrive():
 class TestConfig(NamedTuple):
     '''A test configuration for a swerve module'''
     duration: float
-    test: Callable[[module_position, Any], None]
-    args: tuple[module_position, Any]
+    test: Callable[..., Any]
+    args: Iterable[Any]
 
 class SwerveDriveBasicFunctionTest(SwerveDrive):
 
@@ -47,44 +55,76 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
     tests: list[TestConfig]
     current_test: int = 0
 
-    def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig):
-        super().__init__(swerve_config, physical_config)
+    def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
+        super().__init__(swerve_config, physical_config, logger)
                          
     def testInit(self):
         self.start_time = time.monotonic() 
 
-        self.tests = [
-            
-
-            #TestConfig(1, self.runAngleMotorTest, (module_position.front_left, 0.05)),
-            #TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.05)),
-            #TestConfig(1, self.runAngleMotorTest, (module_position.back_left, 0.05)),
-            #TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.05)), 
+        self.tests = [ 
+            TestConfig(1, self.runAngleMotorTest, (module_position.front_left, -0.05)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.1)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.back_left, -0.15)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.2)), 
            
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, 0)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, 0)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, 0)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, 0)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_left, 0)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_right, 0)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_left, 0)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_right, 0)),
 
-            TestConfig(1, self.runDriveMotorTest, (module_position.front_left, 0.05)),
-            TestConfig(1, self.runDriveMotorTest, (module_position.front_right, 0.05)),
-            TestConfig(1, self.runDriveMotorTest, (module_position.back_left, 0.05)),
-            TestConfig(1, self.runDriveMotorTest, (module_position.back_right, 0.05)),
+            TestConfig(1.25, self.runAngleMotorPIDTests, ([module_position.front_left, 
+                                                          module_position.front_right, 
+                                                          module_position.back_left,   
+                                                          module_position.back_right], 0)),
+                                                
+            # TestConfig(1, self.runDriveMotorTest, (module_position.front_left, 0.05)),
+            # TestConfig(1, self.runDriveMotorTest, (module_position.front_right, 0.05)),
+            # TestConfig(1, self.runDriveMotorTest, (module_position.back_left, 0.05)),
+            # TestConfig(1, self.runDriveMotorTest, (module_position.back_right, 0.05)),
 
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, math.pi / 2)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, math.pi / 2)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, math.pi / 2)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, math.pi / 2)),
+            #TestConfig(2, self.runDriveMotorRotationTest, (module_position.front_left, 1)),
+            #TestConfig(2, self.runDriveMotorRotationTest, (module_position.front_right, 1)),
+            #TestConfig(2, self.runDriveMotorRotationTest, (module_position.back_left, 1)),
+            # TestConfig(2, self.runDriveMotorRotationTest, (module_position.back_right, 1)),
+            
+            # TestConfig(3, self.runDriveMotorVelocityTest, (module_position.front_left, 0.5)),
+            # TestConfig(3, self.runDriveMotorVelocityTest, (module_position.front_right, -0.5)),
+            # TestConfig(3, self.runDriveMotorVelocityTest, (module_position.back_left, 1)),
+            # TestConfig(3, self.runDriveMotorVelocityTest, (module_position.back_right, -1)),
 
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, math.pi)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, math.pi)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, math.pi)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, math.pi)),
+            #------ Rotate all motors together ----
+            TestConfig(1.25, self.runAngleMotorPIDTests, ([module_position.front_left, 
+                                                          module_position.front_right, 
+                                                          module_position.back_left,   
+                                                          module_position.back_right], math.pi / 2)),
+            
+            TestConfig(1.25, self.runAngleMotorPIDTests, ([module_position.front_left, 
+                                                          module_position.front_right, 
+                                                          module_position.back_left,   
+                                                          module_position.back_right], math.pi)),
+            
+            TestConfig(1.25, self.runAngleMotorPIDTests, ([module_position.front_left, 
+                                                          module_position.front_right, 
+                                                          module_position.back_left,   
+                                                          module_position.back_right], -math.pi / 2)),
+            #---------------------------------------
 
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_left, -math.pi / 2)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.front_right, -math.pi / 2)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_left, -math.pi / 2)),
-            TestConfig(2, self.runAngleMotorPIDTest, (module_position.back_right, -math.pi / 2))
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_left, math.pi / 2)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_right, math.pi / 2)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_left, math.pi / 2)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_right, math.pi / 2)),
+
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_left, math.pi)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_right, math.pi)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_left, math.pi)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_right, math.pi)),
+
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_left, -math.pi / 2)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_right, -math.pi / 2)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_left, -math.pi / 2)),
+            # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.back_right, -math.pi / 2)),
+
+            TestConfig(1.25, self.lockWheels, ())
         ]
 
         test_config = self.tests[self.current_test]
@@ -108,17 +148,49 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
         for module in self.modules.values():
             module.angle_motor.set(0)
             module.drive_motor.set(0)
+
+    def lockWheels(self):
+        quarter_pi = math.pi / 4.0
+        self.modules[module_position.front_left].angle = quarter_pi
+        self.modules[module_position.front_right].angle = -quarter_pi
+        self.modules[module_position.back_left].angle = math.pi - quarter_pi
+        self.modules[module_position.back_right].angle = math.pi + quarter_pi
+
+    def runDriveMotorTests(self, position: list[module_position], speed):
+        for module in position:
+            self.runDriveMotorTest(module, speed)
             
     def runDriveMotorTest(self, position: module_position,
                           speed: float):
         self.modules[position].drive_motor.set(speed)
-        
 
+    def runDriveMotorRotationTests(self, num_rotations: list[module_position], speed):
+        for module in num_rotations:
+            self.runDriveMotorTest(module, speed)
+            
+    def runDriveMotorRotationTest(self, position: module_position, num_rotations: float):
+        self.modules[position].rotate_drive_wheel(num_rotations)
+
+    def runDriveMotorVelocityTest(self, position: module_position, meters_per_sec: float):
+        self.modules[position].velocity = meters_per_sec 
+
+    def runAngleMotorTests(self, position: list[module_position],
+                          speed: float):
+        for module in position:
+            self.runAngleMotorTest(module, speed) 
+        
     def runAngleMotorTest(self, position: module_position,
                           speed: float):
         self.modules[position].angle_motor.set(speed)
+
+    def runAngleMotorPIDTests(self, position: list[module_position],
+                          angle: float):
+        for module in position:
+            self.runAngleMotorPIDTest(module, angle) 
     
     def runAngleMotorPIDTest(self, position: module_position,
                           angle: float):
-        self.modules[position].set_angle(angle)
+        self.modules[position].angle = angle
+
+
     
