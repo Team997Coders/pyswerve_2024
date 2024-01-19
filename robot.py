@@ -7,20 +7,26 @@ import debug
 import time
 import telemetry
 import math
+import navx
 
 
 class MyRobot(wpilib.TimedRobot):
 
     swerve_drive: swerve.SwerveDriveBasicFunctionTest
     swerve_telemetry: telemetry.SwerveTelemetry
+    _navx: navx.AHRS  # Attitude Heading Reference System
 
     controller: wpilib.XboxController
 
+    @property
+    def navx(self) -> navx.AHRS:
+        return self._navx
 
     def robotInit(self):
         super().robotInit()
+        self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
-        self.swerve_drive = swerve.SwerveDriveBasicFunctionTest(robot_config.swerve_modules, robot_config.physical_properties, self.logger)
+        self.swerve_drive = swerve.SwerveDriveBasicFunctionTest(self._navx, robot_config.swerve_modules, robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
 
         self.swerve_drive.initialize()
@@ -64,6 +70,6 @@ class MyRobot(wpilib.TimedRobot):
         super().testInit()  
         self.swerve_drive.testInit()
  
-    def testPeriodic(self) -> None: 
-        super().testPeriodic() 
+    def testPeriodic(self) -> None:
+        super().testPeriodic()
         self.swerve_drive.testPeriodic()

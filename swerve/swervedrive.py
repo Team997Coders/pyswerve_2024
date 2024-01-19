@@ -6,6 +6,7 @@ import wpilib
 import wpimath
 import wpimath.units
 import rev
+import navx
 from config import *
 from . import swervemodule
 from .swervemodule import SwerveModule, ISwerveModule
@@ -60,6 +61,8 @@ class SwerveDrive(ISwerveDrive):
   
     _ordered_modules: list[ISwerveModule]
 
+    _navx: navx.AHRS  # Attitude Heading Reference System
+
     @property
     def num_modules(self) -> int:
         return len(self._ordered_modules)
@@ -73,8 +76,9 @@ class SwerveDrive(ISwerveDrive):
         '''Provides a consistent ordering of modules for use with wpilib swerve functions'''
         return self._ordered_modules
     
-    def __init__(self, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
+    def __init__(self, navx: navx.AHRS, swerve_config: dict[module_position, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
         self.logger = logger.getChild("swerve")
+        self._navx = navx
         self._modules = {}    
         for position, module_config in swerve_config.items():
             self._modules[position] = SwerveModule(position, module_config, physical_config, self.logger)
@@ -99,7 +103,7 @@ class SwerveDrive(ISwerveDrive):
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second):
         '''Drive the robot using cartesian coordinates'''
 
-        chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(0))
+        chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
         module_states = self._kinematics.toSwerveModuleStates(chassis_speed)
 
         num_modules = len(self._modules)
@@ -147,10 +151,10 @@ class SwerveDriveBasicFunctionTest(SwerveDrive):
         self.start_time = time.monotonic() 
 
         self.tests = [ 
-            # TestConfig(1, self.runAngleMotorTest, (module_position.front_left, -0.05)),
-            # TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.1)),
-            # TestConfig(1, self.runAngleMotorTest, (module_position.back_left, -0.15)),
-            # TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.2)), 
+            TestConfig(1, self.runAngleMotorTest, (module_position.front_left, -0.05)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.front_right, 0.1)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.back_left, -0.15)),
+            TestConfig(1, self.runAngleMotorTest, (module_position.back_right, 0.2)), 
            
             # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_left, 0)),
             # TestConfig(1.25, self.runAngleMotorPIDTest, (module_position.front_right, 0)),
