@@ -1,7 +1,7 @@
 import enum
 import math
 
-class module_position(enum.IntEnum):
+class ModulePosition(enum.IntEnum):
     front_left = 0
     front_right = 1
     back_right = 2

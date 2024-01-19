@@ -1,5 +1,4 @@
-from swerve.swervedrive import ISwerveDrive
-from swerve.swervemodule import ISwerveModule
+from swerve import ISwerveDrive, ISwerveModule
 from config import PhysicalConfig
 from wpilib import SmartDashboard as sd
 from typing import List, Tuple

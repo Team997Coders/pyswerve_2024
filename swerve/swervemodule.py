@@ -8,68 +8,10 @@ from wpilib import SmartDashboard as sd
 from math_help import shortest_angle_difference
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
-
-class ISwerveModule(abc.ABC):
-    @abc.abstractproperty
-    def location(self) -> geom.Translation2d:
-        '''Location of the module relative to robot center in meters'''
-        raise NotImplementedError()
-
-    @abc.abstractproperty
-    def velocity(self) -> float:
-        '''Velocity of the drive motor in meters per second'''
-        raise NotImplementedError()
-
-    @velocity.setter
-    @abc.abstractmethod
-    def velocity(self, meters_per_sec: float):
-        '''Velocity of the drive motor in meters per second'''
-        raise NotImplementedError()  
-    
-    @abc.abstractproperty
-    def angle(self) -> float:
-        '''Rotation of the module in radians'''
-        raise NotImplementedError()
-    
-    @angle.setter
-    @abc.abstractmethod
-    def angle(self, angle: float):
-        '''Rotation of the module in radians'''
-        raise NotImplementedError()
-    
-    @abc.abstractproperty
-    def position(self) -> kinematics.SwerveModulePosition:
-        raise NotImplementedError()
-    
-    @abc.abstractproperty
-    def rotation2d(self) -> geom.Rotation2d:
-        '''Current rotation of the module'''
-        raise NotImplementedError()
-    
-    @abc.abstractproperty
-    def desired_state(self) -> kinematics.SwerveModuleState:
-        '''The desired state of the module'''
-        raise NotImplementedError()
-    
-    @desired_state.setter
-    @abc.abstractmethod
-    def desired_state(self, value: kinematics.SwerveModuleState):
-        '''The desired state of the module'''
-        raise NotImplementedError()
-    
-    @abc.abstractproperty
-    def measured_state(self) -> kinematics.SwerveModuleState:
-        '''The measured state of the module based on sensor inputs'''
-        raise NotImplementedError() 
-    
-    @abc.abstractmethod
-    def initialize(self) -> bool:
-        '''Initialize the swerve module.  Can be called repeatedly until it returns True.
-           If no initialization is needed simply implement this method to return True.'''
-        raise NotImplementedError()
+from swerve import ISwerveModule
 
 class SwerveModule(ISwerveModule):
-    id: module_position
+    id: ModulePosition
 
     drive_motor: rev.CANSparkMax
     angle_motor: rev.CANSparkMax
@@ -92,7 +34,7 @@ class SwerveModule(ISwerveModule):
 
     logger: logging.Logger # Used to write log messages to driver station
 
-    def __init__(self, id: module_position, module_config: SwerveModuleConfig, physical_config: PhysicalConfig, logger: logging.Logger):
+    def __init__(self, id: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig, logger: logging.Logger):
         self.id = id 
         self.logger = logger.getChild(str(id))
         self._desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(0))
@@ -144,6 +86,11 @@ class SwerveModule(ISwerveModule):
 
         self.angle_motor.burnFlash()
         self.drive_motor.burnFlash()
+
+    def stop(self):
+        self.angle_motor.set(0)
+        self.drive_motor.set(0)
+        self._desired_state = kinematics.SwerveModuleState(0, self.rotation2d)
   
     def __str__(self):
         return f"SwerveModule {str(self.id)}"

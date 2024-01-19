@@ -1,3 +1,6 @@
+from . import interfaces
+from .interfaces import ISwerveModule, ISwerveDrive
+
 from . import swervemodule
 from .swervemodule import *
 
