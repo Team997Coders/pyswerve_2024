@@ -76,8 +76,8 @@ class SwerveDrive(ISwerveDrive):
         num_modules = len(self._modules)
         for i in range(num_modules):
             module = self.ordered_modules[i]
-            position = module.position 
-            state = module_states[i] 
+            position = module.position
+            state = module_states[i]
             module.desired_state = state
 
     def stop(self):

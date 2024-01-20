@@ -3,13 +3,19 @@ import rev
 import config 
 import robot_config
 import swerve
-import debug
 import time
+#from . import debugpy
 import telemetry
 import math
 import navx
 from drivers import TestDriver
 from swerve import ISwerveDrive, ISwerveModule
+
+# if __debug__:
+#     #To enter debug mode, add the --debug flag to the deploy command:
+#     #python -m robotpy deploy --debug
+#     #At the time this was written, you have to wait for the robot code to start before attempted to attach the debugger.
+#     debug.attach_debugger()
 
 
 class MyRobot(wpilib.TimedRobot):
@@ -48,10 +54,15 @@ class MyRobot(wpilib.TimedRobot):
 
         theta = self.controller.getRawAxis(4)
 
-        x_deadband = 0.05
-        y_deadband = 0.05 
+        x_deadband = robot_config.teleop_controls.x_deadband
+        y_deadband = robot_config.teleop_controls.y_deadband
 
-        if abs(vx) < x_deadband and abs(vy) < y_deadband:
+        theta_deadband = robot_config.teleop_controls.theta_deadband
+
+        if abs(theta) < theta_deadband:
+            theta = 0
+
+        if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband:
             # TODO: Make sure robot is not actually moving too
             self.swerve_drive.lock_wheels()
         else:

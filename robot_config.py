@@ -1,6 +1,9 @@
 import enum
 import math
 from config import *
+from typing import Union, NamedTuple
+
+teleop_controls = DriverControlsConfig(x_deadband=0.05, y_deadband=0.05, theta_deadband=0.05)
   
 swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
@@ -31,5 +34,5 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                         ramp_rate=OptionalSwerveModuleFloatProperty(drive=0.25, angle=0.25),
                                         encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                         gear_ratio=SwerveModuleFloatProperty(angle=150.0/7, drive=6.75),
-                                        max_drive_speed=1.5, 
+                                        max_drive_speed=2,
                                         max_rotation_speed=math.pi / 4)
