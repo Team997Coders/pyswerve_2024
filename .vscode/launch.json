@@ -26,6 +26,17 @@
                 "remoteRoot": "." // To current working directory ~/project1
               }
             ]
+        },
+        {
+          "name": "Python: Current File",
+          "type": "python",
+          "request": "launch",
+          "program": "${file}",
+          "justMyCode": true,
+          "console": "integratedTerminal", 
+          "env": {
+            "PYTHONPATH": "${workspaceFolder}"
           }
+      },
     ]
 }
