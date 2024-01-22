@@ -11,7 +11,8 @@
     "python.analysis.exclude": [
         ".vscode/**",
         "*.pyc",
-        "__pycache__/**"
+        "__pycache__/**",
+        ".hypothesis/**"
     ],
     "python.analysis.typeCheckingMode": "basic",
     "files.exclude": {

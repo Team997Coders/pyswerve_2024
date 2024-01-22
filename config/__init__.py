@@ -1,3 +1,8 @@
+'''This package contains read-only record objects used for configuration'''
+
+from .range_config import Range, OptionalRange
+from .pid import PIDConfig
+
 from . import physical_config
 from .physical_config import PhysicalConfig
 

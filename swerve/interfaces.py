@@ -108,3 +108,11 @@ class ISwerveDrive(abc.ABC):
     def stop(self):
         '''Set voltage of all motors to zero'''
         raise NotImplementedError()
+    
+    @abc.abstractproperty
+    def odemetry(self) -> kinematics.SwerveDrive4Odometry:
+        raise NotImplementedError()
+    
+    @abc.abstractmethod
+    def periodic(self):
+        raise NotImplementedError()

@@ -30,6 +30,8 @@ class SwerveDrive(ISwerveDrive):
 
     _navx: navx.AHRS  # Attitude Heading Reference System
 
+    _odemetry: kinematics.SwerveDrive4Odometry
+
     @property
     def num_modules(self) -> int:
         return len(self._ordered_modules)
@@ -37,6 +39,10 @@ class SwerveDrive(ISwerveDrive):
     @property
     def modules(self) -> dict[ModulePosition, ISwerveModule]:
         return self._modules 
+    
+    @property
+    def odemetry(self) -> kinematics.SwerveDrive4Odometry:
+        return self._odemetry
     
     @property
     def ordered_modules(self) -> list[ISwerveModule]:
@@ -54,8 +60,16 @@ class SwerveDrive(ISwerveDrive):
  
         locations = [m.location for m  in self._ordered_modules]
         self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
+
+        
+
+        module_positions = tuple([m.position for m in self._ordered_modules])
+        self._odemetry = kinematics.SwerveDrive4Odometry(self._kinematics,
+                                                         geom.Rotation2d(math.radians(self._navx.getAngle())),
+                                                         module_positions, # type: ignore
+                                                         geom.Pose2d(0,0,geom.Rotation2d(0)))
          
-        self.initialize() 
+        self.initialize()
 
     
     def initialize(self):
@@ -67,14 +81,19 @@ class SwerveDrive(ISwerveDrive):
 
         return False
     
+    def periodic(self):
+        '''Call periodically to update the odemetry'''
+        module_positions = tuple([m.position for m in self._ordered_modules])
+        self._odemetry.update(geom.Rotation2d(math.radians(self._navx.getAngle())),
+                              module_positions) # type: ignore 
+        
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second):
         '''Drive the robot using cartesian coordinates'''
 
         chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
         module_states = self._kinematics.toSwerveModuleStates(chassis_speed)
-
-        num_modules = len(self._modules)
-        for i in range(num_modules):
+ 
+        for i in range(self.num_modules):
             module = self.ordered_modules[i]
             position = module.position
             state = module_states[i]

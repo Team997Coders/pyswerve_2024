@@ -4,19 +4,20 @@ import config
 import robot_config
 import swerve
 import time
-#from . import debugpy
+import ntcore
 import telemetry
 import math
 import navx
 from drivers import TestDriver
 from swerve import ISwerveDrive, ISwerveModule
+from debug import attach_debugger
+import wpimath.kinematics as kinematics
 
 # if __debug__:
 #     #To enter debug mode, add the --debug flag to the deploy command:
 #     #python -m robotpy deploy --debug
 #     #At the time this was written, you have to wait for the robot code to start before attempted to attach the debugger.
-#     debug.attach_debugger()
-
+#     attach_debugger() 
 
 class MyRobot(wpilib.TimedRobot):
 
@@ -26,6 +27,9 @@ class MyRobot(wpilib.TimedRobot):
     _navx: navx.AHRS  # Attitude Heading Reference System
 
     controller: wpilib.XboxController
+
+    photonvision: ntcore.NetworkTable | None
+ 
 
     @property
     def navx(self) -> navx.AHRS:
@@ -40,11 +44,39 @@ class MyRobot(wpilib.TimedRobot):
 
         self.swerve_drive.initialize()
 
+        try:
+            self.photonvision =  ntcore.NetworkTableInstance.getDefault().getTable("photonvision/Camera_Module_v2")
+            if self.photonvision is not None:
+                self.logger.info(f"Photonvision connected!")
+            else:
+                self.logger.error(f"Could not connect to PhotonVision.")
+        except Exception as e:
+            self.logger.error(f"Could not connect to PhotonVision.\n{e}")
+            self.photonvision = None
+
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
+    
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
         self.swerve_telemetry.report_to_dashboard()
+        self.swerve_drive.periodic()
+        self.update_position()
+            
+
+    def update_position(self) -> bool:
+        if self.photonvision is None:
+            return False
+        
+        has_qr_code = self.photonvision.getEntry("hasTarget").getBoolean(False)
+
+        if(has_qr_code):
+            self.logger.info(f"PhotonVision has_qr_code: {has_qr_code}")
+            #TODO: Update pose position using angle to april tag and distance
+            #self.swerve_drive.odemetry.resetPosition(kinematics.SwerveModulePosition(0,0,0), geom.Rotation2d(0))
+            return True
+        
+        return False
   
     def teleopPeriodic(self):
         super().teleopPeriodic()
