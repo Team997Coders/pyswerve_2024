@@ -49,6 +49,7 @@ class TestSwerveModuleState(unittest.TestCase):
                       speed=hypothesis.strategies.floats(min_value=0, max_value=1))
     @hypothesis.settings(max_examples=1000, deadline=10000)
     def test_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
+        '''These are unlikely to fail, but are good to have for regression testing.  Comment them if they delay deployment'''
         self.check_optimization(currentRadians, desiredRadians, speed)
 
     def check_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
@@ -63,7 +64,7 @@ class TestSwerveModuleState(unittest.TestCase):
             self.assertAlmostEqual(optimized_state.angle.radians(), desiredRadians)
         else: #Otherwise, drive direction is reversed and angle should be 180 degrees from desired
             self.assertEqual(optimized_state.speed, -speed)
-            angle_diff = optimized_state.angle.radians() - math_help.clamp_angle(desiredRadians, min=-math.pi)
+            angle_diff = optimized_state.angle.radians() - math_help.wrap_angle(desiredRadians, min=-math.pi)
             self.assertAlmostEqual(abs(angle_diff), math.pi)
 
     def test_falsifying_case(self):
@@ -75,6 +76,7 @@ class TestSwerveModuleState(unittest.TestCase):
                       speed=hypothesis.strategies.floats(min_value=0, max_value=1))
     @hypothesis.settings(max_examples=1000, deadline=10000)
     def test_improved_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
+        '''These are unlikely to fail, but are good to have for regression testing.  Comment them if they delay deployment'''
         self.check_improved_optimization(currentRadians, desiredRadians, speed)
 
     def check_improved_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
@@ -92,7 +94,7 @@ class TestSwerveModuleState(unittest.TestCase):
             if optimized_state.speed > 0:
                 self.assertEqual(optimized_state.speed >= 0 , -speed >= 0) # Check for opposite signs
 
-            angle_diff = optimized_state.angle.radians() - math_help.clamp_angle(desiredRadians, min=-math.pi)
+            angle_diff = optimized_state.angle.radians() - math_help.wrap_angle(desiredRadians, min=-math.pi)
             self.assertAlmostEqual(abs(angle_diff), math.pi)
     
     def test_falsifying_improved_case(self):

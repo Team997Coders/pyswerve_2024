@@ -148,47 +148,62 @@ class TestDriver:
         self.swerve_drive.stop() 
 
     def runDriveMotorTests(self, position: list[ModulePosition], speed):
+        '''Turn on the drive motors to a specific power.  Ensures drive motors are functional.'''
         for module in position:
             self.runDriveMotorTest(module, speed)
 
     def runDriveMotorTest(self, position: ModulePosition,
                           speed: float):
+        '''Turn on the drive motor to a specific power.  Ensures drive motors are functional.'''
         self.logger.info(f"{position} drive motor should be moving {speed * 100} % power")
         self.swerve_drive.modules[position].drive_motor.set(speed)
 
-    def runDriveMotorRotationTests(self, num_rotations: list[ModulePosition], speed):
+    def runDriveMotorRotationTests(self, num_rotations: list[ModulePosition], speed: float):
+        '''Rotates the drive wheels a specific number of rotations.  Ensures our wheel size, gear ratio and math
+           are correct.  This is important for odometry to measure progress across the field.'''
         for module in num_rotations:
             self.runDriveMotorTest(module, speed)
 
     def runDriveMotorRotationTest(self, position: ModulePosition, num_rotations: float):
-        
+        '''Rotates the drive wheel a specific number of rotations.  Ensures our wheel size, gear ratio and math
+           are correct.  This is important for odometry to measure progress across the field.'''
         self.logger.info(f"{position} drive motor wheel should rotate {num_rotations} time(s)")
         self.swerve_drive.modules[position].rotate_drive_wheel(num_rotations)
 
     def runDriveMotorVelocityTest(self, position: ModulePosition, meters_per_sec: float): 
+        '''Turn on the drive motor to a specific speed.  Ensures that drive motors move at the 
+        expected speed.  This can be hard to precisely measure, but eyeballing or using a stopwatch as it drives across ground is a start.'''
         self.logger.info(f"{position} drive motor should be moving {meters_per_sec} m/s")
         self.swerve_drive.modules[position].velocity = meters_per_sec
 
     def runAngleMotorTests(self, position: list[ModulePosition],
-                           speed: float):
+                           power: float):
+        '''Turn on the angle motors to a specific power.  Ensures angle motors are functional.'''
         for module in position:
-            self.runAngleMotorTest(module, speed)
+            self.runAngleMotorTest(module, power)
 
     def runAngleMotorTest(self, position: ModulePosition,
-                          speed: float):
-        self.logger.info(f"{position} angle motor should be spinning at {speed * 100} % power")
-        self.swerve_drive.modules[position].angle_motor.set(speed)
+                          power: float):
+        '''Turn on the angle motor to a specific power.  Ensures angle motors are functional.'''
+        self.logger.info(f"{position} angle motor should be spinning at {power * 100} % power")
+        self.swerve_drive.modules[position].angle_motor.set(power)
 
     def runAngleMotorPIDTests(self, position: list[ModulePosition],
                               angle: float):
+        '''Set the angles of the motors, does not pass through optimization.  Ensures feedback sensors and pid are correctly set.'''
         for module in position:
             self.runAngleMotorPIDTest(module, angle)
 
     def runAngleMotorPIDTest(self, position: ModulePosition,
                              angle: float):
+        '''Set the angle of the motor, does not pass through optimization.   Ensures feedback sensors and pid are correctly set.'''
         self.logger.info(f"{position} angle motor should move to {math.degrees(angle)} degrees")
         self.swerve_drive.modules[position].angle = angle
 
     def runDriveTest(self, vx, vy, rotation):
+        '''Set a desired drive state.  Output should be optimized to use the minimal angle'''
         self.logger.info(f"Chassis should be driving at {vx}x  {vy}y {rotation} rotation rate")
         self.swerve_drive.drive(vx, vy, rotation)
+
+        #TODO: Test the drive states to ensure the angle and direction of each wheel is correct
+

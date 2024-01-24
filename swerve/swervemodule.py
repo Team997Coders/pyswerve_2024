@@ -56,12 +56,11 @@ class SwerveModule(ISwerveModule):
         self.drive_motor_encoder = self.drive_motor.getEncoder()
         self.angle_motor_encoder = self.angle_motor.getEncoder()
 
-        
         self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive * (physical_config.wheel_diameter_cm / 100 * math.pi)) / 60.0) # convert from rpm to revolutions/sec
         
         # Request specific angles from the PID controller 
-        self.configure_pid(self.drive_pid, module_config.drive_pid, feedback_device=self.drive_motor_encoder)
+        self.init_pid(self.drive_pid, module_config.drive_pid, feedback_device=self.drive_motor_encoder)
         
         self.angle_motor_encoder.setPositionConversionFactor((2.0 * math.pi) / physical_config.gear_ratio.angle)
         self.angle_motor_encoder.setVelocityConversionFactor((2.0 * math.pi) / (physical_config.gear_ratio.angle * 60.0)) # convert from rpm to revolutions/sec
@@ -69,14 +68,16 @@ class SwerveModule(ISwerveModule):
         
         if module_config.encoder.conversion_factor is not None:
             self.angle_absolute_encoder.setPositionConversionFactor(module_config.encoder.conversion_factor)
-            self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
+        
+        self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
 
-        self.configure_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)
+        self.init_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)
  
         self.angle_motor.burnFlash()
         self.drive_motor.burnFlash()
 
     def stop(self):
+        '''Idle both motors'''
         self.angle_motor.set(0)
         self.drive_motor.set(0)
         self._desired_state = kinematics.SwerveModuleState(0, self.rotation2d)
@@ -84,27 +85,6 @@ class SwerveModule(ISwerveModule):
     def __str__(self):
         return f"SwerveModule {str(self.id)}"
     
-    @staticmethod
-    def configure_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_device: rev.CANSensor | None = None):
-        '''Configures a SparkMax PID controller with the provided PIDConfig'''
-
-        if feedback_device is not None:
-            pid.setFeedbackDevice(feedback_device)
-    
-        pid.setP(pid_config.p)
-        pid.setI(pid_config.i)
-        pid.setD(pid_config.d) 
-
-        if pid_config.wrapping is not None and \
-            (pid_config.wrapping.min is not None or pid_config.wrapping.max is not None):
-            pid.setPositionPIDWrappingEnabled(True)
-            if pid_config.wrapping.min is not None:
-                pid.setPositionPIDWrappingMinInput(pid_config.wrapping.min) 
-            if pid_config.wrapping.max is not None:
-                pid.setPositionPIDWrappingMaxInput(pid_config.wrapping.max)
-        else:
-            pid.setPositionPIDWrappingEnabled(False)
-
     
     @property
     def location(self) -> geom.Translation2d:
@@ -124,6 +104,7 @@ class SwerveModule(ISwerveModule):
     
     @property
     def raw_position(self) -> float:
+        '''Drive motor encoder position'''
         return self.drive_motor_encoder.getPosition()
     
     @property
@@ -143,15 +124,15 @@ class SwerveModule(ISwerveModule):
         
         # If possible, adjust the offset in Rev Hardware Client instead of in software
         if self.rel_to_corrected_angle_adjustment is None or self.rel_to_corrected_angle_adjustment == 0:
-            self.angle_pid.setReference(math_help.clamp_angle(angle), rev.CANSparkMax.ControlType.kPosition)
-            self.angle_pid_last_reference = math_help.clamp_angle(angle)
+            self.angle_pid.setReference(math_help.wrap_angle(angle), rev.CANSparkMax.ControlType.kPosition)
+            self.angle_pid_last_reference = math_help.wrap_angle(angle)
         else: 
             #Otherwise, attempt to adjust the angle in software using the provided offset
             pid_angle = angle + self.rel_to_corrected_angle_adjustment
             abs_position = self.angle_absolute_encoder.getPosition()
             adjustment = shortest_angle_difference(abs_position, pid_angle)
-            self.angle_pid.setReference(math_help.clamp_angle(abs_position + adjustment), rev.CANSparkMax.ControlType.kPosition)
-            self.angle_pid_last_reference = math_help.clamp_angle(abs_position + adjustment)
+            self.angle_pid.setReference(math_help.wrap_angle(abs_position + adjustment), rev.CANSparkMax.ControlType.kPosition)
+            self.angle_pid_last_reference = math_help.wrap_angle(abs_position + adjustment)
 
     def rotate_drive_wheel(self, num_rotations: float):
         '''Drive the wheel the specified number of rotations'''
@@ -160,23 +141,27 @@ class SwerveModule(ISwerveModule):
     
     @property
     def position(self) -> kinematics.SwerveModulePosition:
+        '''SwerveModulePosition object representing the position of the wheel'''
         return kinematics.SwerveModulePosition(self.raw_position, self.rotation2d)
     
     @property
     def rotation2d(self) -> geom.Rotation2d:
+        '''Measured wheel rotation'''
         return geom.Rotation2d(self.angle)
      
     @property
     def measured_state(self) -> kinematics.SwerveModuleState:
+        '''Swerve module state representing the measured state of the module, not the desired state.'''
         return kinematics.SwerveModuleState(self.velocity, self.rotation2d)
     
     @property
     def desired_state(self) -> kinematics.SwerveModuleState:
+        '''Where the PID controllers were last instructed to rotate the wheel and how fast to drive it'''
         return self._desired_state
     
     @desired_state.setter
     def desired_state(self, value: kinematics.SwerveModuleState):
-        '''Sets the desired state of the module, optimizing for shortest path''' 
+        '''Sets the desired state of the module, optimizing for shortest rotation path''' 
         #self._desired_state = value
         # self._desired_state = kinematics.SwerveModuleState.optimize(value, self.rotation2d)
  
@@ -193,10 +178,10 @@ class SwerveModule(ISwerveModule):
         sd.putNumber(f"Drive {int(self.id)} Position", self.raw_position)
         sd.putNumber(f"Drive {int(self.id)} Velocity", self.velocity)
         sd.putNumber(f"Drive {int(self.id)} Tgt Vel", self._desired_state.speed)
-        sd.putNumber(f"Angle {int(self.id)} Position", self.radians_to_degrees(self.angle / math.pi))
-        sd.putNumber(f"Angle {int(self.id)} Absolute", self.radians_to_degrees(self.angle_absolute_encoder.getPosition()))
+        sd.putNumber(f"Angle {int(self.id)} Position", math.degrees(self.angle))
+        sd.putNumber(f"Angle {int(self.id)} Absolute", math.degrees(self.angle_absolute_encoder.getPosition()))
         sd.putNumber(f"Angle {int(self.id)} Velocity", self.angle_motor_encoder.getVelocity())
-        sd.putNumber(f"Angle PID {int(self.id)} Reference", self.radians_to_degrees(self.angle_pid_last_reference))
+        sd.putNumber(f"Angle PID {int(self.id)} Reference", math.degrees(self.angle_pid_last_reference))
         #sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
         #sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment))
  
@@ -222,13 +207,36 @@ class SwerveModule(ISwerveModule):
         if physical_config.ramp_rate.angle is not None:
             self.angle_motor.setOpenLoopRampRate(physical_config.ramp_rate.angle)
             self.angle_motor.setClosedLoopRampRate(physical_config.ramp_rate.angle) 
+
+    
+    @staticmethod
+    def init_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_device: rev.CANSensor | None = None):
+        '''Configures a SparkMax PID controller with the provided PIDConfig'''
+
+        if feedback_device is not None:
+            pid.setFeedbackDevice(feedback_device)
+    
+        pid.setP(pid_config.p)
+        pid.setI(pid_config.i)
+        pid.setD(pid_config.d)
+
+        if pid_config.wrapping is not None and \
+            (pid_config.wrapping.min is not None or pid_config.wrapping.max is not None):
+            pid.setPositionPIDWrappingEnabled(True)
+            if pid_config.wrapping.min is not None:
+                pid.setPositionPIDWrappingMinInput(pid_config.wrapping.min) 
+            if pid_config.wrapping.max is not None:
+                pid.setPositionPIDWrappingMaxInput(pid_config.wrapping.max)
+        else:
+            pid.setPositionPIDWrappingEnabled(False)
+
     
     def initialize(self) -> bool:
         '''Returns true if the wheel is in the correct position, false if it needs to be adjusted'''
         if self.config.encoder.offset is not None:
             required_absolute_adjustment = self.config.encoder.offset #shortest_angle_difference(self.angle_absolute_encoder.getPosition(), self.angle_absolute_encoder.getPosition() - self.config.encoder.offset)
             self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
-            self.rel_to_absolute_angle_adjustment = shortest_angle_difference(math_help.clamp_angle(self.angle_motor_encoder.getPosition()), self.angle_absolute_encoder.getPosition())
+            self.rel_to_absolute_angle_adjustment = shortest_angle_difference(math_help.wrap_angle(self.angle_motor_encoder.getPosition()), self.angle_absolute_encoder.getPosition())
             self.rel_to_corrected_angle_adjustment = self.rel_to_absolute_angle_adjustment + required_absolute_adjustment
         else:
             self.rel_to_absolute_angle_adjustment = None

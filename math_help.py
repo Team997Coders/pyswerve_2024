@@ -3,8 +3,8 @@ import numpy as np
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
 
-def clamp_angle(angle: float, min: float = 0) -> float:
-        '''Clamp the angle to the range of 0 to 2pi'''
+def wrap_angle(angle: float, min: float = 0) -> float:
+        '''Wrap the angle to the range of 0 to 2pi'''
         clamped = angle % (math.pi * 2.0)
         if min != 0:
               max = min + math.pi * 2.0
