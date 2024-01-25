@@ -1,3 +1,4 @@
+import sys 
 import wpilib
 import rev 
 import config 
@@ -13,11 +14,11 @@ from swerve import ISwerveDrive, ISwerveModule
 from debug import attach_debugger
 import wpimath.kinematics as kinematics
 
-# if __debug__:
-#     #To enter debug mode, add the --debug flag to the deploy command:
-#     #python -m robotpy deploy --debug
-#     #At the time this was written, you have to wait for the robot code to start before attempted to attach the debugger.
-#     attach_debugger() 
+if __debug__ and "run" in sys.argv:
+    #To enter debug mode, add the --debug flag to the deploy command:
+    #python -m robotpy deploy --debug
+    #At the time this was written, you have to wait for the robot code to start before attempted to attach the debugger.
+    attach_debugger() 
 
 class MyRobot(wpilib.TimedRobot):
 

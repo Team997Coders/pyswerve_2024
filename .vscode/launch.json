@@ -37,6 +37,45 @@
           "env": {
             "PYTHONPATH": "${workspaceFolder}"
           }
-      },
+      }, 
+      {
+        "name": "Debug RoboRIO",
+        "type": "python",
+        "request": "attach",
+        "connect": {
+            "host": "roboRIO-997-frc.local",
+            "port": 5678
+        },
+        "pathMappings": [
+            {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/home/lvuser/py"
+            }
+        ],
+        "justMyCode": false,
+        "preLaunchTask": "PyFRC: RIO Debug PreSteps",
+    },
+    {
+        "name": "Simulate",
+        "type": "python",
+        "request": "launch",
+        "module": "robotpy",
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "args": [
+            "sim"
+        ]
+    },
+    {
+        "name": "Test",
+        "type": "python",
+        "request": "launch",
+        "module": "robotpy",
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "args": [
+            "test"
+        ]
+    }
     ]
 }

@@ -3,9 +3,16 @@ import wpimath
 import wpimath.units
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
+from typing import Sequence
 from config import ModulePosition
 
 class ISwerveModule(abc.ABC):
+
+    @abc.abstractproperty
+    def id(self) -> ModulePosition:
+        '''Which module this is, used for ordering and naming'''
+        raise NotImplementedError()
+
     @abc.abstractproperty
     def location(self) -> geom.Translation2d:
         '''Location of the module relative to robot center in meters'''
@@ -79,8 +86,11 @@ class ISwerveDrive(abc.ABC):
     '''Interface for a swerve drive'''
 
     @abc.abstractmethod
-    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second):
-        '''Drive the robot using cartesian coordinates'''
+    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: Sequence[ModulePosition] | None):
+        '''Drive the robot using cartesian coordinates
+        
+        :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
+        '''
         raise NotImplementedError()
 
     @abc.abstractmethod

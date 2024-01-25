@@ -57,6 +57,7 @@ class SwerveDrive(ISwerveDrive):
             self._modules[position] = SwerveModule(position, module_config, physical_config, self.logger)
 
         self._ordered_modules = [self.modules[position] for position in sorted(self.modules.keys())]
+        self.logger.info(f"Module Order: {[m.id for m in self._ordered_modules]}")
  
         locations = [m.location for m  in self._ordered_modules]
         self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
@@ -86,17 +87,31 @@ class SwerveDrive(ISwerveDrive):
         module_positions = tuple([m.position for m in self._ordered_modules])
         self._odemetry.update(geom.Rotation2d(math.radians(self._navx.getAngle())),
                               module_positions) # type: ignore 
+        for m in self._ordered_modules:
+            m.report_to_dashboard()
         
-    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second):
-        '''Drive the robot using cartesian coordinates'''
+    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: set[ModulePosition] | None = None):
+        '''Drive the robot using cartesian coordinates
+        
+        :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
+        '''
 
         chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
         module_states = self._kinematics.toSwerveModuleStates(chassis_speed)
  
         for i in range(self.num_modules):
-            module = self.ordered_modules[i]
+            module = self._ordered_modules[i]
+
+            if run_modules is not None and module.id  not in run_modules:
+                continue
+ 
             position = module.position
-            state = module_states[i]
+            j = i
+            if i == 1:
+                j = 3
+            elif i == 3:
+                j = 1
+            state = module_states[j]
             module.desired_state = state
 
     def stop(self):

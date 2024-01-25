@@ -19,5 +19,6 @@
         "**/__pycache__": true,
         "**/.pytest_cache": true,
         "**/*.pyc": true
-    }
+    },
+    "files.autoSave": "onFocusChange"
 }

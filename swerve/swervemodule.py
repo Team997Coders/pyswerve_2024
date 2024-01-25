@@ -12,7 +12,7 @@ import wpimath.kinematics as kinematics
 from swerve import ISwerveModule
 
 class SwerveModule(ISwerveModule):
-    id: ModulePosition
+    _id: ModulePosition
 
     drive_motor: rev.CANSparkMax
     angle_motor: rev.CANSparkMax
@@ -35,8 +35,12 @@ class SwerveModule(ISwerveModule):
 
     logger: logging.Logger # Used to write log messages to driver station
 
+    @property
+    def id(self) -> ModulePosition:
+        return self._id
+
     def __init__(self, id: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig, logger: logging.Logger):
-        self.id = id 
+        self._id = id 
         self.logger = logger.getChild(str(id))
         self._desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(0))
         self.rel_to_absolute_angle_adjustment = 0
@@ -163,10 +167,10 @@ class SwerveModule(ISwerveModule):
     def desired_state(self, value: kinematics.SwerveModuleState):
         '''Sets the desired state of the module, optimizing for shortest rotation path''' 
         #self._desired_state = value
-        # self._desired_state = kinematics.SwerveModuleState.optimize(value, self.rotation2d)
+        #self._desired_state = kinematics.SwerveModuleState.optimize(value, self.rotation2d)
  
         self._desired_state = math_help.optimize_state_improved(value, geom.Rotation2d(self.angle_motor_encoder.getPosition()))
-        
+        self._desired_state = value
         self.angle = self._desired_state.angle.radians()
         self.velocity = self._desired_state.speed
 
