@@ -20,7 +20,7 @@ swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False),
                                        angle_motor=MotorConfig(id=7, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(-12, 12), 
+                                        location=(12, -12), 
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid),
                   ModulePosition.back_right:
@@ -34,7 +34,7 @@ swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=2, inverted=False),
                                        angle_motor=MotorConfig(id=3, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(12, -12), 
+                                        location=(-12, 12), 
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid)
 
