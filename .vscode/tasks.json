@@ -9,6 +9,31 @@
             "label": "PyFRC: Deploy",
             "type": "shell",
             "windows": {
+                "command": "python ${workspaceFolder}\\robot.py deploy"
+            },
+            "linux": {
+                "command": "python ${workspaceFolder}/robot.py deploy"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true,
+                "focus": true,
+                "showReuseMessage": false
+            },
+            "problemMatcher": [],
+            "icon": {
+                "id": "cloud-upload"
+            }
+        },
+        {
+            "label": "PyFRC: Deploy, No Testing",
+            "type": "shell",
+            "windows": {
                 "command": "python ${workspaceFolder}\\robot.py deploy --skip-tests"
             },
             "linux": {
