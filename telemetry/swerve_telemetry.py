@@ -1,4 +1,4 @@
-from swerve import ISwerveDrive, ISwerveModule
+from swerve import SwerveDrive
 from config import PhysicalConfig
 from wpilib import SmartDashboard as sd
 from typing import List, Tuple
@@ -7,10 +7,10 @@ import math
 class SwerveTelemetry():
     '''Report swerve telemetry to the dashboard.  Compatible with WebComponents'''
 
-    swerve_drive: ISwerveDrive
+    swerve_drive: SwerveDrive
     physical_config: PhysicalConfig
 
-    def __init__(self, swerve_drive: ISwerveDrive, physical_config: PhysicalConfig,) -> None:
+    def __init__(self, swerve_drive: SwerveDrive, physical_config: PhysicalConfig,) -> None:
         self.swerve_drive = swerve_drive
         self.physical_config = physical_config
 
@@ -28,10 +28,11 @@ class SwerveTelemetry():
         sd.putNumber("swerve/robotRotation", 0)
         sd.putNumber("swerve/maxSpeed", self.physical_config.max_drive_speed)
         sd.putString("swerve/rotationUnit", "degrees")
+        sd.putNumber("swerve/measuredChassisSpeeds", math.sqrt(self.swerve_drive.chassis_speed.vx **2 + self.swerve_drive.chassis_speed.vy **2))
         #sd.putNumber("swerve/sizeLeftRight", sizeLeftRight)
         #sd.putNumber("swerve/sizeFrontBack", sizeFrontBack)
         #sd.putString("swerve/forwardDirection", forwardDirection)
         #sd.putNumber("swerve/maxAngularVelocity", maxAngularVelocity)
-        #sd.putNumberArray("swerve/measuredChassisSpeeds", measuredChassisSpeeds)
+        # sd.putNumberArray("swerve/measuredChassisSpeeds", measuredChassisSpeeds)
         #sd.putNumberArray("swerve/desiredChassisSpeeds", desiredChassisSpeeds)
 
