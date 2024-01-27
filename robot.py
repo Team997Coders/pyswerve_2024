@@ -13,6 +13,9 @@ from drivers import TestDriver
 from swerve import SwerveDrive
 from debug import attach_debugger
 import wpimath.kinematics as kinematics
+from wpilib import SmartDashboard, Field2d
+from wpilib import SmartDashboard as sd
+
 
 if __debug__ and "run" in sys.argv:
     #To enter debug mode, add the --debug flag to the deploy command:
@@ -46,6 +49,7 @@ class MyRobot(wpilib.TimedRobot):
         self.field = wpilib.Field2d()
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules, robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
+        SmartDashboard.putData("Field", self.field)
 
         self.swerve_drive.initialize()
 
@@ -68,7 +72,7 @@ class MyRobot(wpilib.TimedRobot):
         self.swerve_drive.periodic()
         self.update_position()
         self.field.setRobotPose(self.swerve_drive.pose)
-
+        sd.putData("Field", self.field)
             
 
     def update_position(self) -> bool:

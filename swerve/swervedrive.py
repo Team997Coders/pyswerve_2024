@@ -105,8 +105,8 @@ class SwerveDrive(ISwerveDrive):
             self._odemetry.update(geom.Rotation2d.fromDegrees(self._navx.getAngle()),
                                   module_positions) # type: ignore 
             
-        #for m in self._ordered_modules:
-        #    m.report_to_dashboard()
+        for m in self._ordered_modules:
+            m.report_to_dashboard()
         
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: set[ModulePosition] | None = None):
         '''Drive the robot using cartesian coordinates
@@ -125,7 +125,6 @@ class SwerveDrive(ISwerveDrive):
             if run_modules is not None and module.id  not in run_modules:
                 continue
  
-            position = module.position 
             state = module_states[i]
             module.desired_state = state
 
