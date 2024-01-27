@@ -94,10 +94,14 @@ class MyRobot(wpilib.TimedRobot):
 
         if abs(theta) < theta_deadband:
             theta = 0
-
-        if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband:
+        # if abs(theta) < theta_deadband:
+        #     theta = 0
+        velocity = math.sqrt(self.swerve_drive.chassis_speed.vx ** 2 + self.swerve_drive.chassis_speed.vy ** 2)
+        
+        if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
             # TODO: Make sure robot is not actually moving too
             self.swerve_drive.lock_wheels()
+            # pass
         else:
             vx *= robot_config.physical_properties.max_drive_speed
             vy *= robot_config.physical_properties.max_drive_speed
@@ -109,7 +113,7 @@ class MyRobot(wpilib.TimedRobot):
                 vx *= scale_factor
                 vy *= scale_factor
 
-            self.swerve_drive.drive(-vx, -vy, theta * robot_config.physical_properties.max_rotation_speed)
+            self.swerve_drive.drive(vx, vy, theta * robot_config.physical_properties.max_rotation_speed)
 
     def autonomousInit(self):
         super().autonomousInit()

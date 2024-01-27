@@ -168,9 +168,16 @@ class SwerveDrive(ISwerveDrive):
         '''Current pose of the robot'''
         with self._odemetry_lock:
             return self._odemetry.getEstimatedPosition()
+        
+        
+    @property
+    def chassis_speed(self) -> kinematics.ChassisSpeeds: 
 
+        return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
+    
     def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
         '''Add a vision measurement to the odemetry'''
         with self._odemetry_lock:
             self._odemetry.addVisionMeasurement(pose, timestamp)
+
   
