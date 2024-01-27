@@ -16,6 +16,7 @@ robotpy_extras = [
     "commands2",
     "cscore",
     "navx",
+    # http://pathplanner.dev/home.html
     "pathplannerlib",
     # "phoenix5"
     # "phoenix6"
