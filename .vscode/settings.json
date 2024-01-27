@@ -1,13 +1,19 @@
 {
     "python.analysis.autoFormatStrings": true,
     "python.analysis.include": [
-        "C:/Python311/Lib/site-packages",
-        "C:/Python311/Lib/site-packages/*", 
+        ".venv/Lib/site-packages",
+        ".venv/Lib/site-packages/*",
+        "{env:ProgramFiles}/Python312/Lib/site-packages",
+        "{env:ProgramFiles}/Python312/Lib/site-packages/*", 
+        "C:/Python312/Lib/site-packages",
+        "C:/Python312/Lib/site-packages/*", 
         "./*"
     ],
     "python.analysis.extraPaths": [
         ".",
-        "C:/Python311/Lib/site-packages", 
+        ".venv/Lib/site-packages",
+        "{env:ProgramFiles}/Python312/Lib/site-packages", 
+        "C:/Python312/Lib/site-packages",
     ],
     "python.analysis.exclude": [
         ".vscode/**",

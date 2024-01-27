@@ -47,7 +47,7 @@ class SwerveDrive(ISwerveDrive):
         return self._modules 
     
     @property
-    def odemetry(self) -> kinematics.SwerveDrive4Odometry:
+    def odemetry(self) -> estimator.SwerveDrive4PoseEstimator:
         return self._odemetry
     
     @property
@@ -68,14 +68,8 @@ class SwerveDrive(ISwerveDrive):
  
         locations = [m.location for m  in self._ordered_modules]
         self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
-
-        
-
-        module_positions = tuple([m.position for m in self._ordered_modules])
-        # self._odemetry = kinematics.SwerveDrive4Odometry(self._kinematics,
-        #                                                  geom.Rotation2d(math.radians(self._navx.getAngle())),
-        #                                                  module_positions, # type: ignore
-        #                                                  geom.Pose2d(0,0,geom.Rotation2d(0)))
+ 
+        module_positions = tuple([m.position for m in self._ordered_modules]) 
 
         #The Pose Estimator uses the default standard deviations for model and vision estimates.
         # According to wpilib:
@@ -87,7 +81,7 @@ class SwerveDrive(ISwerveDrive):
                                                              geom.Rotation2d(math.radians(self._navx.getAngle())),
                                                              module_positions, # type: ignore
                                                              geom.Pose2d(0,0,geom.Rotation2d(0)))
-         
+
         self.initialize()
 
     
@@ -131,13 +125,7 @@ class SwerveDrive(ISwerveDrive):
             if run_modules is not None and module.id  not in run_modules:
                 continue
  
-            position = module.position
-            # j = i
-            # if i == 1:
-            #     j = 3
-            # elif i == 3:
-            #     j = 1
-            # state = module_states[j]
+            position = module.position 
             state = module_states[i]
             module.desired_state = state
 
@@ -152,17 +140,7 @@ class SwerveDrive(ISwerveDrive):
         self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(-quarter_pi))
         self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi - quarter_pi))
         self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi + quarter_pi))
-
-        # self._modules[module_position.front_left].angle = quarter_pi
-        # self._modules[module_position.front_right].angle = -quarter_pi
-        # self._modules[module_position.back_left].angle = math.pi - quarter_pi
-        # self._modules[module_position.back_right].angle = math.pi + quarter_pi
-
-        # self._modules[module_position.front_left].velocity = 0
-        # self._modules[module_position.front_right].velocity = 0
-        # self._modules[module_position.back_left].velocity = 0
-        # self._modules[module_position.back_right].velocity = 0
-
+  
     @property
     def pose(self) -> geom.Pose2d:
         '''Current pose of the robot'''
@@ -171,8 +149,8 @@ class SwerveDrive(ISwerveDrive):
         
         
     @property
-    def chassis_speed(self) -> kinematics.ChassisSpeeds: 
-
+    def chassis_speed(self) -> kinematics.ChassisSpeeds:  
+        '''Current chassis speed of the robot'''
         return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
     
     def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):

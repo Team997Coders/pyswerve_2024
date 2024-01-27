@@ -5,7 +5,8 @@ Getting a robotpy project set up in VS Code
 Python Install
 --------------
 
-Install python 3.12 from https://www.python.org/downloads/
+Install python 3.12 from https://www.python.org/downloads/  Open the folder the installer downloads to.  Right-click the file and select "Run as Administrator". 
+In the installer, be certain to install python for "all users" and add python to the path. 
 
 Install VS Code from https://code.visualstudio.com/download
 
@@ -38,8 +39,8 @@ I recommend skipping this step if you are new to Python, but it is good to be aw
 
 Virtual environments isolate your project from other projects on your system.
 This allows you to run different versions of packages for different projects.
-This is unlikely to be used in the 2024 season, but you may encounter it in
-the wild.
+This is unlikely to be used on a dedicated robotics dev machine, but you may
+encounter or need it in the wild.
 
 Create a virtual environment for the project.  Use the command palette CTRL+SHIFT+P
 and type "Python: Create Virtual Environment"
@@ -132,7 +133,37 @@ VS Tasks
 If you cloned the project, you have a workspace file that defines some
 useful tasks.  Run these tasks from the command palette (CTRL+SHIFT+P)
 or the terminal menu.  These tasks deploy to the robot, debug, and
-run tests.  Source code is found in the .vscode folder in the project.
+run tests.  
+
+Workspace settings may also be accessed directly in the .vscode/settings.json file.
+It is essential for auto-complete and code analysis that the python.analysis.include
+and python.analysis.extraPaths settings contain the correct paths for your project. 
+If you are not using a virtual environment they global python install's site-packages.
+If you are using an environment they should point to site-packages folder of that 
+environment.
+
+Global install example (Your python install path may be different):
+
+    "python.analysis.include": [ 
+        "{env:PyTHONPATH}/Lib/site-packages/*", 
+        "./*"
+    ],
+    "python.analysis.extraPaths": [
+        ".",
+        "{env:PyTHONPATH}/Lib/site-packages"
+    ],
+
+Virtual environment example:
+
+    "python.analysis.include": [ 
+        ".venv/Lib/site-packages/*",
+        "./*"
+    ],
+    "python.analysis.extraPaths": [
+        ".",
+        ".venv/Lib/site-packages"
+    ],
+
 
 NetConsole
 ==========

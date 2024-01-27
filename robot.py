@@ -10,7 +10,7 @@ import telemetry
 import math
 import navx
 from drivers import TestDriver
-from swerve import ISwerveDrive, ISwerveModule
+from swerve import SwerveDrive
 from debug import attach_debugger
 import wpimath.kinematics as kinematics
 
@@ -22,16 +22,15 @@ if __debug__ and "run" in sys.argv:
 
 class MyRobot(wpilib.TimedRobot):
 
-    swerve_drive: ISwerveDrive
+    swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
     test_driver: TestDriver
     _navx: navx.AHRS  # Attitude Heading Reference System
 
     controller: wpilib.XboxController
 
-    photonvision: ntcore.NetworkTable | None
- 
-
+    photonvision: ntcore.NetworkTable | None 
+    
     @property
     def navx(self) -> navx.AHRS:
         return self._navx
@@ -113,7 +112,7 @@ class MyRobot(wpilib.TimedRobot):
                 vx *= scale_factor
                 vy *= scale_factor
 
-            self.swerve_drive.drive(vx, vy, theta * robot_config.physical_properties.max_rotation_speed)
+            self.swerve_drive.drive(vx, vy, theta * robot_config.physical_properties.max_rotation_speed, None)
 
     def autonomousInit(self):
         super().autonomousInit()

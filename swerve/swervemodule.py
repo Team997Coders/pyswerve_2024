@@ -165,10 +165,7 @@ class SwerveModule(ISwerveModule):
     
     @desired_state.setter
     def desired_state(self, value: kinematics.SwerveModuleState):
-        '''Sets the desired state of the module, optimizing for shortest rotation path''' 
-        #self._desired_state = value
-        #self._desired_state = kinematics.SwerveModuleState.optimize(value, self.rotation2d)
- 
+        '''Sets the desired state of the module, optimizing for shortest rotation path'''   
         self._desired_state = math_help.optimize_state_improved(value, geom.Rotation2d(self.angle_motor_encoder.getPosition()))
         self._desired_state = value
         self.angle = self._desired_state.angle.radians()

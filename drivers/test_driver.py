@@ -121,15 +121,15 @@ class TestDriver:
             TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
 
             #Drive individual modules in translation in various directions
-            # TestConfig(3, self.runDriveTest, (0.5, 0, 0), ModulePosition.front_left),
-            # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-            # TestConfig(3, self.runDriveTest, (-0.5, 0, 0)),
-            # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
+            TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_left])),
+            TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_right])),
+            TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
+            TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
 
             #Drive using translation in various directions
-            TestConfig(5, self.runDriveTest, (1, 0, 0)),
+            #TestConfig(5, self.runDriveTest, (1, 0, 0)),
             # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-            TestConfig(5, self.runDriveTest, (-1, 0, 0)),
+            #TestConfig(5, self.runDriveTest, (-1, 0, 0)),
             # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
 
             #Drive using rotation in both directions
