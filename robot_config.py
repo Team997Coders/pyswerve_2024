@@ -47,4 +47,6 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                         encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                         gear_ratio=SwerveModuleFloatProperty(angle=150.0/7, drive=6.75),
                                         max_drive_speed=3,
-                                        max_rotation_speed=math.pi / 6)
+                                        max_rotation_speed=math.pi / 6,
+                                        fw_set_retries=5,
+                                        fw_set_retry_delay_sec=0.05)

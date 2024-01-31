@@ -127,7 +127,7 @@ class MyRobot(wpilib.TimedRobot):
         
         if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
             # TODO: Make sure robot is not actually moving too
-            self.swerve_drive.lock_wheels()
+            self.swerve_drive.stop()# self.swerve_drive.lock_wheels()
             # pass
         else:
             vx *= robot_config.physical_properties.max_drive_speed

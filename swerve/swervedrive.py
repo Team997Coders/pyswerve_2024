@@ -97,6 +97,9 @@ class SwerveDrive(ISwerveDrive):
     def periodic(self):
         '''Call periodically to update the odemetry'''
         self.update_odometry()
+        if __debug__:
+            for m in self._ordered_modules:
+                m.report_to_dashboard()
 
     def update_odometry(self):
 
@@ -105,8 +108,7 @@ class SwerveDrive(ISwerveDrive):
             self._odemetry.update(geom.Rotation2d.fromDegrees(self._navx.getAngle()),
                                   module_positions) # type: ignore 
             
-        for m in self._ordered_modules:
-            m.report_to_dashboard()
+        
         
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: set[ModulePosition] | None = None):
         '''Drive the robot using cartesian coordinates
@@ -146,10 +148,9 @@ class SwerveDrive(ISwerveDrive):
         with self._odemetry_lock:
             return self._odemetry.getEstimatedPosition()
         
-        
     @property
     def chassis_speed(self) -> kinematics.ChassisSpeeds:  
-        '''Current chassis speed of the robot'''
+        '''Current chassis speed of the robot.  Calls hardware, so cache results if possible'''
         return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
     
     def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
