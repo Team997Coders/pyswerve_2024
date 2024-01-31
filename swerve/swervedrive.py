@@ -1,5 +1,6 @@
 import abc 
 import math
+import threading
 from collections.abc import Iterable
 import logging
 import wpilib
@@ -13,6 +14,7 @@ import time
 from typing import NamedTuple, Callable, Any 
 import wpimath.kinematics as kinematics
 import wpimath.geometry as geom
+import wpimath.estimator as estimator
 from . import ISwerveDrive, ISwerveModule
 
 
@@ -30,7 +32,11 @@ class SwerveDrive(ISwerveDrive):
 
     _navx: navx.AHRS  # Attitude Heading Reference System
 
-    _odemetry: kinematics.SwerveDrive4Odometry
+    _odemetry: estimator.SwerveDrive4PoseEstimator
+    
+    _physical_config: PhysicalConfig
+
+    _odemetry_lock: threading.Lock = threading.Lock()
 
     @property
     def num_modules(self) -> int:
@@ -41,7 +47,7 @@ class SwerveDrive(ISwerveDrive):
         return self._modules 
     
     @property
-    def odemetry(self) -> kinematics.SwerveDrive4Odometry:
+    def odemetry(self) -> estimator.SwerveDrive4PoseEstimator:
         return self._odemetry
     
     @property
@@ -53,6 +59,7 @@ class SwerveDrive(ISwerveDrive):
         self.logger = logger.getChild("swerve")
         self._navx = navx
         self._modules = {}    
+        self._physical_config = physical_config
         for position, module_config in swerve_config.items():
             self._modules[position] = SwerveModule(position, module_config, physical_config, self.logger)
 
@@ -61,15 +68,20 @@ class SwerveDrive(ISwerveDrive):
  
         locations = [m.location for m  in self._ordered_modules]
         self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
+ 
+        module_positions = tuple([m.position for m in self._ordered_modules]) 
 
-        
+        #The Pose Estimator uses the default standard deviations for model and vision estimates.
+        # According to wpilib:
+        # The default standard deviations of the model states are 
+        # 0.1 meters for x, 0.1 meters for y, and 0.1 radians for heading. 
+        # The default standard deviations of the vision measurements are
+        # 0.9 meters for x, 0.9 meters for y, and 0.9 radians for heading.
+        self._odemetry = estimator.SwerveDrive4PoseEstimator(self._kinematics,
+                                                             geom.Rotation2d(math.radians(self._navx.getAngle())),
+                                                             module_positions, # type: ignore
+                                                             geom.Pose2d(0,0,geom.Rotation2d(0)))
 
-        module_positions = tuple([m.position for m in self._ordered_modules])
-        self._odemetry = kinematics.SwerveDrive4Odometry(self._kinematics,
-                                                         geom.Rotation2d(math.radians(self._navx.getAngle())),
-                                                         module_positions, # type: ignore
-                                                         geom.Pose2d(0,0,geom.Rotation2d(0)))
-         
         self.initialize()
 
     
@@ -84,9 +96,15 @@ class SwerveDrive(ISwerveDrive):
     
     def periodic(self):
         '''Call periodically to update the odemetry'''
-        module_positions = tuple([m.position for m in self._ordered_modules])
-        self._odemetry.update(geom.Rotation2d(math.radians(self._navx.getAngle())),
-                              module_positions) # type: ignore 
+        self.update_odometry()
+
+    def update_odometry(self):
+
+        with self._odemetry_lock:
+            module_positions = tuple([m.position for m in self._ordered_modules])
+            self._odemetry.update(geom.Rotation2d.fromDegrees(self._navx.getAngle()),
+                                  module_positions) # type: ignore 
+            
         for m in self._ordered_modules:
             m.report_to_dashboard()
         
@@ -98,6 +116,8 @@ class SwerveDrive(ISwerveDrive):
 
         chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
         module_states = self._kinematics.toSwerveModuleStates(chassis_speed)
+
+        module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
  
         for i in range(self.num_modules):
             module = self._ordered_modules[i]
@@ -105,13 +125,7 @@ class SwerveDrive(ISwerveDrive):
             if run_modules is not None and module.id  not in run_modules:
                 continue
  
-            position = module.position
-            j = i
-            if i == 1:
-                j = 3
-            elif i == 3:
-                j = 1
-            state = module_states[j]
+            state = module_states[i]
             module.desired_state = state
 
     def stop(self):
@@ -125,14 +139,22 @@ class SwerveDrive(ISwerveDrive):
         self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(-quarter_pi))
         self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi - quarter_pi))
         self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi + quarter_pi))
+  
+    @property
+    def pose(self) -> geom.Pose2d:
+        '''Current pose of the robot'''
+        with self._odemetry_lock:
+            return self._odemetry.getEstimatedPosition()
+        
+        
+    @property
+    def chassis_speed(self) -> kinematics.ChassisSpeeds:  
+        '''Current chassis speed of the robot'''
+        return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
+    
+    def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
+        '''Add a vision measurement to the odemetry'''
+        with self._odemetry_lock:
+            self._odemetry.addVisionMeasurement(pose, timestamp)
 
-        # self._modules[module_position.front_left].angle = quarter_pi
-        # self._modules[module_position.front_right].angle = -quarter_pi
-        # self._modules[module_position.back_left].angle = math.pi - quarter_pi
-        # self._modules[module_position.back_right].angle = math.pi + quarter_pi
-
-        # self._modules[module_position.front_left].velocity = 0
-        # self._modules[module_position.front_right].velocity = 0
-        # self._modules[module_position.back_left].velocity = 0
-        # self._modules[module_position.back_right].velocity = 0
   

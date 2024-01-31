@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 import math
 import time
-from swerve import ISwerveDrive, ModulePosition
+from swerve import SwerveDrive, ModulePosition
 from typing import Callable, Iterable, Any, NamedTuple, Sequence
 
 class TestConfig(NamedTuple):
@@ -28,9 +28,9 @@ class TestDriver:
     tests: list[TestConfig]
     current_test: int = 0
     logger: logging.Logger
-    swerve_drive: ISwerveDrive
+    swerve_drive: SwerveDrive
 
-    def __init__(self, swerve_drive: ISwerveDrive, logger: logging.Logger):
+    def __init__(self, swerve_drive: SwerveDrive, logger: logging.Logger):
         super().__init__()
         self.swerve_drive = swerve_drive
         self.logger = logger.getChild("SwerveTestDriver")
@@ -118,13 +118,13 @@ class TestDriver:
             # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, -math.pi / 2)),
             # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
 
-            TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
+            # TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
 
-            #Drive individual modules in translation in various directions
-            # TestConfig(3, self.runDriveTest, (0.5, 0, 0), ModulePosition.front_left),
-            # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-            # TestConfig(3, self.runDriveTest, (-0.5, 0, 0)),
-            # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
+            # Drive individual modules in translation in various directions
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_left])),
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_right])),
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
 
             #Drive using translation in various directions
             TestConfig(5, self.runDriveTest, (1, 0, 0)),

@@ -165,12 +165,8 @@ class SwerveModule(ISwerveModule):
     
     @desired_state.setter
     def desired_state(self, value: kinematics.SwerveModuleState):
-        '''Sets the desired state of the module, optimizing for shortest rotation path''' 
-        #self._desired_state = value
-        #self._desired_state = kinematics.SwerveModuleState.optimize(value, self.rotation2d)
- 
-        self._desired_state = math_help.optimize_state_improved(value, geom.Rotation2d(self.angle_motor_encoder.getPosition()))
-        self._desired_state = value
+        '''Sets the desired state of the module, optimizing for shortest rotation path'''   
+        self._desired_state = math_help.optimize_state_improved(value, geom.Rotation2d(self.angle_absolute_encoder.getPosition()))
         self.angle = self._desired_state.angle.radians()
         self.velocity = self._desired_state.speed
 
@@ -182,7 +178,7 @@ class SwerveModule(ISwerveModule):
         sd.putNumber(f"Drive {int(self.id)} Position", self.raw_position)
         sd.putNumber(f"Drive {int(self.id)} Velocity", self.velocity)
         sd.putNumber(f"Drive {int(self.id)} Tgt Vel", self._desired_state.speed)
-        sd.putNumber(f"Angle {int(self.id)} Position", math.degrees(self.angle))
+        sd.putNumber(f"Angle {int(self.id)} Position", math.degrees(self.angle_motor_encoder.getPosition()))
         sd.putNumber(f"Angle {int(self.id)} Absolute", math.degrees(self.angle_absolute_encoder.getPosition()))
         sd.putNumber(f"Angle {int(self.id)} Velocity", self.angle_motor_encoder.getVelocity())
         sd.putNumber(f"Angle PID {int(self.id)} Reference", math.degrees(self.angle_pid_last_reference))

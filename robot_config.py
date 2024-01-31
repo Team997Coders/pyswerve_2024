@@ -3,11 +3,11 @@ import math
 from config import *
 from typing import Union, NamedTuple
 
-default_angle_pid = PIDConfig(p=0.4, i=0.0, d=0.0, wrapping=OptionalRange(min=0, max=math.pi * 2))
-default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.0, wrapping=None)
+default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
+default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 
 
-teleop_controls = DriverControlsConfig(x_deadband=0.05, y_deadband=0.05, theta_deadband=0.05)
+teleop_controls = DriverControlsConfig(x_deadband=0.15, y_deadband=0.15, theta_deadband=0.15)
   
 swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
@@ -20,7 +20,7 @@ swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False),
                                        angle_motor=MotorConfig(id=7, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(-12, 12), 
+                                        location=(12, -12),
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid),
                   ModulePosition.back_right:
@@ -34,7 +34,7 @@ swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=2, inverted=False),
                                        angle_motor=MotorConfig(id=3, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(12, -12), 
+                                        location=(-12, 12), 
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid)
 
@@ -46,5 +46,5 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                         ramp_rate=OptionalSwerveModuleFloatProperty(drive=0.25, angle=0.25),
                                         encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                         gear_ratio=SwerveModuleFloatProperty(angle=150.0/7, drive=6.75),
-                                        max_drive_speed=2.5,
-                                        max_rotation_speed=math.pi / 8)
+                                        max_drive_speed=3,
+                                        max_rotation_speed=math.pi / 6)

@@ -10,9 +10,12 @@ import telemetry
 import math
 import navx
 from drivers import TestDriver
-from swerve import ISwerveDrive, ISwerveModule
+from swerve import SwerveDrive
 from debug import attach_debugger
 import wpimath.kinematics as kinematics
+from wpilib import SmartDashboard, Field2d
+from wpilib import SmartDashboard as sd
+
 
 if __debug__ and "run" in sys.argv:
     #To enter debug mode, add the --debug flag to the deploy command:
@@ -22,16 +25,18 @@ if __debug__ and "run" in sys.argv:
 
 class MyRobot(wpilib.TimedRobot):
 
-    swerve_drive: ISwerveDrive
+    swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
     test_driver: TestDriver
     _navx: navx.AHRS  # Attitude Heading Reference System
 
     controller: wpilib.XboxController
-
-    photonvision: ntcore.NetworkTable | None
+    joyStick: wpilib.Joystick
  
+    photonvision: ntcore.NetworkTable | None
 
+    field: wpilib.Field2d
+ 
     @property
     def navx(self) -> navx.AHRS:
         return self._navx
@@ -40,8 +45,11 @@ class MyRobot(wpilib.TimedRobot):
         super().robotInit()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
+        self.joyStick = wpilib.Joystick(0)
+        self.field = wpilib.Field2d()
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules, robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
+        SmartDashboard.putData("Field", self.field)
 
         self.swerve_drive.initialize()
 
@@ -63,9 +71,12 @@ class MyRobot(wpilib.TimedRobot):
         self.swerve_telemetry.report_to_dashboard()
         self.swerve_drive.periodic()
         self.update_position()
+        self.field.setRobotPose(self.swerve_drive.pose)
+        sd.putData("Field", self.field)
             
 
     def update_position(self) -> bool:
+
         if self.photonvision is None:
             return False
         
@@ -82,10 +93,26 @@ class MyRobot(wpilib.TimedRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
 
+        self.doGameStickInput()
+    
+    def deoGamepadInput(self):
+        vx = self.controller.getRawAxis(0)
+        vy = self.controller.getRawAxis(1)
+
+        theta = self.controller.getRawAxis(3)
+
+        self.proccessContrlerInput(vx, vy, theta)
+
+    def doGameStickInput(self):
+        
         vx = self.controller.getRawAxis(1)
         vy = self.controller.getRawAxis(0)
 
-        theta = self.controller.getRawAxis(4)
+        theta = self.controller.getRawAxis(2)
+
+        self.proccessContrlerInput(-vx, -vy, -theta)
+
+    def proccessContrlerInput(self, vx, vy, theta):
 
         x_deadband = robot_config.teleop_controls.x_deadband
         y_deadband = robot_config.teleop_controls.y_deadband
@@ -94,10 +121,14 @@ class MyRobot(wpilib.TimedRobot):
 
         if abs(theta) < theta_deadband:
             theta = 0
-
-        if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband:
+        # if abs(theta) < theta_deadband:
+        #     theta = 0
+        velocity = math.sqrt(self.swerve_drive.chassis_speed.vx ** 2 + self.swerve_drive.chassis_speed.vy ** 2)
+        
+        if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
             # TODO: Make sure robot is not actually moving too
             self.swerve_drive.lock_wheels()
+            # pass
         else:
             vx *= robot_config.physical_properties.max_drive_speed
             vy *= robot_config.physical_properties.max_drive_speed
@@ -109,7 +140,10 @@ class MyRobot(wpilib.TimedRobot):
                 vx *= scale_factor
                 vy *= scale_factor
 
-            self.swerve_drive.drive(-vx, -vy, theta * robot_config.physical_properties.max_rotation_speed)
+            self.swerve_drive.drive(vx, vy, theta * robot_config.physical_properties.max_rotation_speed, None)
+
+    def updateField(self):
+        pass
 
     def autonomousInit(self):
         super().autonomousInit()

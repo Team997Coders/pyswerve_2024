@@ -56,6 +56,23 @@
         "preLaunchTask": "PyFRC: RIO Debug PreSteps",
     },
     {
+        "name": "Debug RoboRIO Local",
+        "type": "python",
+        "request": "attach",
+        "connect": {
+            "host": "localhost",
+            "port": 5678
+        },
+        "pathMappings": [
+            {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/home/lvuser/py"
+            }
+        ],
+        "justMyCode": false,
+        //"preLaunchTask": "PyFRC: RIO Debug PreSteps",
+    },
+    {
         "name": "Simulate",
         "type": "python",
         "request": "launch",

@@ -13,9 +13,10 @@ robotpy_version = "2024.2.1.1"
 robotpy_extras = [
     # "all"
     "apriltag",
-    # "commands2",
+    "commands2",
     "cscore",
     "navx",
+    # http://pathplanner.dev/home.html
     "pathplannerlib",
     # "phoenix5"
     # "phoenix6"
