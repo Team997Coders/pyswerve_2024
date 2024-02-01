@@ -17,6 +17,7 @@ import commands2
 from math_help import Range
 from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfileRadians
+from computervision.fieldpositioning import AprilTagDetector
 
 if __debug__ and "run" in sys.argv:
     # To enter debug mode, add the --debug flag to the 'deploy' command:
@@ -45,13 +46,16 @@ class MyRobot(commands2.TimedCommandRobot):
 
     field: wpilib.Field2d
 
+    april_tag_one: AprilTagDetector
+ 
+
     @property
     def navx(self) -> navx.AHRS:
         return self._navx
 
     def robotInit(self):
         super().robotInit()
-        # self._command_scheduler = commands2.CommandScheduler()
+        self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
         self.joystick_one = wpilib.Joystick(0)
@@ -123,15 +127,29 @@ class MyRobot(commands2.TimedCommandRobot):
         super().robotPeriodic()
         self.swerve_telemetry.report_to_dashboard()
         self.swerve_drive.periodic()
+        self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
+            
 
+    def update_position(self) -> bool:
+        if self.photonvision is None:
+            return False
+        
+        has_qr_code = self.photonvision.getEntry("hasTarget").getBoolean(False)
+
+        if(has_qr_code):
+            self.logger.info(f"PhotonVision has_qr_code: {has_qr_code}")
+            #TODO: Update pose position using angle to april tag and distance
+            #self.swerve_drive.odemetry.resetPosition(kinematics.SwerveModulePosition(0,0,0), geom.Rotation2d(0))
+            return True
+        
+        return False
+  
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
 
-    def updateField(self):
-        pass
 
     def autonomousInit(self):
         super().autonomousInit()
