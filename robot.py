@@ -6,6 +6,7 @@ import swerve
 import ntcore
 import telemetry
 import navx
+import commands2
 from drivers import TestDriver
 from drivers import TwinStickTeleopDrive
 from drivers import TeleopDrive
@@ -39,6 +40,9 @@ class MyRobot(commands2.TimedCommandRobot):
     joystick_one: wpilib.Joystick
     joystick_two: wpilib.Joystick
 
+    field: wpilib.Field2d
+    april_tag_one: AprilTagDetector
+ 
     photonvision: ntcore.NetworkTable | None
 
     trapezoid_profile: TrapezoidProfileRadians.Constraints
@@ -67,17 +71,15 @@ class MyRobot(commands2.TimedCommandRobot):
         SmartDashboard.putData("Field", self.field)
         self.swerve_drive.initialize()
 
-        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(robot_config.physical_properties.max_drive_speed,
-                                                                     robot_config.physical_properties.ramp_rate.drive)
-
-        self.rotation_pid = ProfiledPIDControllerRadians(
-            robot_config.default_rotation_pid.p,
-            robot_config.default_rotation_pid.i,
-            robot_config.default_rotation_pid.d,
-            self.trapezoid_profile)
-        self.rotation_pid.enableContinuousInput(robot_config.default_rotation_pid.wrapping.min,
-                                                robot_config.default_rotation_pid.wrapping.max)
-        self.rotation_pid.setTolerance(0.03, 0.05)
+        try:
+            self.photonvision =  ntcore.NetworkTableInstance.getDefault().getTable("photonvision/Camera_Module_v2")
+            if self.photonvision is not None:
+                self.logger.info(f"Photonvision connected!")
+            else:
+                self.logger.error(f"Could not connect to PhotonVision.")
+        except Exception as e:
+            self.logger.error(f"Could not connect to PhotonVision.\n{e}")
+            self.photonvision = None
 
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         self.teleop_drive = TeleopDrive(self.swerve_drive,

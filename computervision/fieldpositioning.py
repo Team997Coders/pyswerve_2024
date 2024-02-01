@@ -16,7 +16,7 @@ class AprilTagDetector:
     photon_pose_estimatior: PhotonPoseEstimator
 
     def __init__(self, swerve_drive, logger: logging.Logger):
-        self.photonvision = PhotonCamera("photonvision/Camera_Module_v2")
+        self.photonvision = PhotonCamera("Camera_Module_v2")
         self.apriltagfieldlayout = robotpy_apriltag.AprilTagFieldLayout()
         self.swerve_drive = swerve_drive
         translation = geom.Translation3d(30.5, 0, 16.5)
