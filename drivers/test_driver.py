@@ -19,10 +19,12 @@ class TestConfig(NamedTuple):
 class TestGroup(NamedTuple):
     name: str  # Name of the test group
     description: str  # Description of expected outcome of running the test
-    tests: list[TestConfig | TestGroup]
+    tests: list[TestConfig]  # Todo: enable having TestGroups in the list as well
 
-def create_test_selection_widget(test_groups: list[TestGroup]) -> wpilib.SendableChooser:
-    """Creates a widget in smart dashboard that can select which test group to run from a list"""
+def create_test_selection_widget(sd_path: str, test_groups: list[TestGroup]) -> wpilib.SendableChooser:
+    """Creates a widget in smart dashboard that can select which test group to run from a list
+    :param sd_path: The path in smart dashboard to write the selected test group to
+    """
     chooser = wpilib.SendableChooser()
     for i in range(len(test_groups)-1):
        tg = test_groups[i]
@@ -30,6 +32,7 @@ def create_test_selection_widget(test_groups: list[TestGroup]) -> wpilib.Sendabl
 
     tg = test_groups[-1] # The last test in the test group is the default
     chooser.setDefaultOption(tg.name, len(test_groups)-1)
+    wpilib.SmartDashboard.putData(sd_path, chooser)
     return chooser
 
 
@@ -259,7 +262,7 @@ class TestDriver:
 
         #Use the generic test group by default
         self.current_test_group_index = len(self.test_groups) - 1
-        self._chooser = create_test_selection_widget(self.test_groups)
+        self._chooser = create_test_selection_widget("Test Group", self.test_groups)
 
     def testPeriodic(self):
         if self._chooser is not None:

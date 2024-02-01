@@ -87,6 +87,10 @@ class SwerveModule(ISwerveModule):
     def safe_set(self, func: Callable[[Any], rev.REVLibError], *args, **kwargs):
         '''
         Call the provided function to set hardware settings, retrying after a short delay if an error occurs.
+        This is not being used, to use it, pass the name of the function and the arguments to this function.
+        
+        Example before: self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
+        Example After : self.safe_set(drive_motor_encoder.setPositionConversionFactor, 1.0 / physical_config.gear_ratio.drive)
         '''
         nRetries = self.physical_config.fw_set_retries
         for i in range(0, nRetries):

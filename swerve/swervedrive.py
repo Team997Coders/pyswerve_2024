@@ -1,7 +1,7 @@
 import abc 
 import math
 import threading
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence, Set
 import logging
 import wpilib
 import wpimath
@@ -110,7 +110,7 @@ class SwerveDrive(ISwerveDrive):
             
         
         
-    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: set[ModulePosition] | None = None):
+    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
         '''Drive the robot using cartesian coordinates
         
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
@@ -124,7 +124,7 @@ class SwerveDrive(ISwerveDrive):
         for i in range(self.num_modules):
             module = self._ordered_modules[i]
 
-            if run_modules is not None and module.id  not in run_modules:
+            if run_modules is not None and module.id not in run_modules:
                 continue
  
             state = module_states[i]
