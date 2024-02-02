@@ -127,9 +127,9 @@ class MyRobot(commands2.TimedCommandRobot):
             theta = 0
         # if abs(theta) < theta_deadband:
         #     theta = 0
-        velocity = math.sqrt(self.swerve_drive.chassis_speed.vx ** 2 + self.swerve_drive.chassis_speed.vy ** 2)
+        velocity = math.sqrt(self.swerve_drive.measured_chassis_speed.vx ** 2 + self.swerve_drive.measured_chassis_speed.vy ** 2)
         
-        if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
+        if velocity < 0.05 and abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
             # TODO: Make sure robot is not actually moving too
             self.swerve_drive.stop()# self.swerve_drive.lock_wheels()
             # pass
