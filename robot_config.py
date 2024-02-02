@@ -3,7 +3,7 @@ import math
 from config import *
 from typing import Union, NamedTuple
 
-default_angle_pid = PIDConfig(p=0.4, i=0.0, d=0.0, wrapping=OptionalRange(min=0, max=math.pi * 2))
+default_angle_pid = PIDConfig(p=0.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.0, wrapping=None)
 
 
@@ -13,28 +13,28 @@ swerve_modules = {ModulePosition.front_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
                                        angle_motor=MotorConfig(id=1, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(12, 12), 
+                                        location=(9.5, 9.5), 
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid),
                   ModulePosition.front_right:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False),
                                        angle_motor=MotorConfig(id=7, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(12, -12),
+                                        location=(9.5, -9.5),
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid),
                   ModulePosition.back_right:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=4, inverted=False),
                                        angle_motor=MotorConfig(id=5, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(-12, -12), 
+                                        location=(-9.5, -9.5), 
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid),
                   ModulePosition.back_left:
                     SwerveModuleConfig(drive_motor=MotorConfig(id=2, inverted=False),
                                        angle_motor=MotorConfig(id=3, inverted=True),
                                         encoder=EncoderConfig(id=None, offset=None, conversion_factor=math.pi*2),
-                                        location=(-12, 12), 
+                                        location=(-9.5, 9.5), 
                                         angle_pid=default_angle_pid,
                                         drive_pid=default_drive_pid)
 
