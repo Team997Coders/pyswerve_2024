@@ -15,6 +15,7 @@ from debug import attach_debugger
 import wpimath.kinematics as kinematics
 from wpilib import SmartDashboard, Field2d
 from wpilib import SmartDashboard as sd
+import commands2
 
 
 if __debug__ and "run" in sys.argv:
@@ -23,7 +24,9 @@ if __debug__ and "run" in sys.argv:
     #At the time this was written, you have to wait for the robot code to start before attempted to attach the debugger.
     attach_debugger() 
 
-class MyRobot(wpilib.TimedRobot):
+class MyRobot(commands2.TimedCommandRobot):
+
+    _command_scheduler: commands2.CommandScheduler
 
     swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
@@ -43,6 +46,7 @@ class MyRobot(wpilib.TimedRobot):
 
     def robotInit(self):
         super().robotInit()
+        self._command_scheduler = commands2.CommandScheduler()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
         self.joyStick = wpilib.Joystick(0)
@@ -127,7 +131,7 @@ class MyRobot(wpilib.TimedRobot):
         
         if abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
             # TODO: Make sure robot is not actually moving too
-            self.swerve_drive.lock_wheels()
+            self.swerve_drive.stop()# self.swerve_drive.lock_wheels()
             # pass
         else:
             vx *= robot_config.physical_properties.max_drive_speed

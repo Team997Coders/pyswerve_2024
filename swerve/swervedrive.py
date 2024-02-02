@@ -1,7 +1,7 @@
 import abc 
 import math
 import threading
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence, Set
 import logging
 import wpilib
 import wpimath
@@ -97,6 +97,9 @@ class SwerveDrive(ISwerveDrive):
     def periodic(self):
         '''Call periodically to update the odemetry'''
         self.update_odometry()
+        if __debug__:
+            for m in self._ordered_modules:
+                m.report_to_dashboard()
 
     def update_odometry(self):
 
@@ -105,10 +108,9 @@ class SwerveDrive(ISwerveDrive):
             self._odemetry.update(geom.Rotation2d.fromDegrees(self._navx.getAngle()),
                                   module_positions) # type: ignore 
             
-        for m in self._ordered_modules:
-            m.report_to_dashboard()
         
-    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: set[ModulePosition] | None = None):
+        
+    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
         '''Drive the robot using cartesian coordinates
         
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
@@ -122,7 +124,7 @@ class SwerveDrive(ISwerveDrive):
         for i in range(self.num_modules):
             module = self._ordered_modules[i]
 
-            if run_modules is not None and module.id  not in run_modules:
+            if run_modules is not None and module.id not in run_modules:
                 continue
  
             state = module_states[i]
@@ -146,10 +148,9 @@ class SwerveDrive(ISwerveDrive):
         with self._odemetry_lock:
             return self._odemetry.getEstimatedPosition()
         
-        
-    @property
+    @property=
     def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:  
-        '''Current chassis speed of the robot'''
+        '''Current chassis speed of the robot'''=
         return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
     
     @property
