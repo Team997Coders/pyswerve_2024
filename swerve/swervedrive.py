@@ -114,8 +114,8 @@ class SwerveDrive(ISwerveDrive):
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         '''
 
-        chassis_speed = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
-        module_states = self._kinematics.toSwerveModuleStates(chassis_speed)
+        measured_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
+        module_states = self._kinematics.toSwerveModuleStates(measured_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
  
@@ -148,9 +148,14 @@ class SwerveDrive(ISwerveDrive):
         
         
     @property
-    def chassis_speed(self) -> kinematics.ChassisSpeeds:  
+    def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:  
         '''Current chassis speed of the robot'''
         return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
+    
+    @property
+    def desired_chassis_speed(self) -> kinematics.ChassisSpeeds: 
+        """chasis speeds desired by the robot"""
+        return self._kinematics.toChassisSpeeds(tuple([m.desired_state for m in self._ordered_modules]))
     
     def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
         '''Add a vision measurement to the odemetry'''

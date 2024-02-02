@@ -28,7 +28,7 @@ class SwerveTelemetry():
         sd.putNumber("swerve/robotRotation", 0)
         sd.putNumber("swerve/maxSpeed", self.physical_config.max_drive_speed)
         sd.putString("swerve/rotationUnit", "degrees")
-        sd.putNumber("swerve/measuredChassisSpeeds", math.sqrt(self.swerve_drive.chassis_speed.vx **2 + self.swerve_drive.chassis_speed.vy **2))
+        sd.putNumber("swerve/measuredChassisSpeeds", math.sqrt(self.swerve_drive.measured_chassis_speed.vx **2 + self.swerve_drive.measured_chassis_speed.vy **2))
         #sd.putNumber("swerve/sizeLeftRight", sizeLeftRight)
         #sd.putNumber("swerve/sizeFrontBack", sizeFrontBack)
         #sd.putString("swerve/forwardDirection", forwardDirection)
