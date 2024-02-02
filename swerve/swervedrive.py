@@ -148,9 +148,9 @@ class SwerveDrive(ISwerveDrive):
         with self._odemetry_lock:
             return self._odemetry.getEstimatedPosition()
         
-    @property=
+    @property
     def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:  
-        '''Current chassis speed of the robot'''=
+        '''Current chassis speed of the robot'''
         return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
     
     @property
