@@ -14,3 +14,6 @@ from .swerve_module_config import SwerveModuleConfig, MotorConfig, \
 
 from . import driver_controls
 from .driver_controls import DriverControlsConfig
+
+from . import driver_controls
+from .driver_controls import AxisConfig

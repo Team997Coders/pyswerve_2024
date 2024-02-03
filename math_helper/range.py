@@ -1,5 +1,5 @@
-class Range():
-    '''A 0-1 range between a min and max value, inclusive'''
+class Range:
+
     def normalize(self, val: float) -> float:
         val = self.clip(val)
         return (val - self.min_val)/(self.max_val - self._min_val)
