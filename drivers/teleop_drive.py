@@ -22,18 +22,18 @@ class TeleopDrive:
     _y_config: AxisConfig
     _theta_config: AxisConfig
 
-    def __init__(self, swerve_drive, controller: wpilib.Joystick | wpilib.XboxController, x_config: AxisConfig, y_config: AxisConfig, theta_config: AxisConfig):
+
+    def __init__(self, swerve_drive, x_config: AxisConfig, y_config: AxisConfig, theta_config: AxisConfig):
         self._swerve_drive = swerve_drive
-        self.controller = controller
         self._x_config = x_config
         self._y_config = y_config
         self._theta_config = theta_config
 
     def do_input(self):
 
-        x_input_value = self.controller.getRawAxis(self._x_config.axis_index)
-        y_input_value = self.controller.getRawAxis(self._y_config.axis_index)
-        theta_input_value = self.controller.getRawAxis(self._theta_config.axis_index)
+        x_input_value = self._x_config.controller.getRawAxis(self._x_config.axis_index)
+        y_input_value = self._y_config.controller.getRawAxis(self._y_config.axis_index)
+        theta_input_value = self._theta_config.controller.getRawAxis(self._theta_config.axis_index)
         x_output_value = map_input_to_output_range(x_input_value, self._x_config.input_range, self._x_config.output_range)
         y_output_value = map_input_to_output_range(y_input_value, self._y_config.input_range, self._y_config.output_range)
         theta_output_value = map_input_to_output_range(theta_input_value, self._theta_config.input_range, self._theta_config.output_range)

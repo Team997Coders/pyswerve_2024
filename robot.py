@@ -38,7 +38,8 @@ class MyRobot(commands2.TimedCommandRobot):
     _navx: navx.AHRS  # Attitude Heading Reference System
 
     controller: wpilib.XboxController
-    joyStick: wpilib.Joystick
+    joystick_one: wpilib.Joystick
+    joystick_two: wpilib.Joystick
 
     photonvision: ntcore.NetworkTable | None
 
@@ -53,7 +54,8 @@ class MyRobot(commands2.TimedCommandRobot):
         # self._command_scheduler = commands2.CommandScheduler()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
-        self.joyStick = wpilib.Joystick(0)
+        self.joystick_one = wpilib.Joystick(0)
+        self.joystick_two = wpilib.Joystick(1)
         self.field = wpilib.Field2d()
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
@@ -72,16 +74,19 @@ class MyRobot(commands2.TimedCommandRobot):
             self.photonvision = None
 
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
-        self.teleop_drive = TeleopDrive(self.swerve_drive, self.joyStick,
+        self.teleop_drive = TeleopDrive(self.swerve_drive,
                                         AxisConfig(input_range=robot_config.joystick_controls.x_deadband,
                                                    output_range=Range(0, robot_config.physical_properties.max_drive_speed),
+                                                   controller=self.joystick_one,
                                                    axis_index=0),
                                         AxisConfig(input_range=robot_config.joystick_controls.y_deadband,
                                                    output_range=Range(0, robot_config.physical_properties.max_drive_speed),
+                                                   controller=self.joystick_one,
                                                    axis_index=1),
                                         AxisConfig(input_range=robot_config.joystick_controls.theta_deadband,
                                                    output_range=Range(0, robot_config.physical_properties.max_rotation_speed),
-                                                   axis_index=2))
+                                                   controller=self.joystick_two,
+                                                   axis_index=0))
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
