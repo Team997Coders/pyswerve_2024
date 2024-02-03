@@ -113,7 +113,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
-        self.teleop_drive.do_input()
+        self.teleop_drive.drive()
 
     def updateField(self):
         pass

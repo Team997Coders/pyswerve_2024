@@ -29,7 +29,7 @@ class TeleopDrive:
         self._y_config = y_config
         self._theta_config = theta_config
 
-    def do_input(self):
+    def drive(self):
 
         x_input_value = self._x_config.controller.getRawAxis(self._x_config.axis_index)
         y_input_value = self._y_config.controller.getRawAxis(self._y_config.axis_index)
