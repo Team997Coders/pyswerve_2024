@@ -12,7 +12,7 @@
             "justMyCode": true,
             "args": ["deploy"],
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}"
         },
         {
             "name": "Python: Attach",
@@ -53,7 +53,7 @@
             }
         ],
         "justMyCode": false,
-        "preLaunchTask": "PyFRC: RIO Debug PreSteps",
+        "preLaunchTask": "PyFRC: RIO Debug PreSteps"
     },
     {
         "name": "Debug RoboRIO Local",
@@ -69,7 +69,7 @@
                 "remoteRoot": "/home/lvuser/py"
             }
         ],
-        "justMyCode": false,
+        "justMyCode": false
         //"preLaunchTask": "PyFRC: RIO Debug PreSteps",
     },
     {
