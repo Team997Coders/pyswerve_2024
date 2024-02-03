@@ -1,4 +1,6 @@
 import math
+
+from math_helper import Range
 import numpy as np
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
@@ -49,3 +51,15 @@ def optimize_improved(desired_angle_radians: float, desired_speed: float, curren
     desired_state = kinematics.SwerveModuleState(desired_speed, geom.Rotation2d(desired_angle_radians))
     current_rotation = geom.Rotation2d(current_angle_radians)
     return optimize_state_improved(desired_state, current_rotation)
+
+def processControllerDeadband(input, input_range:Range, output_range:Range):
+    '''proccesses stick input from a controller so that '''
+    input_norm = input_range.normalize(abs(input))
+    # input_one_norm = self.inputControllerOneRange.normalize(abs(input))
+    if input_norm > 0:
+        input_adjusted = output_range.interpolate(input_norm)
+        input_adjusted = input_adjusted if input >= 0 else -input_adjusted
+    else:
+        input_adjusted = 0
+
+    return input_adjusted

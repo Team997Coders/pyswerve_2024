@@ -16,6 +16,8 @@ import wpimath.kinematics as kinematics
 from wpilib import SmartDashboard, Field2d
 from wpilib import SmartDashboard as sd
 import commands2
+from math_helper import Range
+from math_help import processControllerDeadband
 
 
 if __debug__ and "run" in sys.argv:
@@ -26,7 +28,7 @@ if __debug__ and "run" in sys.argv:
 
 class MyRobot(commands2.TimedCommandRobot):
 
-    _command_scheduler: commands2.CommandScheduler
+    # _command_scheduler: commands2.CommandScheduler
 
     swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
@@ -46,7 +48,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
-        self._command_scheduler = commands2.CommandScheduler()
+        # self._command_scheduler = commands2.CommandScheduler()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
         self.joyStick = wpilib.Joystick(0)
@@ -54,7 +56,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules, robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         SmartDashboard.putData("Field", self.field)
-
         self.swerve_drive.initialize()
 
         try:
@@ -68,7 +69,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self.photonvision = None
 
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
-    
+        
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
@@ -96,55 +97,71 @@ class MyRobot(commands2.TimedCommandRobot):
   
     def teleopPeriodic(self):
         super().teleopPeriodic()
-
-        self.doGameStickInput()
+        self.doGamepadInput()
     
-    def deoGamepadInput(self):
-        vx = self.controller.getRawAxis(0)
-        vy = self.controller.getRawAxis(1)
-
-        theta = self.controller.getRawAxis(3)
-
-        self.proccessContrlerInput(vx, vy, theta)
-
-    def doGameStickInput(self):
-        
+    def doGamepadInput(self):
         vx = self.controller.getRawAxis(1)
         vy = self.controller.getRawAxis(0)
 
+        theta = self.controller.getRawAxis(4)
+
+        vx_adjusted = processControllerDeadband(vx, Range(robot_config.teleop_controls.x_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed))
+        vy_adjusted = processControllerDeadband(vy, Range(robot_config.teleop_controls.y_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed))
+        theta_adjusted = processControllerDeadband(theta, Range(robot_config.teleop_controls.theta_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed))
+        
+        requested_speed = math.sqrt(vx_adjusted ** 2 + vy_adjusted ** 2) 
+
+        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
+        if requested_speed > robot_config.physical_properties.max_drive_speed:
+            scale_factor = robot_config.physical_properties.max_drive_speed / requested_speed
+            vx_adjusted *= scale_factor
+            vy_adjusted *= scale_factor
+
+        SmartDashboard.putNumberArray("outputs", [vx_adjusted, vy_adjusted, theta_adjusted])
+        self.sendDriveCommand(vx_adjusted, vy_adjusted, theta_adjusted)
+
+    def doGameStickInput(self):
+        vx = self.controller.getRawAxis(0)
+        vy = self.controller.getRawAxis(1)
+
         theta = self.controller.getRawAxis(2)
 
-        self.proccessContrlerInput(-vx, -vy, -theta)
-
-    def proccessContrlerInput(self, vx, vy, theta):
-
-        x_deadband = robot_config.teleop_controls.x_deadband
-        y_deadband = robot_config.teleop_controls.y_deadband
-
-        theta_deadband = robot_config.teleop_controls.theta_deadband
-
-        if abs(theta) < theta_deadband:
-            theta = 0
-        # if abs(theta) < theta_deadband:
-        #     theta = 0
-        velocity = math.sqrt(self.swerve_drive.measured_chassis_speed.vx ** 2 + self.swerve_drive.measured_chassis_speed.vy ** 2)
+        vx_adjusted = processControllerDeadband(vx, Range(robot_config.teleop_controls.x_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed))
+        vy_adjusted = processControllerDeadband(vy, Range(robot_config.teleop_controls.x_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed))
+        theta_adjusted = processControllerDeadband(theta, Range(robot_config.teleop_controls.theta_deadband, 1), Range(0, robot_config.physical_properties.max_rotation_speed))
         
-        if velocity < 0.05 and abs(vx) < x_deadband and abs(vy) < y_deadband and abs(theta) < theta_deadband: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
+        requested_speed = math.sqrt(vx_adjusted ** 2 + vy_adjusted ** 2) 
+
+        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
+        if requested_speed > robot_config.physical_properties.max_drive_speed:
+            scale_factor = robot_config.physical_properties.max_drive_speed / requested_speed
+            vx_adjusted *= scale_factor
+            vy_adjusted *= scale_factor
+
+
+
+        SmartDashboard.putNumberArray("outputs", [vx_adjusted, vy_adjusted, theta_adjusted])
+
+        # requested_speed = math.sqrt(vx * vx + vy * vy) 
+
+        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
+        # if requested_speed > robot_config.physical_properties.max_drive_speed:
+        #     scale_factor = robot_config.physical_properties.max_drive_speed / requested_speed
+        #     vx *= scale_factor
+        #     vy *= scale_factor
+
+        self.sendDriveCommand(vx_adjusted,  vy_adjusted, theta_adjusted)
+
+    def sendDriveCommand(self, vx: float, vy: float, theta: float):
+
+        #velocity = math.sqrt(self.swerve_drive.measured_chassis_speed.vx ** 2 + self.swerve_drive.measured_chassis_speed.vy ** 2)
+        
+        if False: #velocity < 0.01 and theta == 0 and vx == 0 and vx == 0: # and velocity < .5 and self.swerve_drive.chassis_speed.omega < .5
             # TODO: Make sure robot is not actually moving too
-            self.swerve_drive.stop()# self.swerve_drive.lock_wheels()
+            self.swerve_drive.lock_wheels()
             # pass
         else:
-            vx *= robot_config.physical_properties.max_drive_speed
-            vy *= robot_config.physical_properties.max_drive_speed
-            scaled_speed = math.sqrt(vx * vx + vy * vy) 
-
-            # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
-            if scaled_speed > robot_config.physical_properties.max_drive_speed:
-                scale_factor = robot_config.physical_properties.max_drive_speed / scaled_speed
-                vx *= scale_factor
-                vy *= scale_factor
-
-            self.swerve_drive.drive(vx, vy, theta * robot_config.physical_properties.max_rotation_speed, None)
+            self.swerve_drive.drive(-vx, -vy, -theta, None)
 
     def updateField(self):
         pass
