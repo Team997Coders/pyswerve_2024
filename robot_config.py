@@ -1,21 +1,19 @@
 import enum
 import math
-import math_helper
+import math_help
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty
 
-from typing import Union, NamedTuple
-
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 
-joystick_controls = DriverControlsConfig(x_deadband=math_helper.Range(0.05, 1),
-                                         y_deadband=math_helper.Range(0.05, 1),
-                                         theta_deadband=math_helper.Range(0.05, 1))
-gamepad_controls = DriverControlsConfig(x_deadband=math_helper.Range(0.10, 1),
-                                        y_deadband=math_helper.Range(0.10, 1),
-                                        theta_deadband=math_helper.Range(0.10, 1))
+joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.05, 1),
+                                         y_deadband=math_help.Range(0.05, 1),
+                                         theta_deadband=math_help.Range(0.05, 1))
+gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
+                                        y_deadband=math_help.Range(0.10, 1),
+                                        theta_deadband=math_help.Range(0.10, 1))
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),

@@ -1,6 +1,6 @@
 import math
 
-from math_helper import Range
+from math_help import Range
 import numpy as np
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
@@ -52,7 +52,7 @@ def optimize_improved(desired_angle_radians: float, desired_speed: float, curren
     current_rotation = geom.Rotation2d(current_angle_radians)
     return optimize_state_improved(desired_state, current_rotation)
 
-def processControllerDeadband(input, input_range:Range, output_range:Range):
+def map_input_to_output_range(input, input_range:Range, output_range:Range):
     '''proccesses stick input from a controller so that '''
     input_norm = input_range.normalize(abs(input))
     # input_one_norm = self.inputControllerOneRange.normalize(abs(input))
