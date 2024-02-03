@@ -44,7 +44,7 @@ class TestDriver:
     This class automatically drives the robot through a series of tests.  It is intended to be used to ensure hardware is properly configured.
     If these tests behave as expected the swerve drive should operate correctly.
     '''
-    start_time: float
+    start_time: float | None
     _current_test_group_index: int = 0
     _current_test: int = 0   #
     logger: logging.Logger
@@ -72,13 +72,13 @@ class TestDriver:
 
             self._current_test_group_index = value
             self._current_test = 0
-            self.start_time = time.monotonic()
+            self.start_time = None
 
     def __init__(self, swerve_drive: SwerveDrive, logger: logging.Logger):
         super().__init__()
         self.swerve_drive = swerve_drive
         self.logger = logger.getChild("SwerveTestDriver")
-        self.start_time = time.monotonic()
+        self.start_time = None
 
     def testInit(self):
         # Expected Outcome: Each wheel should rotate in the same direction
@@ -239,10 +239,16 @@ class TestDriver:
             # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
             # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
 
+            TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                                               ModulePosition.front_right,
+                                               ModulePosition.back_left,
+                                               ModulePosition.back_right], 0)),
+
             # Drive using translation in various directions
-            TestConfig(5, self.runDriveTest, (1, 0, 0)),
+            TestConfig(6, self.runDriveDistanceTest, (2, 0)),
+ 
             # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-            TestConfig(5, self.runDriveTest, (-1, 0, 0)),
+            TestConfig(6, self.runDriveDistanceTest, (-2, 0)),
             # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
 
             # Drive using rotation in both directions
@@ -269,7 +275,16 @@ class TestDriver:
             selected_test_group_index = self._chooser.getSelected()
             if selected_test_group_index is not None:
                 self.current_test_group_index = self._chooser.getSelected()
+        
+        #Start the test if there is not test running
+        if self.start_time is None:
+            self.start_time = time.monotonic()
 
+            test_config = self.current_test_group.tests[self._current_test]
+            test_config.test(*test_config.args)
+            return
+        
+        #Check if it is time for the next test
         elapsed_time = time.monotonic() - self.start_time
         if elapsed_time > self.current_test_group.tests[self._current_test].duration:
             self._current_test += 1
@@ -355,3 +370,8 @@ class TestDriver:
         self.swerve_drive.drive(vx, vy, rotation, run_modules)
 
         # TODO: Test the drive states to ensure the angle and direction of each wheel is correct
+
+    def runDriveDistanceTest(self, meters: float, angle : float):
+        '''Drive the robot a specific distance in a specific direction'''
+        self.logger.info(f"Drive the robot {meters} meters at {math.degrees(angle)} degrees")
+        self.swerve_drive.drive_set_distance(meters, angle)

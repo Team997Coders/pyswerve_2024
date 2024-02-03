@@ -163,4 +163,6 @@ class SwerveDrive(ISwerveDrive):
         with self._odemetry_lock:
             self._odemetry.addVisionMeasurement(pose, timestamp)
 
-  
+    def drive_set_distance(self, meters: float, angle: float):
+        for module in self._modules.values():
+            module.drive_set_distance(meters, angle)

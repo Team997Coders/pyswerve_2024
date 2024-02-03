@@ -2,9 +2,9 @@ import enum
 import math
 from config import *
 from typing import Union, NamedTuple
-
+#DON"T USE i IN THE PID
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
-default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
+default_drive_pid = PIDConfig(p=0.5, i=0.0, d=0.0, wrapping=None)
 
 
 teleop_controls = DriverControlsConfig(x_deadband=0.15, y_deadband=0.15, theta_deadband=0.15)
@@ -40,7 +40,7 @@ swerve_modules = {ModulePosition.front_left:
 
                   } # type: dict[ModulePosition, SwerveModuleConfig]
 
-physical_properties = PhysicalConfig(wheel_diameter_cm=12,
+physical_properties = PhysicalConfig(wheel_diameter_cm=10.16,
                                         wheel_grip_coefficient_of_friction=1,
                                         current_limit=OptionalSwerveModuleIntProperty(drive=40, angle=20),
                                         ramp_rate=OptionalSwerveModuleFloatProperty(drive=0.25, angle=0.25),

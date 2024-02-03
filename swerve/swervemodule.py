@@ -64,7 +64,7 @@ class SwerveModule(ISwerveModule):
         self.drive_motor_encoder = self.drive_motor.getEncoder()
         self.angle_motor_encoder = self.angle_motor.getEncoder()
 
-        self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
+        self.drive_motor_encoder.setPositionConversionFactor(1.0 / (physical_config.gear_ratio.drive) * ((physical_config.wheel_diameter_cm / 100) * math.pi)) 
         self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive) * ((physical_config.wheel_diameter_cm / 100) * math.pi) / 60.0) # convert from rpm to revolutions/sec
         
         # Request specific angles from the PID controller 
@@ -105,7 +105,7 @@ class SwerveModule(ISwerveModule):
         '''Idle both motors'''
         self.angle_motor.set(0)
         self.drive_motor.set(0)
-        self._desired_state = kinematics.SwerveModuleState(0, self.rotation2d)
+        self._desired_state = kinematics.SwerveModuleState(self.angle, self.rotation2d)
   
     def __str__(self):
         return f"SwerveModule {str(self.id)}"
@@ -190,6 +190,13 @@ class SwerveModule(ISwerveModule):
         self._desired_state = math_help.optimize_state_improved(value, geom.Rotation2d(self.angle_absolute_encoder.getPosition()))
         self.angle = self._desired_state.angle.radians()
         self.velocity = self._desired_state.speed
+
+    def drive_set_distance(self, meters: float, angle: float):
+        '''Drive the wheel a specific distance in meters.  If you use this call, desired state speed will be incorrect until
+           you set desired_state again. This is because the PID controller will be driving the wheel to the specified distance.'''
+        self.drive_motor_encoder.setPosition(0)
+        self.drive_pid.setReference(meters, rev.CANSparkMax.ControlType.kPosition)
+        self.angle = angle
 
     @staticmethod
     def radians_to_degrees(radians: float) -> float:
