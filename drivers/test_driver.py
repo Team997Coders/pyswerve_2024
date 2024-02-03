@@ -10,7 +10,7 @@ from typing import Callable, Iterable, Any, NamedTuple, Sequence
 
 
 class TestConfig(NamedTuple):
-    '''A test configuration for a swerve module'''
+    """A test configuration for a swerve module"""
     duration: float
     test: Callable[..., Any]
     args: Iterable[Any]
@@ -40,10 +40,10 @@ def create_test_selection_widget(sd_path: str, test_groups: list[TestGroup]) -> 
 
 
 class TestDriver:
-    '''
+    """
     This class automatically drives the robot through a series of tests.  It is intended to be used to ensure hardware is properly configured.
     If these tests behave as expected the swerve drive should operate correctly.
-    '''
+    """
     start_time: float | None
     _current_test_group_index: int = 0
     _current_test: int = 0   #
@@ -142,10 +142,15 @@ class TestDriver:
             "Individual wheel drive test",
             "Drive each wheel individually.  This is a test of rotation conversion factors for the drive wheel" +
             "Each wheel should make one full rotation",
-            [TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
-             TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
+            
+            [TestConfig(.5, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                                                            ModulePosition.front_right,
+                                                            ModulePosition.back_left,
+                                                            ModulePosition.back_right], math.pi / 2)),
+            #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
+            #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
              TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_left, 1)),
-             TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_right, 1)),
+             TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_right, 10)),
              ]
         )
 
@@ -275,7 +280,7 @@ class TestDriver:
             selected_test_group_index = self._chooser.getSelected()
             if selected_test_group_index is not None:
                 self.current_test_group_index = self._chooser.getSelected()
-        
+
         #Start the test if there is not test running
         if self.start_time is None:
             self.start_time = time.monotonic()
@@ -298,68 +303,68 @@ class TestDriver:
             test_config.test(*test_config.args)
 
     def stopMotors(self):
-        '''Turn off the motors to prepare for the next test'''
+        """Turn off the motors to prepare for the next test"""
         self.swerve_drive.stop()
 
     def runDriveMotorTests(self, position: list[ModulePosition], speed):
-        '''Turn on the drive motors to a specific power.  Ensures drive motors are functional.'''
+        """Turn on the drive motors to a specific power.  Ensures drive motors are functional."""
         for module in position:
             self.runDriveMotorTest(module, speed)
 
     def runDriveMotorTest(self, position: ModulePosition,
                           speed: float):
-        '''Turn on the drive motor to a specific power.  Ensures drive motors are functional.'''
+        """Turn on the drive motor to a specific power.  Ensures drive motors are functional."""
         self.logger.info(f"{position} drive motor should be moving {speed * 100} % power")
         self.swerve_drive.modules[position].drive_motor.set(speed)
 
     def runDriveMotorRotationTests(self, num_rotations: list[ModulePosition], speed: float):
-        '''Rotates the drive wheels a specific number of rotations.  Ensures our wheel size, gear ratio and math
-           are correct.  This is important for odometry to measure progress across the field.'''
+        """Rotates the drive wheels a specific number of rotations.  Ensures our wheel size, gear ratio and math
+           are correct.  This is important for odometry to measure progress across the field."""
         for module in num_rotations:
             self.runDriveMotorTest(module, speed)
 
     def runDriveMotorRotationTest(self, position: ModulePosition, num_rotations: float):
-        '''Rotates the drive wheel a specific number of rotations.  Ensures our wheel size, gear ratio and math
-           are correct.  This is important for odometry to measure progress across the field.'''
+        """Rotates the drive wheel a specific number of rotations.  Ensures our wheel size, gear ratio and math
+           are correct.  This is important for odometry to measure progress across the field."""
         self.logger.info(f"{position} drive motor wheel should rotate {num_rotations} time(s)")
         self.swerve_drive.modules[position].rotate_drive_wheel(num_rotations)
 
     def runDriveMotorVelocityTest(self, position: ModulePosition, meters_per_sec: float):
-        '''Turn on the drive motor to a specific speed.  Ensures that drive motors move at the 
-        expected speed.  This can be hard to precisely measure, but eyeballing or using a stopwatch as it drives across ground is a start.'''
+        """Turn on the drive motor to a specific speed.  Ensures that drive motors move at the
+        expected speed.  This can be hard to precisely measure, but eyeballing or using a stopwatch as it drives across ground is a start."""
         self.logger.info(f"{position} drive motor should be moving {meters_per_sec} m/s")
         self.swerve_drive.modules[position].velocity = meters_per_sec
 
     def runAngleMotorTests(self, position: list[ModulePosition],
                            power: float):
-        '''Turn on the angle motors to a specific power.  Ensures angle motors are functional.'''
+        """Turn on the angle motors to a specific power.  Ensures angle motors are functional."""
         for module in position:
             self.runAngleMotorTest(module, power)
 
     def runAngleMotorTest(self, position: ModulePosition,
                           power: float):
-        '''Turn on the angle motor to a specific power.  Ensures angle motors are functional.'''
+        """Turn on the angle motor to a specific power.  Ensures angle motors are functional."""
         self.logger.info(f"{position} angle motor should be spinning at {power * 100} % power")
         self.swerve_drive.modules[position].angle_motor.set(power)
 
     def runAngleMotorPIDTests(self, position: list[ModulePosition],
                               angle: float):
-        '''Set the angles of the motors, does not pass through optimization.  Ensures feedback sensors and pid are correctly set.'''
+        """Set the angles of the motors, does not pass through optimization.  Ensures feedback sensors and pid are correctly set."""
         for module in position:
             self.runAngleMotorPIDTest(module, angle)
 
     def runAngleMotorPIDTest(self, position: ModulePosition,
                              angle: float):
-        '''Set the angle of the motor, does not pass through optimization.   Ensures feedback sensors and pid are correctly set.'''
+        """Set the angle of the motor, does not pass through optimization.   Ensures feedback sensors and pid are correctly set."""
         self.logger.info(f"{position} angle motor should move to {math.degrees(angle)} degrees")
         self.swerve_drive.modules[position].angle = angle
 
     def runDriveTest(self, vx, vy, rotation, run_modules: Sequence[ModulePosition] | None = None):
-        '''
+        """
         Set a desired drive state.  Output should be optimized to use the minimal angle
 
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
-        '''
+        """
         if run_modules is None:
             self.logger.info(f"Chassis should be driving at {vx}x  {vy}y {rotation} rotation rate")
         else:
@@ -372,6 +377,6 @@ class TestDriver:
         # TODO: Test the drive states to ensure the angle and direction of each wheel is correct
 
     def runDriveDistanceTest(self, meters: float, angle : float):
-        '''Drive the robot a specific distance in a specific direction'''
+        """Drive the robot a specific distance in a specific direction"""
         self.logger.info(f"Drive the robot {meters} meters at {math.degrees(angle)} degrees")
         self.swerve_drive.drive_set_distance(meters, angle)
