@@ -1,7 +1,5 @@
-import abc
 import time
 from typing import Callable, Any
-import wpilib
 import rev
 import math
 import logging
@@ -264,7 +262,8 @@ class SwerveModule(ISwerveModule):
         if self.config.encoder.offset is not None:
             required_absolute_adjustment = self.config.encoder.offset #shortest_angle_difference(self.angle_absolute_encoder.getPosition(), self.angle_absolute_encoder.getPosition() - self.config.encoder.offset)
             self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
-            self.rel_to_absolute_angle_adjustment = shortest_angle_difference(math_help.wrap_angle(self.angle_motor_encoder.getPosition()), self.angle_absolute_encoder.getPosition())
+            self.rel_to_absolute_angle_adjustment = shortest_angle_difference(
+                math_help.wrap_angle(self.angle_motor_encoder.getPosition()), self.angle_absolute_encoder.getPosition())
             self.rel_to_corrected_angle_adjustment = self.rel_to_absolute_angle_adjustment + required_absolute_adjustment
         else:
             self.rel_to_absolute_angle_adjustment = None

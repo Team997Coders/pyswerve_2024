@@ -1,4 +1,4 @@
-class EMA():
+class EMA:
     '''
     Accumulates values over time, calculating an exponential moving average over time
     '''

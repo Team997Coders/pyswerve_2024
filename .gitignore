@@ -1,6 +1,7 @@
 **/__pycache__/
 **/*.py[cod]
 **/*.pyc
+**/.idea/
 __pycache__/
 *.pyc
 **/.hypothesis/

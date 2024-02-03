@@ -23,7 +23,7 @@ Install all robotpy subpackages:
     pip install robotpy[all]
 
 If you have trouble the instructions for a robotpy install are available
-at https://robotpy.readthedocs.io/en/stable/install/index.html
+at https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/python-setup.html
 
 You also want to install the following packages via pip:
 
@@ -117,13 +117,14 @@ Never trust CoPilot code without review.  Think of the results as a suggestion, 
 Robotpy Deploy System
 ---------------------
 
-Python is an interpreted language.  Robotpy copies the files to the RoboRIO after running some tests.
+To deploy python to the robot we need RoboRIO versions of python and the python packages.
+The sync command downloads and caches packages for our bot listed in the pyproject.toml file.
 
     python -m robotpy sync
 
 **Note: If you add a new package to your project, update your toml file and run robotpy sync again.**
     
-After that, to build and deploy the robot code to the robot, run:
+After that, to deploy your code to the robot, run:
 
     python -m robotpy deploy
 

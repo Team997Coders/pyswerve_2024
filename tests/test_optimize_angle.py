@@ -1,7 +1,6 @@
 import unittest
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
-import hypothesis
 import hypothesis.strategies
 import math_help
 import math
