@@ -1,4 +1,4 @@
-'''This package contains read-only record objects used for configuration'''
+"""This package contains read-only record objects used for configuration"""
 
 from .range_config import Range, OptionalRange
 from .pid import PIDConfig

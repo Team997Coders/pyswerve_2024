@@ -1,7 +1,7 @@
 class EMA:
-    '''
+    """
     Accumulates values over time, calculating an exponential moving average over time
-    '''
+    """
 
     _last_ema_value: float
     _current_value: float
@@ -20,7 +20,7 @@ class EMA:
 
     @property
     def ema_value(self) -> float:
-        '''Current exponential moving average'''
+        """Current exponential moving average"""
         if self._num_samples_collected == 0:
             raise ValueError('Cannot calculate EMA until at least one sample is collected')
 

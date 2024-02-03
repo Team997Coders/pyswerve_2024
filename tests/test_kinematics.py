@@ -17,7 +17,7 @@ class testKinematics(unittest.TestCase):
  
 
     def testModuleOrderOne(self):
-        '''Test that the module order is correct.  Remember that the positive X direction is away from the team wall'''
+        """Test that the module order is correct.  Remember that the positive X direction is away from the team wall"""
 
         locations = [self.front_left, self.front_right, self.back_left, self.back_right]
         k_fl_fr_bl_br = kinematics.SwerveDrive4Kinematics(*locations)
@@ -46,7 +46,7 @@ class testKinematics(unittest.TestCase):
         return 
     
     def testModuleOrderTwo(self):
-        '''Test that the module order is correct.  This test is the same as TestOne.  The only difference is the order of the modules'''
+        """Test that the module order is correct.  This test is the same as TestOne.  The only difference is the order of the modules"""
 
         locations = [self.front_right, self.front_left, self.back_right, self.back_left]
         k = kinematics.SwerveDrive4Kinematics(*locations)

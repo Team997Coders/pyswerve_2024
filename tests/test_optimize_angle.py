@@ -48,7 +48,7 @@ class TestSwerveModuleState(unittest.TestCase):
                       speed=hypothesis.strategies.floats(min_value=0, max_value=1))
     @hypothesis.settings(max_examples=50, deadline=10000)
     def test_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
-        '''These are unlikely to fail, but are good to have for regression testing.  Comment them if they delay deployment'''
+        """These are unlikely to fail, but are good to have for regression testing.  Comment them if they delay deployment"""
         self.check_optimization(currentRadians, desiredRadians, speed)
 
     def check_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
@@ -67,7 +67,7 @@ class TestSwerveModuleState(unittest.TestCase):
             self.assertAlmostEqual(abs(angle_diff), math.pi)
 
     def test_falsifying_case(self):
-        '''Use this test case to reproduce hypothesis testing failures'''
+        """Use this test case to reproduce hypothesis testing failures"""
         self.check_optimization(0, (math.pi * 3) / 2, 1)
 
     @hypothesis.given(currentRadians=hypothesis.strategies.floats(min_value=0, max_value=2*math.pi),
@@ -75,7 +75,7 @@ class TestSwerveModuleState(unittest.TestCase):
                       speed=hypothesis.strategies.floats(min_value=0, max_value=1))
     @hypothesis.settings(max_examples=50, deadline=10000)
     def test_improved_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
-        '''These are unlikely to fail, but are good to have for regression testing.  Comment them if they delay deployment'''
+        """These are unlikely to fail, but are good to have for regression testing.  Comment them if they delay deployment"""
         self.check_improved_optimization(currentRadians, desiredRadians, speed)
 
     def check_improved_optimization(self, currentRadians: float, desiredRadians: float, speed: float):
@@ -97,7 +97,7 @@ class TestSwerveModuleState(unittest.TestCase):
             self.assertAlmostEqual(abs(angle_diff), math.pi)
     
     def test_falsifying_improved_case(self):
-        '''Use this test case to reproduce hypothesis testing failures'''
+        """Use this test case to reproduce hypothesis testing failures"""
         self.check_improved_optimization(6.210083064008053,
                                          6.210083064008053, 2)
 

@@ -1,6 +1,5 @@
 import unittest
 import math_help
-import robot_config
 
 class controller_input_test(unittest.TestCase):
     def test_deadband_input(self):

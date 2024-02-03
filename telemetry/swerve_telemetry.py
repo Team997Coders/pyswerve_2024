@@ -1,11 +1,10 @@
 from swerve import SwerveDrive
 from config import PhysicalConfig
 from wpilib import SmartDashboard as sd
-from typing import List, Tuple 
-import math
+from typing import List, Tuple
 
 class SwerveTelemetry():
-    '''Report swerve telemetry to the dashboard.  Compatible with WebComponents'''
+    """Report swerve telemetry to the dashboard.  Compatible with WebComponents"""
 
     swerve_drive: SwerveDrive
     physical_config: PhysicalConfig
@@ -17,11 +16,11 @@ class SwerveTelemetry():
 
     @staticmethod
     def unpack_tuples(tuples: List[Tuple[float, float]]) -> list[float]:
-        '''Unpack list of tuples into a list of all tuple values'''
+        """Unpack list of tuples into a list of all tuple values"""
         return [i for item in tuples for i in item]
     
     def report_static_to_dashboard(self):
-        '''Write unchanging values to dashboard'''
+        """Write unchanging values to dashboard"""
         sd.putNumber("swerve/moduleCount", self.swerve_drive.num_modules)
         sd.putNumberArray("swerve/wheelLocations", self.unpack_tuples([(m.location.X(), m.location.Y()) for m in self.swerve_drive.ordered_modules]))
         sd.putNumber("swerve/maxSpeed", self.physical_config.max_drive_speed)
@@ -35,7 +34,7 @@ class SwerveTelemetry():
         sd.putNumber("swerve/sizeFrontBack", maxx - minx)
     
     def report_to_dashboard(self):
-        '''Write all module info to nettables''' 
+        """Write all module info to nettables"""
         sd.putNumberArray("swerve/measuredStates", self.unpack_tuples([(m.measured_state.angle.degrees(), m.measured_state.speed) for m in self.swerve_drive.ordered_modules]))
         sd.putNumberArray("swerve/desiredStates", self.unpack_tuples([(m.desired_state.angle.degrees(), m.desired_state.speed) for m in self.swerve_drive.ordered_modules]))
         sd.putNumber("swerve/robotRotation", 0)
