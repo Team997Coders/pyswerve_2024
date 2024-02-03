@@ -75,8 +75,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
         self.swerve_telemetry.report_to_dashboard()
-        self.swerve_drive.periodic()
-        self.update_position()
+        self.swerve_drive.periodic() 
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
 
