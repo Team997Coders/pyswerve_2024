@@ -10,7 +10,7 @@ from typing import Union, NamedTuple
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Carefull when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
-default_rotation_pid = PIDConfig(p=0.02, i=0.0, d=0.0, wrapping=OptionalRange(min=0, max=math.pi * 2))
+default_rotation_pid = PIDConfig(p=.2, i=0.0, d=0.0, wrapping=OptionalRange(min=0, max=math.pi * 2))
 
 joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
                                          y_deadband=math_help.Range(0.15, 1),
