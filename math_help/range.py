@@ -23,7 +23,7 @@ class Range:
     def clip(self, val: float) -> float:
         """
         :param val: value to compare
-        :return: thenearest value within the range
+        :return: nearest value within the range
         """
         if val < self._min_val:
             return self._min_val
@@ -32,7 +32,7 @@ class Range:
 
     def interpolate(self, scalar: float) -> float:
         """
-        :param value: A scalar representing the distance between min/max
+        :param scalar: A scalar representing the distance between min/max
         :return: The value, ex: 0.5 is the midpoint between min/max
         """
         return (self._range * scalar) + self._min_val

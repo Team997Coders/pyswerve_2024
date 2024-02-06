@@ -1,22 +1,17 @@
 import sys
 import wpilib
-import rev
-import config
 from config import AxisConfig
 import robot_config
 import swerve
-import time
 import ntcore
 import telemetry
-import math
 import navx
 from drivers import TestDriver
 from drivers import TwinStickTeleopDrive
 from drivers import TeleopDrive
 from swerve import SwerveDrive
 from debug import attach_debugger
-import wpimath.kinematics as kinematics
-from wpilib import SmartDashboard, Field2d
+from wpilib import SmartDashboard
 from wpilib import SmartDashboard as sd
 import commands2
 from math_help import Range

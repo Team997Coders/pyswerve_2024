@@ -43,7 +43,7 @@ def optimize_state_improved(desired_state: kinematics.SwerveModuleState,
     elif result < 0:  # If the dot product is negative, we need to reverse the desired angle, and scale speed by the dot product
         desired_angle = desired_angle + geom.Rotation2d(math.pi)
         desired_state = kinematics.SwerveModuleState(desired_speed, desired_angle)
-    else:  # No change needed to the desired angle
+    else: # No change needed to the desired angle
         desired_state = kinematics.SwerveModuleState(desired_speed, desired_angle)
 
     return desired_state

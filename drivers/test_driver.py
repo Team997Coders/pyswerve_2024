@@ -48,7 +48,7 @@ class TestDriver:
     _current_test_group_index: int = 0
     _current_test: int = 0  #
     logger: logging.Logger
-    swerve_drive: SwerveDrive  # The swerve drive to test
+    swerve_drive: SwerveDrive # The swerve drive to test
     test_groups: list[TestGroup]
 
     _chooser = wpilib.SendableChooser()
@@ -144,11 +144,11 @@ class TestDriver:
             "Each wheel should make one full rotation",
 
             [TestConfig(.5, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-                                                          ModulePosition.front_right,
-                                                          ModulePosition.back_left,
-                                                          ModulePosition.back_right], math.pi / 2)),
-             #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
-             #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
+                                                            ModulePosition.front_right,
+                                                            ModulePosition.back_left,
+                                                            ModulePosition.back_right], math.pi / 2)),
+            #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
+            #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
              TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_left, 1)),
              TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_right, 10)),
              ]
@@ -234,32 +234,32 @@ class TestDriver:
             # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, -math.pi / 2)),
             # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, -math.pi / 2)),
             # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, -math.pi / 2)),
-                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
+            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
 
-                # TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
+            # TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
 
-                # Drive individual modules in translation in various directions
-                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_left])),
-                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_right])),
-                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
-                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
+            # Drive individual modules in translation in various directions
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_left])),
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_right])),
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
+            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
 
-                TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-                                                               ModulePosition.front_right,
-                                                               ModulePosition.back_left,
-                                                               ModulePosition.back_right], 0)),
+            TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                                                           ModulePosition.front_right,
+                                                           ModulePosition.back_left,
+                                                           ModulePosition.back_right], 0)),
 
-                # Drive using translation in various directions
-                TestConfig(6, self.runDriveDistanceTest, (2, 0)),
+            # Drive using translation in various directions
+            TestConfig(6, self.runDriveDistanceTest, (2, 0)),
 
-                # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-                TestConfig(6, self.runDriveDistanceTest, (-2, 0)),
-                # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
+            # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
+            TestConfig(6, self.runDriveDistanceTest, (-2, 0)),
+            # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
 
-                # Drive using rotation in both directions
-                # TestConfig(3, self.runDriveTest, (0, 0, 0.5)),
-                # TestConfig(3, self.runDriveTest, (0, 0, -0.5)),
-            ]
+            # Drive using rotation in both directions
+            # TestConfig(3, self.runDriveTest, (0, 0, 0.5)),
+            # TestConfig(3, self.runDriveTest, (0, 0, -0.5)),
+          ]
         )
 
         self.test_groups = [
@@ -281,7 +281,7 @@ class TestDriver:
             if selected_test_group_index is not None:
                 self.current_test_group_index = self._chooser.getSelected()
 
-        # Start the test if there is not test running
+        #Start the test if there is not test running
         if self.start_time is None:
             self.start_time = time.monotonic()
 
@@ -289,7 +289,7 @@ class TestDriver:
             test_config.test(*test_config.args)
             return
 
-        # Check if it is time for the next test
+        #Check if it is time for the next test
         elapsed_time = time.monotonic() - self.start_time
         if elapsed_time > self.current_test_group.tests[self._current_test].duration:
             self._current_test += 1
@@ -375,8 +375,7 @@ class TestDriver:
         self.swerve_drive.drive(vx, vy, rotation, run_modules)
 
         # TODO: Test the drive states to ensure the angle and direction of each wheel is correct
-
-    def runDriveDistanceTest(self, meters: float, angle: float):
+    def runDriveDistanceTest(self, meters: float, angle : float):
         """Drive the robot a specific distance in a specific direction"""
         self.logger.info(f"Drive the robot {meters} meters at {math.degrees(angle)} degrees")
         self.swerve_drive.drive_set_distance(meters, angle)

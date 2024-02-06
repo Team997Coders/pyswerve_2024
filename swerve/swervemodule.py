@@ -256,6 +256,7 @@ class SwerveModule(ISwerveModule):
             self._angle_motor.setOpenLoopRampRate(physical_config.ramp_rate.angle)
             self._angle_motor.setClosedLoopRampRate(physical_config.ramp_rate.angle)
 
+    
     @staticmethod
     def init_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_device: rev.CANSensor | None = None):
         """Configures a SparkMax PID controller with the provided PIDConfig"""
