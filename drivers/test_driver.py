@@ -21,17 +21,17 @@ class TestGroup(NamedTuple):
     description: str  # Description of expected outcome of running the test
     tests: list[TestConfig]  # Todo: enable having TestGroups in the list as well
 
+
 def create_test_selection_widget(sd_path: str, test_groups: list[TestGroup]) -> wpilib.SendableChooser:
     """Creates a widget in smart dashboard that can select which test group to run from a list
     :param sd_path: The path in smart dashboard to write the selected test group to
     """
     chooser = wpilib.SendableChooser()
-    for i in range(len(test_groups)-1):
-       tg = test_groups[i]
-       chooser.addOption(tg.name, i) # Write the index to the dashboard, we'll use this to lookup which test to run
+    for i, tg in enumerate(test_groups):
+        chooser.addOption(tg.name, i)  # Write the index to the dashboard, we'll use this to lookup which test to run
 
-    tg = test_groups[-1] # The last test in the test group is the default
-    chooser.setDefaultOption(tg.name, len(test_groups)-1)
+    tg = test_groups[-1]  # The last test in the test group is the default
+    chooser.setDefaultOption(tg.name, len(test_groups) - 1)
     wpilib.SmartDashboard.putData(sd_path, chooser)
     return chooser
 
@@ -48,7 +48,7 @@ class TestDriver:
     _current_test_group_index: int = 0
     _current_test: int = 0  #
     logger: logging.Logger
-    swerve_drive: SwerveDrive # The swerve drive to test
+    swerve_drive: SwerveDrive  # The swerve drive to test
     test_groups: list[TestGroup]
 
     _chooser = wpilib.SendableChooser()
@@ -67,7 +67,7 @@ class TestDriver:
     def current_test_group_index(self, value: int):
         """Change the active test group and start the first test of the new test group"""
         if value != self._current_test_group_index:
-            if value >= len(self.test_groups): # A sanity check for crazy values
+            if value >= len(self.test_groups):  # A sanity check for crazy values
                 value = value % len(self.test_groups)
 
             self._current_test_group_index = value
@@ -80,7 +80,9 @@ class TestDriver:
         self.logger = logger.getChild("SwerveTestDriver")
         self.start_time = None
 
-    def testInit(self):
+        self.populate_tests()
+
+    def populate_tests(self):
         # Expected Outcome: Each wheel should rotate in the same direction
         angle_motor_rotation_tests = TestGroup("Angle Motor Rotation",
                                                "Rotate angle motors with a percentage of full power.  Ensure motors rotate in the same direction.",
@@ -121,9 +123,9 @@ class TestDriver:
             "Each wheel  should rotate to align with the robots forward direction" +
             "then rotate in 90 degree increments",
             [TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-                                               ModulePosition.front_right,
-                                               ModulePosition.back_left,
-                                               ModulePosition.back_right], 0)),
+                                                            ModulePosition.front_right,
+                                                            ModulePosition.back_left,
+                                                            ModulePosition.back_right], 0)),
              TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
                                                             ModulePosition.front_right,
                                                             ModulePosition.back_left,
@@ -136,7 +138,7 @@ class TestDriver:
                                                             ModulePosition.front_right,
                                                             ModulePosition.back_left,
                                                             ModulePosition.back_right], -math.pi / 2)),
-            ])
+             ])
 
         individual_drive_wheel_rotation_tests = TestGroup(
             "Individual wheel drive test",
@@ -144,11 +146,11 @@ class TestDriver:
             "Each wheel should make one full rotation",
 
             [TestConfig(.5, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-                                                            ModulePosition.front_right,
-                                                            ModulePosition.back_left,
-                                                            ModulePosition.back_right], math.pi / 2)),
-            #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
-            #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
+                                                          ModulePosition.front_right,
+                                                          ModulePosition.back_left,
+                                                          ModulePosition.back_right], math.pi / 2)),
+             #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
+             #  TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
              TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_left, 1)),
              TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_right, 10)),
              ]
@@ -158,108 +160,108 @@ class TestDriver:
             "Basic Drive Tests",
             "Starting with locked wheels, robot should drive forward, backward, left, right, and rotate clockwise and counter clockwise",
             [
-             TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
-             #Drive forward and backward
-             TestConfig(3, self.runDriveTest, (1, 0, 0)),
-             TestConfig(3, self.runDriveTest, (-1, 0, 0)),
-             #Drive left and right
-             TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-             TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
-             # Spin using rotation in both directions
-             TestConfig(3, self.runDriveTest, (0, 0, 0.5)),
-             TestConfig(3, self.runDriveTest, (0, 0, -0.5))]
+                TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
+                # Drive forward and backward
+                TestConfig(3, self.runDriveTest, (1, 0, 0)),
+                TestConfig(3, self.runDriveTest, (-1, 0, 0)),
+                # Drive left and right
+                TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
+                TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
+                # Spin using rotation in both directions
+                TestConfig(3, self.runDriveTest, (0, 0, 0.5)),
+                TestConfig(3, self.runDriveTest, (0, 0, -0.5))]
         )
 
         default_tests = TestGroup(
             "Default Test",
             "The place to put whatever test you want to run as you edit the code",
             [
-            # TestConfig(1, self.runAngleMotorTest, (ModulePosition.front_left, -0.05)),
-            # TestConfig(1, self.runAngleMotorTest, (ModulePosition.front_right, 0.1)),
-            # TestConfig(1, self.runAngleMotorTest, (ModulePosition.back_left, -0.15)),
-            # TestConfig(1, self.runAngleMotorTest, (ModulePosition.back_right, 0.2)),
+                # TestConfig(1, self.runAngleMotorTest, (ModulePosition.front_left, -0.05)),
+                # TestConfig(1, self.runAngleMotorTest, (ModulePosition.front_right, 0.1)),
+                # TestConfig(1, self.runAngleMotorTest, (ModulePosition.back_left, -0.15)),
+                # TestConfig(1, self.runAngleMotorTest, (ModulePosition.back_right, 0.2)),
 
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, 0)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, 0)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, 0)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, 0)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, 0)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, 0)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, 0)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, 0)),
 
-            # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-            #                                                ModulePosition.front_right,
-            #                                                ModulePosition.back_left,
-            #                                                ModulePosition.back_right], 0)),
+                # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                #                                                ModulePosition.front_right,
+                #                                                ModulePosition.back_left,
+                #                                                ModulePosition.back_right], 0)),
 
-            # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.front_left, 0.05)),
-            # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.front_right, 0.05)),
-            # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.back_left, 0.05)),
-            # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.back_right, 0.05)),
+                # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.front_left, 0.05)),
+                # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.front_right, 0.05)),
+                # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.back_left, 0.05)),
+                # # TestConfig(1, self.runDriveMotorTest, (ModulePosition.back_right, 0.05)),
 
-            # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
-            # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
-            # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_left, 1)),
-            # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_right, 1)),
+                # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_left, 1)),
+                # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.front_right, 1)),
+                # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_left, 1)),
+                # TestConfig(2, self.runDriveMotorRotationTest, (ModulePosition.back_right, 1)),
 
-            # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.front_left, 0.5)),
-            # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.front_right, -0.5)),
-            # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.back_left, 1)),
-            # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.back_right, -1)),
+                # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.front_left, 0.5)),
+                # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.front_right, -0.5)),
+                # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.back_left, 1)),
+                # # TestConfig(3, self.runDriveMotorVelocityTest, (ModulePosition.back_right, -1)),
 
-            # # # ------ Rotate all motors together ----
-            # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-            #                                                ModulePosition.front_right,
-            #                                                ModulePosition.back_left,
-            #                                                ModulePosition.back_right], math.pi / 2)),
+                # # # ------ Rotate all motors together ----
+                # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                #                                                ModulePosition.front_right,
+                #                                                ModulePosition.back_left,
+                #                                                ModulePosition.back_right], math.pi / 2)),
 
-            # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-            #                                                ModulePosition.front_right,
-            #                                                ModulePosition.back_left,
-            #                                                ModulePosition.back_right], math.pi)),
+                # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                #                                                ModulePosition.front_right,
+                #                                                ModulePosition.back_left,
+                #                                                ModulePosition.back_right], math.pi)),
 
-            # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-            #                                                ModulePosition.front_right,
-            #                                                ModulePosition.back_left,
-            #                                                ModulePosition.back_right], -math.pi / 2)),
-            # # # ---------------------------------------
+                # TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                #                                                ModulePosition.front_right,
+                #                                                ModulePosition.back_left,
+                #                                                ModulePosition.back_right], -math.pi / 2)),
+                # # # ---------------------------------------
 
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi / 2)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi / 2)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi / 2)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi / 2)),
 
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi)),
 
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, -math.pi / 2)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, -math.pi / 2)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, -math.pi / 2)),
-            # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, -math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, -math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, -math.pi / 2)),
+                # # TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
 
-            # TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
+                # TestConfig(1.25, self.swerve_drive.lock_wheels, ()),
 
-            # Drive individual modules in translation in various directions
-            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_left])),
-            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_right])),
-            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
-            # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
+                # Drive individual modules in translation in various directions
+                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_left])),
+                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.front_right])),
+                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_right])),
+                # TestConfig(3, self.runDriveTest, (0.5, 0, 0.2, [ModulePosition.back_left])),
 
-            TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
-                                                           ModulePosition.front_right,
-                                                           ModulePosition.back_left,
-                                                           ModulePosition.back_right], 0)),
+                TestConfig(1.25, self.runAngleMotorPIDTests, ([ModulePosition.front_left,
+                                                               ModulePosition.front_right,
+                                                               ModulePosition.back_left,
+                                                               ModulePosition.back_right], 0)),
 
-            # Drive using translation in various directions
-            TestConfig(6, self.runDriveDistanceTest, (2, 0)),
+                # Drive using translation in various directions
+                TestConfig(6, self.runDriveDistanceTest, (2, 0)),
 
-            # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
-            TestConfig(6, self.runDriveDistanceTest, (-2, 0)),
-            # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
+                # TestConfig(3, self.runDriveTest, (0, 0.5, 0)),
+                TestConfig(6, self.runDriveDistanceTest, (-2, 0)),
+                # TestConfig(3, self.runDriveTest, (0, -0.5, 0)),
 
-            # Drive using rotation in both directions
-            # TestConfig(3, self.runDriveTest, (0, 0, 0.5)),
-            # TestConfig(3, self.runDriveTest, (0, 0, -0.5)),
-          ]
+                # Drive using rotation in both directions
+                # TestConfig(3, self.runDriveTest, (0, 0, 0.5)),
+                # TestConfig(3, self.runDriveTest, (0, 0, -0.5)),
+            ]
         )
 
         self.test_groups = [
@@ -271,17 +273,19 @@ class TestDriver:
             default_tests
         ]
 
-        #Use the generic test group by default
+        # Use the generic test group by default
         self.current_test_group_index = len(self.test_groups) - 1
         self._chooser = create_test_selection_widget("Test Group", self.test_groups)
+        self._chooser.onChange(self.on_test_change)
+
+    def testInit(self):
+        return
+
+    def on_test_change(self, selected_test_group_index: int):
+        self.current_test_group_index = selected_test_group_index
 
     def testPeriodic(self):
-        if self._chooser is not None:
-            selected_test_group_index = self._chooser.getSelected()
-            if selected_test_group_index is not None:
-                self.current_test_group_index = self._chooser.getSelected()
-
-        #Start the test if there is not test running
+        # Start the test if there is not test running
         if self.start_time is None:
             self.start_time = time.monotonic()
 
@@ -289,7 +293,7 @@ class TestDriver:
             test_config.test(*test_config.args)
             return
 
-        #Check if it is time for the next test
+        # Check if it is time for the next test
         elapsed_time = time.monotonic() - self.start_time
         if elapsed_time > self.current_test_group.tests[self._current_test].duration:
             self._current_test += 1
@@ -375,7 +379,8 @@ class TestDriver:
         self.swerve_drive.drive(vx, vy, rotation, run_modules)
 
         # TODO: Test the drive states to ensure the angle and direction of each wheel is correct
-    def runDriveDistanceTest(self, meters: float, angle : float):
+
+    def runDriveDistanceTest(self, meters: float, angle: float):
         """Drive the robot a specific distance in a specific direction"""
         self.logger.info(f"Drive the robot {meters} meters at {math.degrees(angle)} degrees")
         self.swerve_drive.drive_set_distance(meters, angle)
