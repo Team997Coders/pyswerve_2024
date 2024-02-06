@@ -60,13 +60,22 @@ class TwinStickTeleopDrive:
         roty_output_value = map_input_to_output_range(roty_input_value, self._roty_config.input_range,
                                                       self._roty_config.output_range)
 
+        # So if push the stick directly vertically or horizontally what is supposed to happen?
         if rotx_output_value != 0 and roty_output_value != 0:
+
             rot = geom.Rotation2d(-rotx_output_value, -roty_output_value)
             # self._desired_robot_heading = rot.radians()
-            self._desired_robot_heading += (2 * math.pi) / (50 * 5)
+            # self._desired_robot_heading += (2 * math.pi) / (50 * 5)
             # self._desired_robot_heading = math.atan2(-rotx_output_value, -roty_output_value)
-            self._angle_pid.setGoal(self._desired_robot_heading)
-            theta_change = self._angle_pid.calculate(self._swerve_drive.pose.rotation().radians())
+            _updated_desired_robot_heading = rot.radians()
+            if abs(self._desired_robot_heading - _updated_desired_robot_heading) > (math.pi / 180):
+                self._desired_robot_heading = _updated_desired_robot_heading
+                self._angle_pid.setGoal(self._desired_robot_heading)
+
+            # See: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/profiled-pidcontroller.html
+            # "Goal vs Setpoint" and "Getting/Using the Setpoint"
+            self._angle_pid.calculate(self._swerve_drive.pose.rotation().radians())
+            theta_change = self._angle_pid.getSetpoint().velocity
             SmartDashboard.putNumberArray("theta_change", [theta_change])
         else:
             # self._desired_robot_heading = self._swerve_drive.pose.rotation().radians()
