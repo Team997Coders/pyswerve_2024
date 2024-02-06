@@ -1,12 +1,17 @@
 import unittest
 import math
 import math_help
-from math_help import Range
+from math_help import Range, map_input_to_output_range
+from drivers import TwinStickTeleopDrive
 import robot_config
+
 
 class controller_input_test(unittest.TestCase):
     def test_deadband_input(self):
-        self.assertEqual(math_help.processControllerDeadband(0, Range(robot_config.teleop_controls.y_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed)), 0)
-        self.assertEqual(math_help.processControllerDeadband(1, Range(robot_config.teleop_controls.y_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed)), robot_config.physical_properties.max_drive_speed)
-        self.assertAlmostEqual(math_help.processControllerDeadband(robot_config.teleop_controls.y_deadband, Range(robot_config.teleop_controls.y_deadband, 1), Range(0, robot_config.physical_properties.max_drive_speed)), 0, places= 2)
-        
+        dead_band_end = 0.10
+        input_range = Range(dead_band_end, 1)  # Input range is 0 to 1 (absolute)
+        output_range = Range(0, 9)  # Robot drives from 0 to 9 m/s
+        self.assertEqual(math_help.map_input_to_output_range(0, input_range, output_range), output_range.min_val)
+        self.assertEqual(math_help.map_input_to_output_range(1, input_range, output_range), output_range.max_val)
+        self.assertAlmostEqual(math_help.map_input_to_output_range(dead_band_end, input_range, output_range),
+                               output_range.min_val, places=2)

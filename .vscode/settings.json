@@ -13,7 +13,7 @@
         ".",
         ".venv/Lib/site-packages",
         "{env:ProgramFiles}/Python312/Lib/site-packages", 
-        "C:/Python312/Lib/site-packages",
+        "C:/Python312/Lib/site-packages"
     ],
     "python.analysis.exclude": [
         ".vscode/**",

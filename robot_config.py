@@ -1,6 +1,6 @@
 import enum
+import math_help
 import math
-import math_helper
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty
@@ -8,14 +8,16 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
 from typing import Union, NamedTuple
 
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
+# Be Carefull when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
+default_rotation_pid = PIDConfig(p=0.02, i=0.0, d=0.0, wrapping=OptionalRange(min=0, max=math.pi * 2))
 
-joystick_controls = DriverControlsConfig(x_deadband=math_helper.Range(0.05, 1),
-                                         y_deadband=math_helper.Range(0.05, 1),
-                                         theta_deadband=math_helper.Range(0.05, 1))
-gamepad_controls = DriverControlsConfig(x_deadband=math_helper.Range(0.10, 1),
-                                        y_deadband=math_helper.Range(0.10, 1),
-                                        theta_deadband=math_helper.Range(0.10, 1))
+joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
+                                         y_deadband=math_help.Range(0.15, 1),
+                                         theta_deadband=math_help.Range(0.05, 1))
+gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
+                                        y_deadband=math_help.Range(0.10, 1),
+                                        theta_deadband=math_help.Range(0.10, 1))
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),

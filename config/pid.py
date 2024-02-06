@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from . import Range, OptionalRange
+from . import OptionalRange
 
 class PIDConfig(NamedTuple):
     p: float

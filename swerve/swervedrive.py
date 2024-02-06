@@ -19,7 +19,7 @@ from . import ISwerveDrive, ISwerveModule
 
 
 class SwerveDrive(ISwerveDrive):
-    '''Abstract base class for a sweve drive.'''
+    """Abstract base class for a sweve drive."""
     _modules: dict[ModulePosition, ISwerveModule]
 
     initialized: bool = False # True if the swerve drive has been initialized at least once
@@ -52,7 +52,7 @@ class SwerveDrive(ISwerveDrive):
     
     @property
     def ordered_modules(self) -> list[ISwerveModule]:
-        '''Provides a consistent ordering of modules for use with wpilib swerve functions'''
+        """Provides a consistent ordering of modules for use with wpilib swerve functions"""
         return self._ordered_modules
     
     def __init__(self, navx: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
@@ -86,7 +86,7 @@ class SwerveDrive(ISwerveDrive):
 
     
     def initialize(self):
-        '''Initialize the swerve drive.  Needs to be called repeatedly until it returns True.'''
+        """Initialize the swerve drive.  Needs to be called repeatedly until it returns True."""
         results = [module.initialize() for module in self._modules.values()]
         if all(results):
             self.initialized = True
@@ -95,7 +95,7 @@ class SwerveDrive(ISwerveDrive):
         return False
     
     def periodic(self):
-        '''Call periodically to update the odemetry'''
+        """Call periodically to update the odemetry"""
         self.update_odometry()
         if __debug__:
             for m in self._ordered_modules:
@@ -107,20 +107,20 @@ class SwerveDrive(ISwerveDrive):
             module_positions = tuple([m.position for m in self._ordered_modules])
             self._odemetry.update(geom.Rotation2d.fromDegrees(self._navx.getAngle()),
                                   module_positions) # type: ignore 
-            
-        
-        
-    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second, run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
-        '''Drive the robot using cartesian coordinates
-        
-        :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
-        '''
 
-        measured_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(math.radians(self._navx.getAngle())))
+    def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second,
+              run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
+        """Drive the robot using cartesian coordinates
+
+        :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
+        """
+
+        measured_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
+            math.radians(self._navx.getAngle())))
         module_states = self._kinematics.toSwerveModuleStates(measured_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
- 
+
         for i in range(self.num_modules):
             module = self._ordered_modules[i]
 
@@ -131,7 +131,7 @@ class SwerveDrive(ISwerveDrive):
             module.desired_state = state
 
     def stop(self):
-        '''Set voltage to all motors to zero'''
+        """Set voltage to all motors to zero"""
         for module in self._modules.values():
             module.stop()
 
@@ -144,23 +144,26 @@ class SwerveDrive(ISwerveDrive):
   
     @property
     def pose(self) -> geom.Pose2d:
-        '''Current pose of the robot'''
+        """Current pose of the robot"""
         with self._odemetry_lock:
             return self._odemetry.getEstimatedPosition()
-        
+
     @property
-    def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:  
-        '''Current chassis speed of the robot'''
-        return self._kinematics.toChassisSpeeds(tuple([m.measured_state for m in self._ordered_modules])) # type: ignore
-    
+    def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:
+        """Current chassis speed of the robot"""
+        return self._kinematics.toChassisSpeeds(
+            tuple([m.measured_state for m in self._ordered_modules]))  # type: ignore
+
     @property
-    def desired_chassis_speed(self) -> kinematics.ChassisSpeeds: 
+    def desired_chassis_speed(self) -> kinematics.ChassisSpeeds:
         """chasis speeds desired by the robot"""
         return self._kinematics.toChassisSpeeds(tuple([m.desired_state for m in self._ordered_modules]))
-    
+
     def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
-        '''Add a vision measurement to the odemetry'''
+        """Add a vision measurement to the odemetry"""
         with self._odemetry_lock:
             self._odemetry.addVisionMeasurement(pose, timestamp)
 
-  
+    def drive_set_distance(self, meters: float, angle: float):
+        for module in self._modules.values():
+            module.drive_set_distance(meters, angle)

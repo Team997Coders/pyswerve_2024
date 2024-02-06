@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 import wpilib
 
-from math_helper import Range
+from math_help import Range
 
 
 class DriverControlsConfig(NamedTuple):
