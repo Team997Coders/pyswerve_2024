@@ -70,6 +70,18 @@ class MyRobot(commands2.TimedCommandRobot):
         SmartDashboard.putData("Field", self.field)
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
+
+        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(robot_config.physical_properties.max_drive_speed,
+                                                                     robot_config.physical_properties.ramp_rate.drive)
+
+        self.rotation_pid = ProfiledPIDControllerRadians(
+            robot_config.default_rotation_pid.p,
+            robot_config.default_rotation_pid.i,
+            robot_config.default_rotation_pid.d,
+            self.trapezoid_profile)
+        self.rotation_pid.enableContinuousInput(robot_config.default_rotation_pid.wrapping.min,
+                                                robot_config.default_rotation_pid.wrapping.max)
+        self.rotation_pid.setTolerance(0.03, 0.05)
  
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         self.teleop_drive = TeleopDrive(self.swerve_drive,
@@ -88,32 +100,32 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                       robot_config.physical_properties.max_rotation_speed),
                                                    controller=self.joystick_two,
                                                    axis_index=0))
-        self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
-                                                           AxisConfig(
-                                                               input_range=robot_config.joystick_controls.x_deadband,
-                                                               output_range=Range(0,
-                                                                                  robot_config.physical_properties.max_drive_speed),
-                                                               controller=self.joystick_one,
-                                                               axis_index=1),
-                                                           AxisConfig(
-                                                               input_range=robot_config.joystick_controls.y_deadband,
-                                                               output_range=Range(0,
-                                                                                  robot_config.physical_properties.max_drive_speed),
-                                                               controller=self.joystick_one,
-                                                               axis_index=0),
-                                                           AxisConfig(
-                                                               input_range=robot_config.joystick_controls.theta_deadband,
-                                                               output_range=Range(0,
-                                                                                  robot_config.physical_properties.max_rotation_speed),
-                                                               controller=self.joystick_two,
-                                                               axis_index=0),
-                                                           AxisConfig(
-                                                               input_range=robot_config.joystick_controls.theta_deadband,
-                                                               output_range=Range(0,
-                                                                                  robot_config.physical_properties.max_rotation_speed),
-                                                               controller=self.joystick_two,
-                                                               axis_index=1),
-                                                           self.rotation_pid)
+        # self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.x_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_drive_speed),
+        #                                                        controller=self.joystick_one,
+        #                                                        axis_index=1),
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.y_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_drive_speed),
+        #                                                        controller=self.joystick_one,
+        #                                                        axis_index=0),
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.theta_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_rotation_speed),
+        #                                                        controller=self.joystick_two,
+        #                                                        axis_index=0),
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.theta_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_rotation_speed),
+        #                                                        controller=self.joystick_two,
+        #                                                        axis_index=1),
+        #                                                    self.rotation_pid)
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
@@ -122,25 +134,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
-            
-
-    def update_position(self) -> bool:
-        if self.photonvision is None:
-            return False
-        
-        has_qr_code = self.photonvision.getEntry("hasTarget").getBoolean(False)
-
-        if(has_qr_code):
-            self.logger.info(f"PhotonVision has_qr_code: {has_qr_code}")
-            #TODO: Update pose position using angle to april tag and distance
-            #self.swerve_drive.odemetry.resetPosition(kinematics.SwerveModulePosition(0,0,0), geom.Rotation2d(0))
-            return True
-        
-        return False
-  
+              
     def teleopPeriodic(self):
         super().teleopPeriodic()
-        self.twinstick_teleop_drive.drive()
+        # self.twinstick_teleop_drive.drive()
 
 
     def autonomousInit(self):
