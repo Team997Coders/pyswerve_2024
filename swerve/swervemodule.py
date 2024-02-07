@@ -171,6 +171,14 @@ class SwerveModule(ISwerveModule):
             self.angle_pid_last_reference = math_help.wrap_angle(angle)
         else:
             # Otherwise, attempt to adjust the angle in software using the provided offset
+
+            # There is almost certainly a bug in this code where the drive motor will move 
+            # the wrong direction if the offset is more than 90 degrees.  That would cause
+            # the shortest_angle_difference to go to 180 degrees of the exepected angle 
+            # but not reverse the drive motor.  The fix is probably to check the offsets 
+            # in the desired_state setter and reverse drive motors for all offsets more 
+            # than +/- 90 degrees.  We do not run this configuration so haven't needed to 
+            # debug it.
             pid_angle = angle + self.rel_to_corrected_angle_adjustment
             abs_position = self.angle_absolute_encoder.getPosition()
             adjustment = shortest_angle_difference(abs_position, pid_angle)
