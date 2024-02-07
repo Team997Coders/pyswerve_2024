@@ -1,7 +1,6 @@
 import unittest
 import math_help
-from math_help import Range, map_input_to_output_range
-import robot_config
+from math_help import Range
 
 
 class controller_input_test(unittest.TestCase):

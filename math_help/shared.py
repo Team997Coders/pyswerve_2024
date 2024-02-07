@@ -6,14 +6,14 @@ import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
 
 
-def wrap_angle(angle: float, min: float = 0) -> float:
+def wrap_angle(angle: float, min_val: float = 0) -> float:
     """Wrap the angle to the range of 0 to 2pi"""
     clamped = angle % (math.pi * 2.0)
-    if min != 0:
-        max = min + math.pi * 2.0
-        while clamped > max:  # TODO Do the math and multiply instead of adding
+    if min_val != 0:
+        max_val = min_val + math.pi * 2.0
+        while clamped > max_val:  # TODO Do the math and multiply instead of adding
             clamped -= math.pi * 2.0
-        while clamped < min:
+        while clamped < min_val:
             clamped += math.pi * 2.0
     return clamped
 

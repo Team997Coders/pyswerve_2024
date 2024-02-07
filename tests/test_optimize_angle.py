@@ -13,7 +13,8 @@ AngleNegNinety = geom.Rotation2d(-90)
 
 class TestSwerveModuleState(unittest.TestCase):
 
-    def is_angle_difference_greater_than_180(self, old_angle, new_angle):
+    @staticmethod
+    def is_angle_difference_greater_than_180(old_angle: float, new_angle: float) -> float:
         return abs(old_angle - new_angle) > 180
 
     def test_optimize_trivial(self):
@@ -58,12 +59,12 @@ class TestSwerveModuleState(unittest.TestCase):
         module_state = kinematics.SwerveModuleState(speed, desiredAngle)
         optimized_state = kinematics.SwerveModuleState.optimize(module_state, currentAngle)
 
-        if(abs(difference) < math.pi / 2.0): #If the turn is less than 90 degrees drive direction should be the same and angle should match
+        if abs(difference) < math.pi / 2.0: #If the turn is less than 90 degrees drive direction should be the same and angle should match
             self.assertEqual(optimized_state.speed, speed)
             self.assertAlmostEqual(optimized_state.angle.radians(), desiredRadians)
         else: #Otherwise, drive direction is reversed and angle should be 180 degrees from desired
             self.assertEqual(optimized_state.speed, -speed)
-            angle_diff = optimized_state.angle.radians() - math_help.wrap_angle(desiredRadians, min=-math.pi)
+            angle_diff = optimized_state.angle.radians() - math_help.wrap_angle(desiredRadians, min_val=-math.pi)
             self.assertAlmostEqual(abs(angle_diff), math.pi)
 
     def test_falsifying_case(self):
@@ -85,7 +86,7 @@ class TestSwerveModuleState(unittest.TestCase):
         module_state = kinematics.SwerveModuleState(speed, desiredAngle)
         optimized_state = math_help.optimize_state_improved(module_state, currentAngle)
 
-        if(abs(difference) <= math.pi / 2.0): #If the turn is less than 90 degrees drive direction should be the same and angle should match
+        if abs(difference) <= math.pi / 2.0: #If the turn is less than 90 degrees drive direction should be the same and angle should match
             
             self.assertEqual(optimized_state.speed >= 0, speed >= 0) # check for same sign
             self.assertAlmostEqual(optimized_state.angle.radians(), desiredRadians)
@@ -93,7 +94,7 @@ class TestSwerveModuleState(unittest.TestCase):
             if optimized_state.speed > 0:
                 self.assertEqual(optimized_state.speed >= 0 , -speed >= 0) # Check for opposite signs
 
-            angle_diff = optimized_state.angle.radians() - math_help.wrap_angle(desiredRadians, min=-math.pi)
+            angle_diff = optimized_state.angle.radians() - math_help.wrap_angle(desiredRadians, min_val=-math.pi)
             self.assertAlmostEqual(abs(angle_diff), math.pi)
     
     def test_falsifying_improved_case(self):

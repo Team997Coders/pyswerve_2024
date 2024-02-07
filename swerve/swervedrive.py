@@ -55,9 +55,9 @@ class SwerveDrive(ISwerveDrive):
         """Provides a consistent ordering of modules for use with wpilib swerve functions"""
         return self._ordered_modules
     
-    def __init__(self, navx: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
+    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig], physical_config: PhysicalConfig, logger: logging.Logger):
         self.logger = logger.getChild("swerve")
-        self._navx = navx
+        self._navx = gyro
         self._modules = {}    
         self._physical_config = physical_config
         for position, module_config in swerve_config.items():

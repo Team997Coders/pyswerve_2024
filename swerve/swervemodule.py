@@ -31,7 +31,7 @@ class SwerveModule(ISwerveModule):
     rel_to_absolute_angle_adjustment: float | None  # How far we need to adjust the pid reference to get the absolute encoder to read the correct angle
     rel_to_corrected_angle_adjustment: float | None  # How far we need to adjust the pid reference to get the angle relative to robot chassis
     config: SwerveModuleConfig
-    physical_config: PhysicalConfig
+    _physical_config: PhysicalConfig
 
     _desired_state: kinematics.SwerveModuleState
 
@@ -52,10 +52,10 @@ class SwerveModule(ISwerveModule):
         """Module position ID"""
         return self._id
 
-    def __init__(self, id: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig,
+    def __init__(self, position: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig,
                  logger: logging.Logger):
-        self._id = id
-        self.physical_config = physical_config
+        self._id = position
+        self._physical_config = physical_config
         self.logger = logger.getChild(str(id))
         self._desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(0))
         self.rel_to_absolute_angle_adjustment = 0
@@ -75,8 +75,7 @@ class SwerveModule(ISwerveModule):
         self.drive_motor_encoder = self._drive_motor.getEncoder()
         self.angle_motor_encoder = self._angle_motor.getEncoder()
 
-        self.drive_motor_encoder.setPositionConversionFactor(
-            1.0 / (physical_config.gear_ratio.drive) * ((physical_config.wheel_diameter_cm / 100) * math.pi))
+        self.drive_motor_encoder.setPositionConversionFactor(1.0 / (physical_config.gear_ratio.drive * ((physical_config.wheel_diameter_cm / 100) * math.pi)))
         # Use the line below to report number of rotations for wheel rotation tests
         # self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive) * (
@@ -109,13 +108,13 @@ class SwerveModule(ISwerveModule):
         Example before: self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         Example After : self.safe_set(drive_motor_encoder.setPositionConversionFactor, 1.0 / physical_config.gear_ratio.drive)
         """
-        nRetries = self.physical_config.fw_set_retries
+        nRetries = self._physical_config.fw_set_retries
         error = None
         for i in range(0, nRetries):
             error = func(*args, **kwargs)
             if error == rev.REVLibError.kOk:
                 return
-            time.sleep(self.physical_config.fw_set_retry_delay_sec)
+            time.sleep(self._physical_config.fw_set_retry_delay_sec)
 
         if error:
             self.logger.error(f"Error setting {func.__name__}: {error}")

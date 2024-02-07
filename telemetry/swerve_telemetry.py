@@ -3,7 +3,7 @@ from config import PhysicalConfig
 from wpilib import SmartDashboard as sd
 from typing import List, Tuple 
 
-class SwerveTelemetry():
+class SwerveTelemetry:
     """Report swerve telemetry to the dashboard.  Compatible with WebComponents"""
 
     swerve_drive: SwerveDrive

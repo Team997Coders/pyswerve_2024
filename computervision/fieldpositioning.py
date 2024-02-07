@@ -21,7 +21,7 @@ class AprilTagDetector:
 
     def __init__(self, swerve_drive, logger: logging.Logger):
         self.logger = logger 
-        translation = geom.Translation3d((0.305) , 0, (0.152)) # inches(12, 0, 6)
+        translation = geom.Translation3d(0.305, 0, 0.152) # inches(12, 0, 6)
         rotation = geom.Rotation3d(0, 0, 0)
         self.cam_position = geom.Transform3d(translation, rotation)
         self.last_print = None
@@ -49,7 +49,7 @@ class AprilTagDetector:
                 if pose is None: 
                     return 
                 
-                if time.monotonic() - self.last_print > 10:
+                if self.last_print is None or time.monotonic() - self.last_print > 10:
                 #     self.logger.info(f"April tag {result.getTargets()} at {result.getTimestamp()}")
                     self.last_print = time.monotonic()
                     self.logger.info(f"Pose estimate: {pose}")

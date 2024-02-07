@@ -3,8 +3,8 @@ class EMA:
     Accumulates values over time, calculating an exponential moving average over time
     """
 
-    _last_ema_value: float
-    _current_value: float
+    _last_ema_value: float | None
+    _current_value: float | None
     _current_ema_value: float | None
     _smooth_factor: float
     _num_samples: int

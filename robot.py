@@ -3,10 +3,9 @@ import wpilib
 from config import AxisConfig
 import robot_config
 import swerve
-import ntcore
 import telemetry
 import navx
-import commands2
+import math
 from drivers import TestDriver
 from drivers import TwinStickTeleopDrive
 from drivers import TeleopDrive
@@ -28,12 +27,13 @@ if __debug__ and "run" in sys.argv:
 
 
 class MyRobot(commands2.TimedCommandRobot):
-    # _command_scheduler: commands2.CommandScheduler
+    _command_scheduler: commands2.CommandScheduler
 
     swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
     test_driver: TestDriver
     teleop_drive: TeleopDrive
+    twinstick_teleop_drive: TwinStickTeleopDrive
     _navx: navx.AHRS  # Attitude Heading Reference System
 
     controller: wpilib.XboxController
@@ -42,16 +42,12 @@ class MyRobot(commands2.TimedCommandRobot):
 
     field: wpilib.Field2d
     april_tag_one: AprilTagDetector
- 
-    photonvision: ntcore.NetworkTable | None
 
     trapezoid_profile: TrapezoidProfileRadians.Constraints
     rotation_pid: ProfiledPIDControllerRadians
 
-    field: wpilib.Field2d
-
-    april_tag_one: AprilTagDetector
- 
+    def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
+        super().__init__(period)
 
     @property
     def navx(self) -> navx.AHRS:
@@ -59,11 +55,11 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
+        self.field = wpilib.Field2d()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
         self.joystick_one = wpilib.Joystick(0)
         self.joystick_two = wpilib.Joystick(1)
-        self.field = wpilib.Field2d()
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
@@ -129,15 +125,15 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
-        self.swerve_telemetry.report_to_dashboard()
         self.swerve_drive.periodic()
         self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
+        self.swerve_telemetry.report_to_dashboard()
               
     def teleopPeriodic(self):
         super().teleopPeriodic()
-        # self.twinstick_teleop_drive.drive()
+        self.twinstick_teleop_drive.drive()
 
 
     def autonomousInit(self):

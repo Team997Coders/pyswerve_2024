@@ -1,5 +1,4 @@
 from typing import NamedTuple
-import abc
 
 class Range(NamedTuple):
     """Describes a range of values"""

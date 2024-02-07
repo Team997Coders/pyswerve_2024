@@ -110,6 +110,8 @@ class ISwerveModule(abc.ABC):
 
 
 class ISwerveDrive(abc.ABC):
+
+    @property
     @abc.abstractmethod
     def num_modules(self) -> int:
         """Returns the number of swerve modules"""
@@ -130,12 +132,14 @@ class ISwerveDrive(abc.ABC):
         """Lock the wheels in place"""
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def modules(self) -> dict[ModulePosition, ISwerveModule]:
         """Returns a dictionary of swerve modules"""
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def ordered_modules(self) -> list[ISwerveModule]:
         """Returns a list of swerve modules in order.  This order should not change after initialization as it is passed to wpilib functions that depend on consistent ordering"""
         raise NotImplementedError()
@@ -150,8 +154,9 @@ class ISwerveDrive(abc.ABC):
     def stop(self):
         """Set voltage of all motors to zero"""
         raise NotImplementedError()
-    
-    @abc.abstractproperty
+
+    @property
+    @abc.abstractmethod
     def odemetry(self) -> kinematics.SwerveDrive4Odometry:
         raise NotImplementedError()
     
