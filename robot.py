@@ -59,7 +59,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
-        self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
         self.joystick_one = wpilib.Joystick(0)
@@ -70,17 +69,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         SmartDashboard.putData("Field", self.field)
         self.swerve_drive.initialize()
-
-        try:
-            self.photonvision =  ntcore.NetworkTableInstance.getDefault().getTable("photonvision/Camera_Module_v2")
-            if self.photonvision is not None:
-                self.logger.info(f"Photonvision connected!")
-            else:
-                self.logger.error(f"Could not connect to PhotonVision.")
-        except Exception as e:
-            self.logger.error(f"Could not connect to PhotonVision.\n{e}")
-            self.photonvision = None
-
+        self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
+ 
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         self.teleop_drive = TeleopDrive(self.swerve_drive,
                                         AxisConfig(input_range=robot_config.joystick_controls.x_deadband,
