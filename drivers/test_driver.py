@@ -275,14 +275,17 @@ class TestDriver:
 
         # Use the generic test group by default
         self.current_test_group_index = len(self.test_groups) - 1
-        self._chooser = create_test_selection_widget("Test Group", self.test_groups)
-        self._chooser.onChange(self.on_test_change)
+
+        if not wpilib.RobotBase.isTest:
+            self._chooser = create_test_selection_widget("Test Group", self.test_groups)
+            self._chooser.onChange(self.on_test_change)
 
     def testInit(self):
         return
 
-    def on_test_change(self, selected_test_group_index: int):
-        self.current_test_group_index = selected_test_group_index
+    def on_test_change(self, selected_test_group_index: int | None):
+        if isinstance(selected_test_group_index, int):
+            self.current_test_group_index = selected_test_group_index
 
     def testPeriodic(self):
         # Start the test if there is not test running
