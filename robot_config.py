@@ -1,4 +1,5 @@
 import math_help
+
 import math
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
@@ -15,6 +16,12 @@ joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
 gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         y_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
+
+shooter_constants = ShooterConfig(left_flywheel_id = 3, right_flywheel_id = 4, is_flywheel_inverted=False, flywheel_voltage=2.0, relative_encoder_id=1)
+
+indexer_constants = IndexerConfig(feeder_motor_id = 2, intake_motor_id = 3, feeder_sensor_channel = 0,is_feeder_motor_inverted = True, is_intake_motor_inverted = False)
+
+climber_constants = ClimberConfig(climber_motor_id= 5, is_climber_motor_inverted= False)
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
@@ -57,3 +64,4 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05)
+
