@@ -17,6 +17,17 @@ def wrap_angle(angle: float, min_val: float = 0) -> float:
             clamped += math.pi * 2.0
     return clamped
 
+def wrap_angle_degrees(angle: float, min_val: float = 0) -> float:
+    """Wrap the angle to the range of 0 to 2pi"""
+    clamped = angle % 360
+    if min_val != 0:
+        max_val = min_val + 360
+        while clamped > max_val:  # TODO Do the math and multiply instead of adding
+            clamped -= 360
+        while clamped < min_val:
+            clamped += 360
+    return clamped
+
 
 def shortest_angle_difference(angle1: float, angle2: float) -> float:
     """Returns the shortest angle difference between two angles"""

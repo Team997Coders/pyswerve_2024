@@ -3,6 +3,9 @@ from typing import Callable, Any
 import rev
 import math
 import logging
+
+import wpilib.sysid
+
 import math_help
 from config import *
 from wpilib import SmartDashboard as sd
@@ -298,3 +301,14 @@ class SwerveModule(ISwerveModule):
             self.rel_to_absolute_angle_adjustment = None
 
         return True
+
+    def drive_at_voltage(self, voltage: float):
+        """Drive the wheel at the specified voltage"""
+        self.angle = 0 # Safety to ensure motors are all pointed in the same direction
+        self._drive_motor.setVoltage(voltage)
+
+    def log_to_sysid(self, log: wpilib.sysid.SysIdRoutineLog.MotorLog):
+        log.velocity(self.velocity)
+        log.position(self.position.distance)
+        log.voltage(self.drive_motor.getAppliedOutput())
+        log.current(self.drive_motor.getOutputCurrent())

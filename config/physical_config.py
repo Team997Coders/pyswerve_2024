@@ -12,7 +12,7 @@ class PhysicalConfig:
     max_rotation_speed: float # Radians per second
     fw_set_retry_delay_sec: float # How long to wait between retries if hardware returns an error during configuration
     fw_set_retries: int # How many times to retry if hardware returns an error during configuration
-
+    invert_gyro: bool # Whether the gyro is inverted
     def __init__(self,
                  wheel_diameter_cm: float,
                  wheel_grip_coefficient_of_friction: float,
@@ -24,7 +24,8 @@ class PhysicalConfig:
                  max_drive_speed: float = 1.0, 
                  max_rotation_speed: float = math.pi / 4, 
                  fw_set_retry_delay_sec : float = 0.01,
-                 fw_set_retries: int = 5): 
+                 fw_set_retries: int = 5,
+                 invert_gyro: bool = False):
         current_limit = current_limit if current_limit is not None else OptionalSwerveModuleIntProperty(None, None)
         ramp_rate = ramp_rate if ramp_rate is not None else OptionalSwerveModuleFloatProperty(None, None)
 
@@ -38,6 +39,7 @@ class PhysicalConfig:
         self.max_rotation_speed = max_rotation_speed
         self.fw_set_retries = fw_set_retries
         self.fw_set_retry_delay_sec = fw_set_retry_delay_sec
+        self.invert_gyro = invert_gyro
 
         if self.wheel_diameter_cm <= 0:
             raise ValueError("Wheels must have a positive diameter")
