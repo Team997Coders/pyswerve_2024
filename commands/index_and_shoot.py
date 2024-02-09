@@ -58,41 +58,6 @@ class index_and_shoot(commands2.Command):
     def initialize(self):
 
     def execute(self):
-        '''
-        boolean status = indexer.getSensorStatus();
-        while (!status){
-            shooter.setLeftMotorVoltage(0);
-            indexer.setFeederVoltage(feederVoltage);
-            indexer.setIntakeVoltage(intakeVoltage);
-            status = indexer.getSensorStatus();
-            if(status){
-                shooter.setLeftMotorVoltage(shooterVoltage);
-                indexer.setFeederVoltage(0);
-                indexer.setIntakeVoltage(0);
-            }
-        }
-        while (status ){
-            status = indexer.getSensorStatus();
-            shooter.setLeftMotorVoltage(shooterVoltage);
-            indexer.setFeederVoltage(0);
-            indexer.setIntakeVoltage(0);
-            if (timer.get() > 3){
-                indexer.setFeederVoltage(feederVoltage);
-                timer.reset();
-            }
-            if (!status){
-                shooter.setLeftMotorVoltage(0);
-                indexer.setFeederVoltage(feederVoltage);
-                indexer.setIntakeVoltage(intakeVoltage);
-            }
-
-        }
-        '''
-
-        """
-        if not status:
-        set intake_pid.set_goal()
-        """
         status = self._indexer.get_sensor_status()
         if not status:
             self._shooter.set_left_motor_voltage(0)
@@ -134,6 +99,7 @@ class index_and_shoot(commands2.Command):
 
     def getDefaultCommand(self) -> Optional[Command]:
         return super().getDefaultCommand()
-
+    def is_finished(self):
+        return False
 
 
