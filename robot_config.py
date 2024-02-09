@@ -16,6 +16,12 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         y_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
 
+shooter_constants = ShooterConfig(left_flywheel_id = 3, right_flywheel_id = 4, is_flywheel_inverted=False, flywheel_voltage=2.0, relative_encoder_id=1)
+
+indexer_constants = IndexerConfig(feeder_motor_id = 2, intake_motor_id = 3, feeder_sensor_channel = 0,is_feeder_motor_inverted = True, is_intake_motor_inverted = False)
+
+climber_constants = ClimberConfig(climber_motor_id= 5, is_climber_motor_inverted= False)
+
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
                                          angle_motor=MotorConfig(id=1, inverted=True),
