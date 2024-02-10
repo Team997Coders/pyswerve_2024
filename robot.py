@@ -18,8 +18,8 @@ from wpilib import SmartDashboard as sd
 import commands2
 from math_help import Range
 
-from wpimath.controller import ProfiledPIDController
-from wpimath.trajectory import TrapezoidProfile
+from wpimath.controller import ProfiledPIDController, ProfiledPIDControllerRadians
+from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
 import math
 
@@ -48,7 +48,7 @@ class MyRobot(commands2.TimedCommandRobot):
     april_tag_one: AprilTagDetector
 
     trapezoid_profile: TrapezoidProfile.Constraints
-    rotation_pid: ProfiledPIDController
+    rotation_pid: ProfiledPIDControllerRadians
 
     shooter: subsystems.Shooter
     intake: subsystems.Intake
@@ -80,17 +80,16 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
-        self.trapezoid_profile = TrapezoidProfile.Constraints(robot_config.physical_properties.max_drive_speed,
-                                                              (math.pi / 180) * 15)
+        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(math.pi, math.pi)
 
-        self.rotation_pid = ProfiledPIDController(
-            robot_config.default_rotation_pid.p,
-            robot_config.default_rotation_pid.i,
-            robot_config.default_rotation_pid.d,
-            self.trapezoid_profile)
+        self.rotation_pid = ProfiledPIDControllerRadians(
+            Kp=robot_config.default_rotation_pid.p,
+            Ki=robot_config.default_rotation_pid.i,
+            Kd=robot_config.default_rotation_pid.d,
+            constraints=self.trapezoid_profile)
         self.rotation_pid.enableContinuousInput(robot_config.default_rotation_pid.wrapping.min,
                                                 robot_config.default_rotation_pid.wrapping.max)
-        self.rotation_pid.setTolerance(.3, 0.1)
+        self.rotation_pid.setTolerance(math.pi/180, 0.1)
 
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         self.teleop_drive = TeleopDrive(self.swerve_drive,
