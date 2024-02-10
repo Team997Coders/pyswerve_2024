@@ -1,4 +1,3 @@
-
 import rev
 import wpilib
 
@@ -11,15 +10,14 @@ class Indexer(subsystems):
     feederEncoder: rev.RelativeEncoder.EncoderType.kHallSensor
     intakeEncoder: rev.RelativeEncoder.EncoderType.kHallSensor
     def __init__(self):
-        self.intakeNEO = rev.CANSparkMax(indexer_constants.intake_motor_id, rev.CANSparkMax.MotorType.kBrushless)
         self.feederNEO = rev.CANSparkMax(indexer_constants.feeder_motor_id, rev.CANSparkMax.MotorType.kBrushless)
         self.feederEncoder = self.feederNEO.getEncoder()
-        self.intakeEncoder = self.intakeNEO.getEncoder()
         self.feederSensor = wpilib.DigitalInput(indexer_constants.feeder_sensor_channel)
-
+        self.feeder_pid = self.feederNEO.getPIDController()
+    @property
     def get_sensor_status(self):
         return not self.feederSensor.get()
-
+    @property
     def set_feeder_voltage(self, voltage: float):
         self.setVoltage(voltage)
 

@@ -6,6 +6,10 @@ import swerve
 import telemetry
 import navx
 import math
+from subsystems import climber
+from subsystems import shooter
+from subsystems import feeder
+from commands import index_and_shoot
 from drivers import TestDriver
 from drivers import TwinStickTeleopDrive
 from drivers import TeleopDrive
@@ -55,6 +59,9 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
+        self.index_and_shoot = self.index_and_shoot
+        self.climb = self.climb
+        self.xbox_controller = wpilib.XboxController
         self.field = wpilib.Field2d()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
@@ -134,7 +141,16 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
-
+        while self.xbox_controller.B():
+            self.index_and_shoot(indexer, shooter, 3, 3, 4)
+        while self.xbox_controller.rightBumper():
+            self.climb(climber, 5)
+        while self.xbox_controller.leftBumper():
+            self.climb(climber, -5)
+        while not self.xbox_controller.rightBumper():
+            self.climb(climber, 0)
+        while not self.xbox_controller.leftBumper():
+            self.climb(climber, 0)
 
     def autonomousInit(self):
         super().autonomousInit()
