@@ -2,12 +2,13 @@ import math_help
 import math
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModule, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
-    OptionalSwerveModuleFloatProperty, ShooterConfig, FeedConfig, IntakeConfig, ClimberConfig
+    OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig
 
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Carefull when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 default_rotation_pid = PIDConfig(p=.02, i=0.0, d=0.0, wrapping=OptionalRange(min=-math.pi, max=math.pi))
+default_flywheel_pid = PIDConfig(p=0.5, i=0.0, d=0.05, wrapping=None)
 
 joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
                                          y_deadband=math_help.Range(0.15, 1),
@@ -16,10 +17,16 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         y_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
 
-shooter_constants = ShooterConfig(left_flywheel_id = 1, right_flywheel_id = 4, is_flywheel_inverted=False, relative_encoder_id=1)
-feed_constants = FeedConfig(feeder_motor_id= 2, is_feeder_motor_inverted= True)
-intake_constants = IntakeConfig(intake_motor_id = 2, is_intake_motor_inverted = False)
-climber_constants = ClimberConfig(climber_motor_id= 5, is_climber_motor_inverted= False)
+shooter_config = ShooterConfig(left_motor=MotorConfig(id=12, inverted=False),
+                               right_motor=MotorConfig(id=13, inverted=False),
+                               right_flywheel_gear_ratio=1,
+                               left_flywheel_gear_ratio=1,
+                               right_flywheel_diameter_cm=5,
+                               left_flywheel_diameter_cm=5)  # add motor configs
+indexer_config = IndexerConfig(MotorConfig(id=9, inverted=True), indexer_sensor_id=14, indexer_sensor_inverted=True,
+                               pid=PIDConfig(p=1, i=0, d=0, wrapping=None))  # fix feeder_sensor_id
+intake_config = IntakeConfig(MotorConfig(id=10, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None))
+climber_config = ClimberConfig(climber_motor_id=11, is_climber_motor_inverted=False)
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModule(drive_motor=MotorConfig(id=8, inverted=False),

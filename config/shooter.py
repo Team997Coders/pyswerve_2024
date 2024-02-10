@@ -1,10 +1,10 @@
 from typing import NamedTuple
-
-import wpilib
-import rev
+from config import MotorConfig
 
 class ShooterConfig(NamedTuple):
-    left_flywheel_id: int
-    right_flywheel_id: int
-    is_flywheel_inverted: bool
-    relative_encoder_id: int
+    left_motor: MotorConfig
+    right_motor: MotorConfig
+    left_flywheel_gear_ratio: float
+    right_flywheel_gear_ratio: float
+    left_flywheel_diameter_cm: float
+    right_flywheel_diameter_cm: float

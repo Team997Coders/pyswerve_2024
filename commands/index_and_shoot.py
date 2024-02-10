@@ -80,7 +80,7 @@
 #                 self._shooter.set_left_motor_voltage(0)
 #                 self._indexer.set_intake_voltage(self._intake_pid)
 #                 self._indexer.set_feeder_voltage(self._feeder_pid)
-#
+
 #         # self._shooter.set_left_motor_voltage(self._shooter_pid.calculate())  # fix PIDs later
 #         # self._indexer.set_intake_voltage(self._intake_pid.calculate())
 #         # self._indexer.set_feeder_voltage(self._feeder_pid)

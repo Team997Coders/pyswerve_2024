@@ -1,29 +1,31 @@
-# import rev
-# import wpilib
-#
-# import subsystems
-# from robot_config import indexer_constants
-#
-# class Intake(subsystems):
-#     intakeNEO: rev.CANSparkMax
-#     intakeEncoder: rev.RelativeEncoder.EncoderType.kHallSensor
-#     def __init__(self):
-#         self.intakeNEO = rev.CANSparkMax(indexer_constants.intake_motor_id, rev.CANSparkMax.MotorType.kBrushless)
-#         self.intakeEncoder = self.intakeNEO.getEncoder()
-#         self.intake_pid = self.intakeNEO.getPIDController()
-#     @property
-#     def intake_velocity(self):
-#         return self.intakeNEO.getVelocity()
-#     @intake_velocity.setter
-#     def set_intake_velocity(self, value : float):
-#         self.feeder_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
-#     @property
-#     def set_intake_voltage(self, voltage: float):
-#         self.intakeNEO.setVoltage(voltage)
-#     @property
-#     def get_intake_motor_voltage(self):
-#         return self.intakeNEO.getEncoder().getVelocity()
-#     @property
-#     def get_intake_motor_position(self):
-#         return self.intakeNEO.getEncoder().getPosition()
-#
+import rev
+import wpilib
+import commands2
+
+import hardware
+from config import IntakeConfig
+
+
+class Intake(commands2.Subsystem):
+    intake_motor: rev.CANSparkMax
+    intake_encoder: rev.SparkRelativeEncoder
+    intake_pid: rev.SparkMaxPIDController
+
+    def __init__(self, config: IntakeConfig):
+        super().__init__()
+        self.intake_motor = rev.CANSparkMax(config.motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        hardware.init_motor(self.intake_motor, config.motor)
+        self.intake_encoder = self.intake_motor.getEncoder()
+        self.intake_pid = self.intake_motor.getPIDController()
+        hardware.init_pid(self.intake_pid, config.pid)
+
+        # self.intake_encoder.setPositionConversionFactor(1)
+        # self.intake_encoder.setVelocityConversionFactor(1)
+
+    @property
+    def intake_velocity(self) -> float:
+        return self.intake_encoder.getVelocity()
+
+    @intake_velocity.setter
+    def intake_velocity(self, value: float):
+        self.intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)

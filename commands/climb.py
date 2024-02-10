@@ -5,7 +5,7 @@ import wpimath
 import rev
 import logging
 import robot_config
-from robot_config import climber_constants
+from robot_config import climber_config
 from commands2 import Command
 from subsystems.climber import Climber
 

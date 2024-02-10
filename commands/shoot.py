@@ -3,91 +3,62 @@
 from typing import Optional
 import time
 import commands2
-import wpilib
-import wpimath.controller
-import rev
-import logging
-import robot_config
-from robot_config import shooter_constants
-from robot_config import intake_constants
-from robot_config import feed_constants
-from commands2 import Command
-from subsystems.shooter import Shooter
-from subsystems.feeder import Indexer
+import commands2.cmd
+import subsystems
+from commands import index
 
+
+# Shooting Sequence
+# 1a. Spin up motor
+# 1b. Turn off indexer
+# 2. Wait 200ms
+# 3. Turn on indexer
+# 4a. Spin down motor
+# 4b. Turn off indexer
+
+
+class SpinupShooter(commands2.Command):
+    _shooter: subsystems.Shooter
+    _shot_velocity: float
+
+    def __init__(self, shooter: subsystems.Shooter, shot_velocity: float):
+        super().__init__()
+        self._shooter = shooter
+
+    def execute(self):
+        self._shooter.velocity = self._shot_velocity
+
+
+class SpindownShooter(commands2.Command):
+    _shooter: subsystems.Shooter
+
+    def __init__(self, shooter: subsystems.Shooter):
+        super().__init__()
+        self._shooter = shooter
+
+    def execute(self):
+        self._shooter.velocity = 0
 
 
 class Shoot(commands2.Command):
-    """An example barebones subsystem that can be copied when creating a new subsystem
-       Documentation for the subsystem class is at:
-       https://robotpy.readthedocs.io/projects/commands-v2/en/stable/commands2/Subsystem.html#commands2.Subsystem
-       """
+    _command: commands2.Command
 
-    # Member variables may be pre-declared and initialized here.  If they are not declared here it is best
-    # practice to set them in the __init__ method.
-    logger: logging.Logger
-    _command_scheduler: commands2.CommandScheduler # An underscore in Python indicates the member is private
-
-    #Here are some examples of declaring a motor and a sensor from the rev package.
-    #motor1 : rev.CANSparkMax
-    #sensor1 : rev.CANSensor
-
-    _shooter: Shooter
-    _indexer: Indexer
-
-    _feeder_pid: wpimath.controller.ProfiledPIDController
-    _intake_pid: wpimath.controller.ProfiledPIDController
-    _shooter_pid: wpimath.controller.ProfiledPIDController
-
-
-    def __init__(self, indexer, shooter, feeder_pid:wpimath.controller.ProfiledPIDController, shooter_pid:wpimath.controller.ProfiledPIDController, intake_pid:wpimath.controller.ProfiledPIDController):
-        """Pass other subsystems and a logger to this subsystem for debugging
-
-        :param command_scheduler: Defined in robot.py, allows registering the subsystem and schedules commands
-        :param logger: A python built-in package that handles writing logging messages to netconsole
-        """
-        # Calls the constructor of our parent class if it exists.  Do this first when inheriting from a parent class.
-        # This call is most likely required for a submodule to work properly
+    def __init__(self, shooter: subsystems.Shooter, indexer: subsystems.Indexer, shot_velocity: float = 5,
+                 spinup_delay: float = 0.2, fire_time: float = 1):
         super().__init__()
-
-        self._shooter = shooter
-        self._indexer = indexer
-        self._feeder_pid = feeder_pid
-        self._intake_pid = intake_pid
-        self._shooter_pid = shooter_pid
-
-    def initialize(self):
-        pass
+        self._command = commands2.cmd.sequence(
+            commands2.cmd.ParallelCommandGroup(
+                SpinupShooter(shooter, shot_velocity),
+                index.IndexerOff(indexer)
+            ),
+            commands2.WaitCommand(spinup_delay),
+            commands2.IndexerOn(indexer),
+            commands2.WaitCommand(fire_time),
+            commands2.cmd.ParallelCommandGroup(
+                SpindownShooter(shooter),
+                index.IndexerOff(indexer)
+            )
+        )
 
     def execute(self):
-        shooter_output = self._shooter_pid.calculate(self._shooter.left_flywheel_encoder_velocity)
-        intake_output = self._intake_pid.calculate(self._indexer.intake_encoder_velocity)
-        feeder_output = self._feeder_pid.calculate(self._indexer.feeder_encoder_velocity)
-        self._shooter.set_left_motor_voltage(shooter_output)
-        self._indexer.set_feeder_voltage(0)
-        self._indexer.set_intake_voltage(0)
-        commands2.WaitCommand(.2)
-        self._indexer.set_feeder_voltage(feeder_output)
-        # self._shooter.set_left_motor_voltage(self._shooter_pid.calculate())  # fix PIDs later
-        # self._indexer.set_intake_voltage(self._intake_pid.calculate())
-        # self._indexer.set_feeder_voltage(self._feeder_pid)
-
-    def end(self):
-        self._shooter.left_flywheel_velocity = 0
-        self._indexer
-
-    def getName(self) -> str:
-        return type(self).__name__  # Replace with a string if you want a friendlier name
-
-    def periodic(self) -> None:
-        super().periodic()
-
-    def getCurrentCommand(self) -> Optional[Command]:
-        return super().getCurrentCommand()
-
-    def getDefaultCommand(self) -> Optional[Command]:
-        return super().getDefaultCommand()
-    def is_finished(self):
-        return False
-
-
+        commands2.CommandScheduler.getInstance().schedule(self._command)

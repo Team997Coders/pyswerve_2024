@@ -24,8 +24,8 @@ from .shooter import ShooterConfig
 from . import intake
 from .intake import IntakeConfig
 
-from . import feeder
-from .feeder import FeedConfig
+from . import indexer
+from .indexer import IndexerConfig
 
 from . import climber
 from .climber import ClimberConfig
