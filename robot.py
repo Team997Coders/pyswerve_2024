@@ -137,9 +137,9 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                axis_index=0),
                                                            self.rotation_pid)
 
-        self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid)
-        self.indexer = subsystems.Indexer(robot_config.indexer_config)
-        self.intake = subsystems.Intake(robot_config.intake_config)
+        self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid, self.logger)
+        self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
+        self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
         # one sitck, only used for testing
         # self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,

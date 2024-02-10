@@ -5,6 +5,7 @@ from config import ShooterConfig
 from config import PIDConfig
 import hardware
 import math
+import logging
 
 
 class Shooter(commands2.Subsystem):
@@ -13,9 +14,11 @@ class Shooter(commands2.Subsystem):
     _left_encoder: rev.SparkRelativeEncoder
     _right_encoder: rev.SparkRelativeEncoder
     _pid: rev.SparkMaxPIDController
+    _logger: logging.Logger
 
-    def __init__(self, config: ShooterConfig, pid_config: PIDConfig):
+    def __init__(self, config: ShooterConfig, pid_config: PIDConfig, logger: logging.Logger):
         super().__init__()
+        self._logger = logger.getChild("Shooter")
         self._left_motor = rev.CANSparkMax(config.left_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self._right_motor = rev.CANSparkMax(config.right_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self._left_motor, config.left_motor)
