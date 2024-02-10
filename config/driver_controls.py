@@ -1,8 +1,15 @@
 from typing import NamedTuple
 
+import enum
+from math_help import Range
 import wpilib
 
-from math_help import Range
+
+class ControllerType(enum.IntEnum):
+    Joystick = 0
+    XBox = 1
+    PS4 = 2
+    PS5 = 3
 
 
 class DriverControlsConfig(NamedTuple):
@@ -12,9 +19,22 @@ class DriverControlsConfig(NamedTuple):
 
 
 class AxisConfig(NamedTuple):
-    input_range: Range
+    #Range we wamt to allow from controller input, absolute value is used and then negated if input was negative
+    deadband: Range
+    # Output range of the axis to the robot
     output_range: Range
-    # controller that the axis is on
     controller: wpilib.XboxController | wpilib.Joystick
     # index of axis on the controller
     axis_index: int
+    input_range: Range = Range(0, 1)
+
+
+class ControllerKey(NamedTuple):
+    """Used to identify a controller"""
+    controller_type: ControllerType
+    controller_index: int
+
+
+class ControllerConfig(NamedTuple):
+    controller_key: ControllerKey  # The controller type and index
+    axes: dict[int, AxisConfig]  # The axes on the controller we are configuring
