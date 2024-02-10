@@ -14,8 +14,9 @@ from wpilib import SmartDashboard
 from wpilib import SmartDashboard as sd
 import commands2
 from math_help import Range
-from wpimath.controller import ProfiledPIDControllerRadians
-from wpimath.trajectory import TrapezoidProfileRadians
+
+from wpimath.controller import ProfiledPIDController
+from wpimath.trajectory import TrapezoidProfile
 from computervision.fieldpositioning import AprilTagDetector
 import math
 

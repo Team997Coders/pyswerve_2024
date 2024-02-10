@@ -9,9 +9,10 @@ import wpimath.units
 import rev
 import navx
 from .swervemodule import SwerveModule
-from config import *
+import config
+from config import ModulePosition, PhysicalConfig
 import time
-from typing import NamedTuple, Callable, Any 
+from typing import NamedTuple, Callable, Any
 import wpimath.kinematics as kinematics
 import wpimath.geometry as geom
 import wpimath.estimator as estimator
@@ -21,16 +22,16 @@ import wpilib.sysid
 import math_help
 
 
-class SwerveDrive(commands2.subsystem.Subsystem, ISwerveDrive):
+class SwerveDrive(commands2.subsystem.Subsystem):
     """Abstract base class for a sweve drive."""
     _modules: dict[ModulePosition, ISwerveModule]
 
-    initialized: bool = False # True if the swerve drive has been initialized at least once
+    initialized: bool = False  # True if the swerve drive has been initialized at least once
 
-    _kinematics: kinematics.SwerveDrive4Kinematics # Kinematics object for the swerve drive
+    _kinematics: kinematics.SwerveDrive4Kinematics  # Kinematics object for the swerve drive
 
     logger: logging.Logger
-  
+
     _ordered_modules: list[ISwerveModule]
 
     _odemetry: estimator.SwerveDrive4PoseEstimator
@@ -67,12 +68,12 @@ class SwerveDrive(commands2.subsystem.Subsystem, ISwerveDrive):
     def ordered_modules(self) -> list[ISwerveModule]:
         """Provides a consistent ordering of modules for use with wpilib swerve functions"""
         return self._ordered_modules
-    
-    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig],
+
+    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModule],
                  physical_config: PhysicalConfig, logger: logging.Logger):
         self.logger = logger.getChild("swerve")
-        self.__gyro_get_lambda = lambda : -gyro.getAngle() if physical_config.invert_gyro else lambda: gyro.getAngle()
-        self._modules = {}    
+        self.__gyro_get_lambda = lambda: -gyro.getAngle() if physical_config.invert_gyro else lambda: gyro.getAngle()
+        self._modules = {}
         self._physical_config = physical_config
         for position, module_config in swerve_config.items():
             self._modules[position] = SwerveModule(position, module_config, physical_config, self.logger)

@@ -60,7 +60,7 @@ class EncoderConfig:
                 self.offset = self.offset + (math.pi * 2.0)
 
 
-class SwerveModuleConfig(NamedTuple):
+class SwerveModule(NamedTuple):
     """Information to configure a swerve module"""
     drive_motor: MotorConfig
     angle_motor: MotorConfig

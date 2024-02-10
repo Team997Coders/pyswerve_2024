@@ -1,4 +1,5 @@
-from .swerve_module_config import SwerveModuleFloatProperty, SwerveModuleIntProperty, OptionalSwerveModuleFloatProperty, OptionalSwerveModuleIntProperty
+from .swerve_module import SwerveModuleFloatProperty, SwerveModuleIntProperty, OptionalSwerveModuleFloatProperty, \
+    OptionalSwerveModuleIntProperty
 import math
 
 class PhysicalConfig:
