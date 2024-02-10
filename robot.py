@@ -5,11 +5,6 @@ import robot_config
 import swerve
 import telemetry
 import navx
-import math
-from subsystems import climber
-from subsystems import shooter
-from subsystems import feeder
-from commands import index_and_shoot
 from drivers import TestDriver
 from drivers import TwinStickTeleopDrive
 from drivers import TeleopDrive
@@ -22,6 +17,7 @@ from math_help import Range
 from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
+import math
 
 if __debug__ and "run" in sys.argv:
     # To enter debug mode, add the --debug flag to the 'deploy' command:
@@ -47,8 +43,8 @@ class MyRobot(commands2.TimedCommandRobot):
     field: wpilib.Field2d
     april_tag_one: AprilTagDetector
 
-    trapezoid_profile: TrapezoidProfileRadians.Constraints
-    rotation_pid: ProfiledPIDControllerRadians
+    trapezoid_profile: TrapezoidProfile.Constraints
+    rotation_pid: ProfiledPIDController
 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
@@ -59,9 +55,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
-        self.index_and_shoot = self.index_and_shoot
-        self.climb = self.climb
-        self.xbox_controller = wpilib.XboxController
+        self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
         self._navx = navx.AHRS.create_spi()
         self.controller = wpilib.XboxController(0)
@@ -74,18 +68,18 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
-        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(robot_config.physical_properties.max_drive_speed,
-                                                                     robot_config.physical_properties.ramp_rate.drive)
+        self.trapezoid_profile = TrapezoidProfile.Constraints(robot_config.physical_properties.max_drive_speed,
+                                                              (math.pi / 180) * 15)
 
-        self.rotation_pid = ProfiledPIDControllerRadians(
+        self.rotation_pid = ProfiledPIDController(
             robot_config.default_rotation_pid.p,
             robot_config.default_rotation_pid.i,
             robot_config.default_rotation_pid.d,
             self.trapezoid_profile)
         self.rotation_pid.enableContinuousInput(robot_config.default_rotation_pid.wrapping.min,
                                                 robot_config.default_rotation_pid.wrapping.max)
-        self.rotation_pid.setTolerance(0.03, 0.05)
- 
+        self.rotation_pid.setTolerance(.3, 0.1)
+
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         self.teleop_drive = TeleopDrive(self.swerve_drive,
                                         AxisConfig(deadband=robot_config.joystick_controls.x_deadband,
@@ -103,6 +97,7 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                       robot_config.physical_properties.max_rotation_speed),
                                                    controller=self.joystick_two,
                                                    axis_index=0))
+        # for standard double flight sticks
         self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
                                                            AxisConfig(
                                                                deadband=robot_config.joystick_controls.x_deadband,
@@ -121,36 +116,60 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                output_range=Range(0,
                                                                                   robot_config.physical_properties.max_rotation_speed),
                                                                controller=self.joystick_two,
-                                                               axis_index=0),
+                                                               axis_index=1),
                                                            AxisConfig(
                                                                deadband=robot_config.joystick_controls.theta_deadband,
                                                                output_range=Range(0,
                                                                                   robot_config.physical_properties.max_rotation_speed),
                                                                controller=self.joystick_two,
-                                                               axis_index=1),
+                                                               axis_index=0),
                                                            self.rotation_pid)
+        # one sitck, only used for testing
+        # self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.x_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_drive_speed),
+        #                                                        controller=self.joystick_one,
+        #                                                        axis_index=2),
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.y_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_drive_speed),
+        #                                                        controller=self.joystick_one,
+        #                                                        axis_index=3),
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.theta_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_rotation_speed),
+        #                                                        controller=self.joystick_one,
+        #                                                        axis_index=0),
+        #                                                    AxisConfig(
+        #                                                        input_range=robot_config.joystick_controls.theta_deadband,
+        #                                                        output_range=Range(0,
+        #                                                                           robot_config.physical_properties.max_rotation_speed),
+        #                                                        controller=self.joystick_one,
+        #                                                        axis_index=1),
+        #                                                    self.rotation_pid)
+
+
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
+        self._command_scheduler.getInstance().run()
+        self.swerve_telemetry.report_to_dashboard()
         self.swerve_drive.periodic()
         self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
         self.swerve_telemetry.report_to_dashboard()
-              
+
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
-        while self.xbox_controller.B():
-            self.index_and_shoot(indexer, shooter, 3, 3, 4)
-        while self.xbox_controller.rightBumper():
-            self.climb(climber, 5)
-        while self.xbox_controller.leftBumper():
-            self.climb(climber, -5)
-        while not self.xbox_controller.rightBumper():
-            self.climb(climber, 0)
-        while not self.xbox_controller.leftBumper():
-            self.climb(climber, 0)
+
+    def updateField(self):
+        pass
 
     def autonomousInit(self):
         super().autonomousInit()

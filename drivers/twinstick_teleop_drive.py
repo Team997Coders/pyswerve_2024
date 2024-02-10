@@ -29,7 +29,7 @@ class TwinStickTeleopDrive:
     # https://docs.wpilib.org/en/stable/docs/software/commandbased/pid-subsystems-commands.html#pid-control-through-pidsubsystems-and-pidcommands
     # https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html#introduction-to-pid
     # https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/profiled-pidcontroller.html
-    _angle_pid: wpimath.controller.ProfiledPIDControllerRadians
+    _angle_pid: wpimath.controller.ProfiledPIDController
 
     _desired_robot_heading: float  # The last valid robot heading that was requested
 
@@ -61,28 +61,33 @@ class TwinStickTeleopDrive:
                                                       self._roty_config.output_range)
 
         # So if push the stick directly vertically or horizontally what is supposed to happen?
-        if rotx_output_value != 0 and roty_output_value != 0:
+        if rotx_output_value != 0 or roty_output_value != 0:
 
             rot = geom.Rotation2d(-rotx_output_value, -roty_output_value)
-            # self._desired_robot_heading = rot.radians()
-            # self._desired_robot_heading += (2 * math.pi) / (50 * 5)
-            # self._desired_robot_heading = math.atan2(-rotx_output_value, -roty_output_value)
             _updated_desired_robot_heading = rot.radians()
             if abs(self._desired_robot_heading - _updated_desired_robot_heading) > (math.pi / 180):
+                # self._angle_pid.reset(self._swerve_drive.pose.rotation().radians())
                 self._desired_robot_heading = _updated_desired_robot_heading
+                # if self._desired_robot_heading < -math.pi:
+                #     self._desired_robot_heading += math.pi
+                # elif self._desired_robot_heading > math.pi:
+                #     self._desired_robot_heading -= math.pi
                 self._angle_pid.setGoal(self._desired_robot_heading)
-
             # See: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/profiled-pidcontroller.html
             # "Goal vs Setpoint" and "Getting/Using the Setpoint"
             self._angle_pid.calculate(self._swerve_drive.pose.rotation().radians())
             theta_change = self._angle_pid.getSetpoint().velocity
-            SmartDashboard.putNumberArray("theta_change", [theta_change])
+            SmartDashboard.putNumber("theta_change", theta_change)
+            SmartDashboard.putNumber("desired heading", _updated_desired_robot_heading)
+            SmartDashboard.putData("PID controller", self._angle_pid)
+            SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
+            SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
+
         else:
-            # self._desired_robot_heading = self._swerve_drive.pose.rotation().radians()
             theta_change = 0
 
-        if self._desired_robot_heading < 0:
-            self._desired_robot_heading += math.pi * 2
+        # if self._desired_robot_heading < 0:
+        #     self._desired_robot_heading += math.pi * 2
 
         requested_speed = math.sqrt(x_output_value ** 2 + y_output_value ** 2)
 

@@ -7,6 +7,7 @@ from swerve import SwerveDrive
 from debug import attach_debugger
 from wpilib import SmartDashboard
 from math_help import map_input_to_output_range
+import commands2
 
 if __debug__ and "run" in sys.argv:
     # To enter debug mode, add the --debug flag to the 'deploy' command:
@@ -15,22 +16,35 @@ if __debug__ and "run" in sys.argv:
     attach_debugger()
 
 
-class TeleopDrive:
+class TeleopDrive(commands2.Command):
     _swerve_drive: SwerveDrive
     _controller: wpilib.XboxController
     _x_config: AxisConfig
     _y_config: AxisConfig
     _theta_config: AxisConfig
+    _command_scheduler: commands2.CommandScheduler # An underscore in Python indicates the member is private
+
 
 
     def __init__(self, swerve_drive, x_config: AxisConfig, y_config: AxisConfig, theta_config: AxisConfig):
+
+        super().__init__()
+
         self._swerve_drive = swerve_drive
         self._x_config = x_config
         self._y_config = y_config
         self._theta_config = theta_config
+        self._command_scheduler = commands2.CommandScheduler.getInstance()
+
+    def initialize(self):
+        pass
+    def execute(self):
+        self.drive()
+
+    def end(self, interrupted: bool):
+        pass
 
     def drive(self):
-
         x_input_value = self._x_config.controller.getRawAxis(self._x_config.axis_index)
         y_input_value = self._y_config.controller.getRawAxis(self._y_config.axis_index)
         theta_input_value = self._theta_config.controller.getRawAxis(self._theta_config.axis_index)

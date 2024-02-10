@@ -21,7 +21,7 @@ import wpilib.sysid
 import math_help
 
 
-class SwerveDrive(commands2.subsystem.Subsystem):
+class SwerveDrive(commands2.subsystem.Subsystem, ISwerveDrive):
     """Abstract base class for a sweve drive."""
     _modules: dict[ModulePosition, ISwerveModule]
 
@@ -101,7 +101,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         #Register the subsystem at the end to ensure periodic is called
 #        commands2.CommandScheduler.getInstance().registerSubsystem(self)
 
-    
+
     def initialize(self):
         """Initialize the swerve drive.  Needs to be called repeatedly until it returns True."""
         results = [module.initialize() for module in self._modules.values()]
@@ -133,9 +133,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         """
 
-        measured_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
+        desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
             self.gyro_angle_radians))
-        module_states = self._kinematics.toSwerveModuleStates(measured_chasis_speeds)
+        module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
 
