@@ -1,8 +1,9 @@
 from typing import NamedTuple
 import wpilib
 import rev
+from config import MotorConfig, PIDConfig, AxisConfig
 
 
 class ClimberConfig(NamedTuple):
-    climber_motor_id: int
-    is_climber_motor_inverted: bool
+    climber_motor: MotorConfig
+    climber_pid: PIDConfig

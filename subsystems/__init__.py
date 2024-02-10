@@ -1,5 +1,5 @@
-# import climber
-# from climber import Climber
+from . import climber
+from .climber import Climber
 
 from . import indexer
 from .indexer import Indexer

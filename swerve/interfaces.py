@@ -1,5 +1,6 @@
 import abc
 import rev
+import wpilib.sysid
 import wpimath.units
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
@@ -106,6 +107,15 @@ class ISwerveModule(abc.ABC):
     def drive_set_distance(self, meters: float, angle: float):
         """Drive the wheel a specific distance in meters.  If you use this call, desired state speed will be incorrect until
            you set desired_state again. This is because the PID controller will be driving the wheel to the specified distance."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def drive_at_voltage(self, voltage: float, angle: float):
+        """Provide the drive motors a set voltage at the requested angle"""
+        raise NotImplementedError()
+
+    def log_to_sysid(self, log: wpilib.sysid.SysIdRoutineLog):
+        """Log the state of the swerve drive for system identification"""
         raise NotImplementedError()
 
 

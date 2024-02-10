@@ -184,7 +184,6 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
-
         if self.joystick_one.getRawButton(1) and not self.button_state_zero:
             self.button_state_zero = self.joystick_one.getRawButton(1)
             shoot = commands.Shoot(self.shooter, self.indexer)

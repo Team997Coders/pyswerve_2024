@@ -5,23 +5,34 @@ import wpimath
 import rev
 import logging
 import robot_config
-from robot_config import climber_config
+from math_help import Range
+from config import AxisConfig
+from math_help import shared
+import wpimath.controller
 from commands2 import Command
 from subsystems.climber import Climber
 
-class climb(commands2.command):
-    def __init__(self, climber, climber_pid):
+
+class ClimberFollow(commands2.Command):
+    _climber: Climber
+    _arm_range: Range
+    _arm_position: float
+
+    def __init__(self, climber, config: AxisConfig, pid: wpimath.controller.PIDController, ticks_to_climb: float):
+        super().__init__()
         self._climber = climber
-        self._climber_pid = climber_pid
+        self._config = config
+        self._pid = pid
+        self._ticks_to_climb = ticks_to_climb
+        self._arm_range = Range(0, 1)
+        self._arm_position = 0.0
 
     def initialize(self):
-        pass
+        self._arm_range = Range(min_val=self._climber.climber_encoder, max_val=self._ticks_to_climb)
+
 
     def execute(self):
-        self._climber.set_climber_motor_voltage(self._climber_pid)
-
-    def end(self):
-        pass
-
-
-
+        input = self._config.controller.getRawAxis(self._config.axis_index)
+        output = shared.map_input_to_output_range(input, self._config.input_range, self._arm_range)
+        self._pid.setGoal(output)
+        self._climber.velocity = self._pid.calculate(self._climber.velocity, self._climber.climber_encoder)

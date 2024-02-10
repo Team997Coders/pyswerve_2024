@@ -24,9 +24,9 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=12, inverted=False),
                                right_flywheel_diameter_cm=5,
                                left_flywheel_diameter_cm=5)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=9, inverted=True), indexer_sensor_id=14, indexer_sensor_inverted=True,
-                               pid=PIDConfig(p=1, i=0, d=0, wrapping=None))  # fix feeder_sensor_id
+                               pid=PIDConfig(p=.5, i=0, d=0, wrapping=None))
 intake_config = IntakeConfig(MotorConfig(id=10, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None))
-climber_config = ClimberConfig(climber_motor_id=11, is_climber_motor_inverted=False)
+climber_config = ClimberConfig(MotorConfig(id=5, inverted=False), climber_pid=PIDConfig(p=.5, i=0, d=0, wrapping=None))
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModule(drive_motor=MotorConfig(id=8, inverted=False),

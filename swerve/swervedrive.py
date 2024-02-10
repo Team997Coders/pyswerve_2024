@@ -55,15 +55,15 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     @property
     def num_modules(self) -> int:
         return len(self._ordered_modules)
-    
+
     @property
     def modules(self) -> dict[ModulePosition, ISwerveModule]:
-        return self._modules 
-    
+        return self._modules
+
     @property
     def odemetry(self) -> estimator.SwerveDrive4PoseEstimator:
         return self._odemetry
-    
+
     @property
     def ordered_modules(self) -> list[ISwerveModule]:
         """Provides a consistent ordering of modules for use with wpilib swerve functions"""
@@ -71,6 +71,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModule],
                  physical_config: PhysicalConfig, logger: logging.Logger):
+        super().__init__()
         self.logger = logger.getChild("swerve")
         self.__gyro_get_lambda = lambda: -gyro.getAngle() if physical_config.invert_gyro else lambda: gyro.getAngle()
         self._modules = {}
@@ -117,14 +118,14 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self.update_odometry()
         if __debug__:
             for m in self._ordered_modules:
-                m.report_to_dashboard()
+                m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
 
         with self._odemetry_lock:
             module_positions = tuple([m.position for m in self._ordered_modules])
-            self._odemetry.update(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
-                                  module_positions) # type: ignore
+            self._odemetry.update(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),  # type: ignore
+                                  module_positions)  # type: ignore
 
 
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second,
@@ -171,6 +172,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def pose(self, value: geom.Pose2d):
         with self._odemetry_lock:
             self._odemetry.resetPosition(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
+                                         # possible cause of teleporting position on field
                                          tuple(self._measured_module_states),
                                          value)
 
@@ -208,7 +210,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def log_to_sysid(self, log: wpilib.sysid.SysIdRoutineLog):
         """Log the state of the swerve drive for system identification"""
         for module in self._modules.values():
-            module.log_to_sysid(log.motor(str(module.id)))
+            module.log_to_sysid(log.motor(str(module.id)))  # type: ignore
 
     @property
     def velocity(self) -> float:

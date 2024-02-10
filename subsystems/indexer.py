@@ -14,9 +14,9 @@ class Indexer(commands2.Subsystem):
     _indexer_encoder: rev.SparkRelativeEncoder
     _indexer_pid: rev.SparkMaxPIDController
     _config: IndexerConfig
-    _voltage: float
     _feederSensor: wpilib.DigitalInput | None
     _logger: logging.Logger
+    _index_sensor: wpilib.DigitalInput
 
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
@@ -35,8 +35,7 @@ class Indexer(commands2.Subsystem):
         hardware.init_motor(self._indexer_motor, config.motor_config)
         self._indexer_encoder = self._indexer_motor.getEncoder()
         self._indexer_pid = self._indexer_motor.getPIDController()
-        self._voltage = 0
-        hardware.init_pid(self._indexer_pid, config.pid)
+        hardware.init_pid(self._indexer_pid, self._config.pid)
 
     @property
     def ready(self) -> bool:
@@ -44,11 +43,10 @@ class Indexer(commands2.Subsystem):
 
     @property
     def voltage(self):
-        return self._voltage
+        return self._indexer_motor.getBusVoltage()
 
     @voltage.setter
     def voltage(self, value: float):
-        self._voltage = value
         self._indexer_motor.setVoltage(value)
 
     @property
