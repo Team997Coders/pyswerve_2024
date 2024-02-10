@@ -244,12 +244,6 @@ class SwerveModule(ISwerveModule):
         # sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
         # sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment)
 
-    @staticmethod
-    def init_motor(motor: rev.CANSparkMax, config: MotorConfig):
-        motor.restoreFactoryDefaults()
-        motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
-        motor.setInverted(config.inverted)
-
     def init_physical(self, physical_config: PhysicalConfig):
 
         if physical_config.current_limit.angle is not None:
