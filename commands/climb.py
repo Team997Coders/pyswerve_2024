@@ -15,10 +15,13 @@ class climb(commands2.command):
         self._climber_pid = climber_pid
 
     def initialize(self):
+        pass
 
     def execute(self):
         self._climber.set_climber_motor_voltage(self._climber_pid)
 
     def end(self):
+        pass
+
 
 

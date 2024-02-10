@@ -4,19 +4,20 @@ from typing import Optional
 import time
 import commands2
 import wpilib
-import wpimath
+import wpimath.controller
 import rev
 import logging
 import robot_config
 from robot_config import shooter_constants
-from robot_config import indexer_constants
+from robot_config import intake_constants
+from robot_config import feed_constants
 from commands2 import Command
 from subsystems.shooter import Shooter
 from subsystems.feeder import Indexer
 
 
 
-class index_and_shoot(commands2.Command):
+class Shoot(commands2.Command):
     """An example barebones subsystem that can be copied when creating a new subsystem
        Documentation for the subsystem class is at:
        https://robotpy.readthedocs.io/projects/commands-v2/en/stable/commands2/Subsystem.html#commands2.Subsystem
@@ -39,7 +40,7 @@ class index_and_shoot(commands2.Command):
     _shooter_pid: wpimath.controller.ProfiledPIDController
 
 
-    def __init__(self, indexer, shooter, feeder_pid, shooter_pid, intake_pid):
+    def __init__(self, indexer, shooter, feeder_pid:wpimath.controller.ProfiledPIDController, shooter_pid:wpimath.controller.ProfiledPIDController, intake_pid:wpimath.controller.ProfiledPIDController):
         """Pass other subsystems and a logger to this subsystem for debugging
 
         :param command_scheduler: Defined in robot.py, allows registering the subsystem and schedules commands
@@ -59,34 +60,21 @@ class index_and_shoot(commands2.Command):
         pass
 
     def execute(self):
-        status = self._indexer.get_sensor_status()
-        if not status:
-            self._shooter.set_left_motor_voltage(0)
-            self._indexer.set_intake_voltage(self._intake_pid)  # fix PIDs later
-            self._indexer.set_feeder_voltage(self._feeder_pid)
-            status = self._indexer.get_sensor_status()
-            if status:
-                self._shooter.set_left_motor_voltage(self._shooter_pid)
-                self._indexer.set_feeder_voltage(0)
-                self._indexer.set_intake_voltage(0)
-        if status:
-            self._shooter.set_left_motor_voltage(self._shooter_pid)
-            self._indexer.set_feeder_voltage(0)
-            self._indexer.set_intake_voltage(0)
-            commands2.WaitCommand(3)
-            self._indexer.set_feeder_voltage(self._feeder_pid)
-            status = self._indexer.get_sensor_status()
-            if not status:
-                self._shooter.set_left_motor_voltage(0)
-                self._indexer.set_intake_voltage(self._intake_pid)
-                self._indexer.set_feeder_voltage(self._feeder_pid)
-
+        shooter_output = self._shooter_pid.calculate(self._shooter.left_flywheel_encoder_velocity)
+        intake_output = self._intake_pid.calculate(self._indexer.intake_encoder_velocity)
+        feeder_output = self._feeder_pid.calculate(self._indexer.feeder_encoder_velocity)
+        self._shooter.set_left_motor_voltage(shooter_output)
+        self._indexer.set_feeder_voltage(0)
+        self._indexer.set_intake_voltage(0)
+        commands2.WaitCommand(.2)
+        self._indexer.set_feeder_voltage(feeder_output)
         # self._shooter.set_left_motor_voltage(self._shooter_pid.calculate())  # fix PIDs later
         # self._indexer.set_intake_voltage(self._intake_pid.calculate())
         # self._indexer.set_feeder_voltage(self._feeder_pid)
 
     def end(self):
-        pass
+        self._shooter.left_flywheel_velocity = 0
+        self._indexer
 
     def getName(self) -> str:
         return type(self).__name__  # Replace with a string if you want a friendlier name

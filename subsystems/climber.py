@@ -13,12 +13,12 @@ class Climber(subsystems):
         self.climberEncoder = self.climberMotor.getEncoder()
         self.climberEncoder.setPosition(0)
         self.climberMotor.setIdleMode(self.climberMotor.getIdleMode().kBrake)
-
+    @property
     def set_climber_motor_voltage(self, voltage: float):
         self.climberMotor.setVoltage(voltage)
-
+    @property
     def get_climber_encoder_rotation(self):
         return self.climberEncoder.getPosition()
-
+    @property
     def set_brake_mode(self):
         self.climberMotor.setIdleMode(self.climberMotor.getIdleMode().kBrake)
