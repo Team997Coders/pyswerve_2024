@@ -1,7 +1,6 @@
-#Packages related to FIRST can be found at https://robotpy.readthedocs.io/en/stable/ as various API's
-#If you add a package check if it is listed in the pyproject.toml file to ensure it deploys to the robot
+# Packages related to FIRST can be found at https://robotpy.readthedocs.io/en/stable/ as various API's
+# If you add a package check if it is listed in the pyproject.toml file to ensure it deploys to the robot
 from typing import Optional
-import time
 import commands2
 import commands2.cmd
 import subsystems

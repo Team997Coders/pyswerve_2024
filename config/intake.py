@@ -2,10 +2,8 @@ from typing import NamedTuple
 
 import wpilib
 import rev
+from config import MotorConfig, PIDConfig
 
 class IntakeConfig(NamedTuple):
-    intake_motor_id: int
-    is_intake_motor_inverted: bool
-
-
-
+    motor: MotorConfig
+    pid: PIDConfig

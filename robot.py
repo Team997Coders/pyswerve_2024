@@ -1,5 +1,8 @@
 import sys
 import wpilib
+import wpilib.event
+import commands.shoot
+import subsystems
 from config import AxisConfig
 import robot_config
 import swerve
@@ -46,6 +49,14 @@ class MyRobot(commands2.TimedCommandRobot):
 
     trapezoid_profile: TrapezoidProfile.Constraints
     rotation_pid: ProfiledPIDController
+
+    shooter: subsystems.Shooter
+    intake: subsystems.Intake
+    indexer: subsystems.Indexer
+
+    # Horrible hack, do not expand this system.  Use an array later.
+    button_state_zero: bool = False
+    button_state_one: bool = False
 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
@@ -125,6 +136,11 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                controller=self.joystick_two,
                                                                axis_index=0),
                                                            self.rotation_pid)
+
+        self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid)
+        self.indexer = subsystems.Indexer(robot_config.indexer_config)
+        self.intake = subsystems.Intake(robot_config.intake_config)
+
         # one sitck, only used for testing
         # self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
         #                                                    AxisConfig(
@@ -153,7 +169,8 @@ class MyRobot(commands2.TimedCommandRobot):
         #                                                        axis_index=1),
         #                                                    self.rotation_pid)
 
-
+    def shoot(self):
+        pass
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
@@ -168,6 +185,21 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
+
+        if self.joystick_one.getRawButton(1) and not self.button_state_zero:
+            self.button_state_zero = self.joystick_one.getRawButton(1)
+            shoot = commands.Shoot(self.shooter, self.indexer)
+            self._command_scheduler.getInstance().schedule(shoot)
+
+        if self.joystick_one.getRawButton(2) and not self.button_state_one:
+            self.button_state_one = self.joystick_one.getRawButton(2)
+            load = commands.Load(self.intake, self.indexer)
+            self._command_scheduler.getInstance().schedule(load)
+
+    #         shoot_event_loop = wpilib.event.EventLoop()
+    #         shoot_event_loop.bind(lambda: commands.shoot.Shoot(self.shooter, self.indexer))
+    #         commands2.button.trigger.Trigger(shoot_event_loop,
+    #                                          lambda: self.joystick_one.button(0))
 
     def updateField(self):
         pass

@@ -3,7 +3,7 @@ from typing import Callable, Any
 import rev
 import math
 import logging
-
+import hardware
 import wpilib.sysid
 
 import math_help
@@ -68,8 +68,8 @@ class SwerveModule(ISwerveModule):
         self._drive_motor = rev.CANSparkMax(module_config.drive_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self._angle_motor = rev.CANSparkMax(module_config.angle_motor.id, rev.CANSparkMax.MotorType.kBrushless)
 
-        self.init_motor(self._drive_motor, module_config.drive_motor)
-        self.init_motor(self._angle_motor, module_config.angle_motor)
+        hardware.init_motor(self._drive_motor, module_config.drive_motor)
+        hardware.init_motor(self._angle_motor, module_config.angle_motor)
         self.init_physical(physical_config)
 
         self.drive_pid = self._drive_motor.getPIDController()
@@ -85,7 +85,7 @@ class SwerveModule(ISwerveModule):
                 (physical_config.wheel_diameter_cm / 100) * math.pi) / 60.0)  # convert from rpm to revolutions/sec
 
         # Request specific angles from the PID controller 
-        self.init_pid(self.drive_pid, module_config.drive_pid, feedback_device=self.drive_motor_encoder)
+        hardware.init_pid(self.drive_pid, module_config.drive_pid, feedback_device=self.drive_motor_encoder)
 
         self.angle_motor_encoder.setPositionConversionFactor((2.0 * math.pi) / physical_config.gear_ratio.angle)
         self.angle_motor_encoder.setVelocityConversionFactor(
@@ -98,7 +98,7 @@ class SwerveModule(ISwerveModule):
 
         self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
 
-        self.init_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)
+        hardware.init_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)
 
         self._angle_motor.burnFlash()
         self._drive_motor.burnFlash()
@@ -266,27 +266,6 @@ class SwerveModule(ISwerveModule):
             self._angle_motor.setOpenLoopRampRate(physical_config.ramp_rate.angle)
             self._angle_motor.setClosedLoopRampRate(physical_config.ramp_rate.angle)
 
-    
-    @staticmethod
-    def init_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_device: rev.CANSensor | None = None):
-        """Configures a SparkMax PID controller with the provided PIDConfig"""
-
-        if feedback_device is not None:
-            pid.setFeedbackDevice(feedback_device)
-
-        pid.setP(pid_config.p)
-        pid.setI(pid_config.i)
-        pid.setD(pid_config.d)
-
-        if pid_config.wrapping is not None and \
-                (pid_config.wrapping.min is not None or pid_config.wrapping.max is not None):
-            pid.setPositionPIDWrappingEnabled(True)
-            if pid_config.wrapping.min is not None:
-                pid.setPositionPIDWrappingMinInput(pid_config.wrapping.min)
-            if pid_config.wrapping.max is not None:
-                pid.setPositionPIDWrappingMaxInput(pid_config.wrapping.max)
-        else:
-            pid.setPositionPIDWrappingEnabled(False)
 
     def initialize(self) -> bool:
         """Returns true if the wheel is in the correct position, false if it needs to be adjusted"""
