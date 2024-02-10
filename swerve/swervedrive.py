@@ -99,7 +99,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self.initialize()
 
         #Register the subsystem at the end to ensure periodic is called
-        commands2.CommandScheduler.getInstance().registerSubsystem(self)
+#        commands2.CommandScheduler.getInstance().registerSubsystem(self)
 
     
     def initialize(self):
