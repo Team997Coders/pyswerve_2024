@@ -6,3 +6,8 @@ class PIDConfig(NamedTuple):
     i: float
     d: float
     wrapping: OptionalRange | None # If range, is PID wrapping is enabled
+
+class FeedForwardConfig(NamedTuple):
+    kS: float
+    kV: float
+    kA: float
