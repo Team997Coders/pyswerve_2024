@@ -2,12 +2,16 @@ import math_help
 import math
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
-    OptionalSwerveModuleFloatProperty
+    OptionalSwerveModuleFloatProperty, ControllerConfig, ControllerKey, ControllerType, AxisConfig, \
+    ShooterConfig, IndexerConfig, ClimberConfig
 
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Carefull when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 default_rotation_pid = PIDConfig(p=.2, i=0.0, d=0.0, wrapping=OptionalRange(min=0, max=math.pi * 2))
+
+controllers = {ControllerKey(ControllerType.Joystick, 0), ControllerKey(ControllerType.XBox, 0),
+               ControllerKey(ControllerType.Joystick, 1)}
 
 joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
                                          y_deadband=math_help.Range(0.15, 1),
@@ -16,11 +20,28 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         y_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
 
-shooter_constants = ShooterConfig(left_flywheel_id = 3, right_flywheel_id = 4, is_flywheel_inverted=False, flywheel_voltage=2.0, relative_encoder_id=1)
+# shooter_constants = ShooterConfig(left_flywheel_id = 3, right_flywheel_id = 4, is_flywheel_inverted=False, flywheel_voltage=2.0, relative_encoder_id=1)
+#
+# indexer_constants = IndexerConfig(feeder_motor_id = 2, intake_motor_id = 3, feeder_sensor_channel = 0,is_feeder_motor_inverted = True, is_intake_motor_inverted = False)
+#
+# climber_constants = ClimberConfig(climber_motor_id= 5, is_climber_motor_inverted= False)
 
-indexer_constants = IndexerConfig(feeder_motor_id = 2, intake_motor_id = 3, feeder_sensor_channel = 0,is_feeder_motor_inverted = True, is_intake_motor_inverted = False)
+# AxisConfig(input_range=joystick_controls.x_deadband,
+#            output_range=Range(0, physical_properties.max_drive_speed),
+#            controller=ControllerKey(ControllerType.Joystick, 0),
+#            axis_index=1),
+# AxisConfig(input_range=robot_config.joystick_controls.y_deadband,
+#            output_range=Range(0,
+#                               robot_config.physical_properties.max_drive_speed),
+#            controller=self.joystick_one,
+#            axis_index=0),
+# AxisConfig(input_range=robot_config.joystick_controls.theta_deadband,
+#            output_range=Range(0,
+#                               robot_config.physical_properties.max_rotation_speed),
+#            controller=self.joystick_two,
+#            axis_index=0)
 
-climber_constants = ClimberConfig(climber_motor_id= 5, is_climber_motor_inverted= False)
+#twin_stick_translation = ControllerConfig(controller_key=ControllerKey(controller_type=ControllerType.Joystick, controller_index=0),
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
