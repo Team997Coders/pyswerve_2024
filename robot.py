@@ -168,8 +168,8 @@ class MyRobot(commands2.TimedCommandRobot):
         #                                                        axis_index=1),
         #                                                    self.rotation_pid)
 
-    def shoot(self):
-        pass
+    # def shoot(self):
+    #     pass
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
@@ -186,7 +186,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.twinstick_teleop_drive.drive()
         if self.joystick_one.getRawButton(1) and not self.button_state_zero:
             self.button_state_zero = self.joystick_one.getRawButton(1)
-            shoot = commands.Shoot(self.shooter, self.indexer)
+            shoot = commands.Shoot(self.shooter, self.indexer, shot_velocity=5, spinup_delay=.2)
             self._command_scheduler.getInstance().schedule(shoot)
 
         if self.joystick_one.getRawButton(2) and not self.button_state_one:

@@ -23,6 +23,7 @@ class SpinupShooter(commands2.Command):
     def __init__(self, shooter: subsystems.Shooter, shot_velocity: float):
         super().__init__()
         self._shooter = shooter
+        self._shot_velocity = shot_velocity
 
     def execute(self):
         self._shooter.velocity = self._shot_velocity
@@ -48,14 +49,14 @@ class Shoot(commands2.Command):
         self._command = commands2.cmd.sequence(
             commands2.cmd.ParallelCommandGroup(
                 SpinupShooter(shooter, shot_velocity),
-                index.IndexerOff(indexer)
+                index.IndexOff(indexer)
             ),
             commands2.WaitCommand(spinup_delay),
-            commands2.IndexerOn(indexer),
+            index.IndexOn(indexer),
             commands2.WaitCommand(fire_time),
             commands2.cmd.ParallelCommandGroup(
                 SpindownShooter(shooter),
-                index.IndexerOff(indexer)
+                index.IndexOff(indexer)
             )
         )
 

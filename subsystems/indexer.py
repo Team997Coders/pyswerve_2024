@@ -14,21 +14,20 @@ class Indexer(commands2.Subsystem):
     _indexer_encoder: rev.SparkRelativeEncoder
     _indexer_pid: rev.SparkMaxPIDController
     _config: IndexerConfig
-    _feederSensor: wpilib.DigitalInput | None
+    _indexer_sensor: wpilib.DigitalInput | None
     _logger: logging.Logger
-    _index_sensor: wpilib.DigitalInput
 
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
         self._logger = logger.getChild("Indexer")
         self._config = config
         try:
-            self._feederSensor = wpilib.DigitalInput(config.indexer_sensor_id)
-            self._read_indexer_state = lambda: not self._feederSensor.get() if config.indexer_sensor_inverted \
-                else self._feederSensor
+            self._indexer_sensor = wpilib.DigitalInput(config.indexer_sensor_id)
+            self._read_indexer_state = lambda: not self._indexer_sensor.get() if config.indexer_sensor_inverted \
+                else self._indexer_sensor
         except:
             self._logger.error("Could not initialize indexer sensor")
-            self._feederSensor = None
+            self._indexer_sensor = None
             self._read_indexer_state = lambda: False
 
         self._indexer_motor = rev.CANSparkMax(config.motor_config.id, rev.CANSparkMax.MotorType.kBrushless)

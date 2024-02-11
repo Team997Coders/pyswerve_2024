@@ -100,22 +100,22 @@ class TestDriver:
             "  This is a test of the absolute encoder and the offset of the encoder." +
             "  The offset should be set so that the wheel is aligned with the robot's forward direction when the robot is initialized." +
             "  The wheels should rotate in the following order: front left, front right, back left, back right",
-            [TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, 0)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, 0)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, 0)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, 0)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, -math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, -math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, -math.pi / 2)),
-             TestConfig(1.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
+            [TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, 0)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, 0)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, 0)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, 0)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, math.pi)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, math.pi)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, math.pi)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, math.pi)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_left, -math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.front_right, -math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_left, -math.pi / 2)),
+             TestConfig(2.25, self.runAngleMotorPIDTest, (ModulePosition.back_right, -math.pi / 2)),
              ])
 
         quick_angle_orientation_tests = TestGroup(
@@ -274,7 +274,7 @@ class TestDriver:
         ]
 
         # Use the generic test group by default
-        self.current_test_group_index = len(self.test_groups) - 1
+        self.current_test_group_index = 1  # len(self.test_groups) - 1
         self._chooser = create_test_selection_widget("Test Group", self.test_groups)
 
         if not wpilib.RobotBase.isTest:

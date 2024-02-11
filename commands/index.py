@@ -14,7 +14,7 @@ from subsystems.shooter import Shooter
 from subsystems.indexer import Indexer
 
 
-class IndexOn(commands2.Subsystem):
+class IndexOn(commands2.Command):
     _indexer: Indexer
 
     def __init__(self, indexer: Indexer):
@@ -28,11 +28,12 @@ class IndexOn(commands2.Subsystem):
         self._indexer.velocity = 1
 
 
-class IndexerOff(commands2.Command):
+class IndexOff(commands2.Command):
     _indexer: Indexer
 
     def __init__(self, indexer: Indexer):
         super().__init__()
+        self._indexer = indexer
 
     def execute(self):
         self._indexer.velocity = 0
