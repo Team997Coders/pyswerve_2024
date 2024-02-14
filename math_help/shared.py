@@ -5,27 +5,29 @@ import numpy as np
 import wpimath.geometry as geom
 import wpimath.kinematics as kinematics
 
+tau = math.pi * 2
+
 
 def wrap_angle(angle: float, min_val: float = 0) -> float:
     """Wrap the angle to the range of 0 to 2pi"""
-    clamped = angle % (math.pi * 2.0)
-    if min_val != 0:
-        max_val = min_val + math.pi * 2.0
-        while clamped > max_val:  # TODO Do the math and multiply instead of adding
-            clamped -= math.pi * 2.0
-        while clamped < min_val:
-            clamped += math.pi * 2.0
+    clamped = angle % tau
+
+    max_val = min_val + tau
+    while clamped >= max_val:  # TODO Do the math and multiply instead of adding
+        clamped -= tau
+    while clamped < min_val:
+        clamped += tau
     return clamped
+
 
 def wrap_angle_degrees(angle: float, min_val: float = 0) -> float:
     """Wrap the angle to the range of 0 to 2pi"""
-    clamped = angle % 360
-    if min_val != 0:
-        max_val = min_val + 360
-        while clamped > max_val:  # TODO Do the math and multiply instead of adding
-            clamped -= 360
-        while clamped < min_val:
-            clamped += 360
+    clamped = angle % 360.0
+    max_val = min_val + 360.0
+    while clamped >= max_val:  # TODO Do the math and multiply instead of adding
+        clamped -= 360.0
+    while clamped < min_val:
+        clamped += 360.0
     return clamped
 
 
@@ -54,7 +56,7 @@ def optimize_state_improved(desired_state: kinematics.SwerveModuleState,
     elif result < 0:  # If the dot product is negative, we need to reverse the desired angle, and scale speed by the dot product
         desired_angle = desired_angle + geom.Rotation2d(math.pi)
         desired_state = kinematics.SwerveModuleState(desired_speed, desired_angle)
-    else: # No change needed to the desired angle
+    else:  # No change needed to the desired angle
         desired_state = kinematics.SwerveModuleState(desired_speed, desired_angle)
 
     return desired_state

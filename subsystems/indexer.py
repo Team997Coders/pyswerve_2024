@@ -22,12 +22,15 @@ class Indexer(commands2.Subsystem):
         self._logger = logger.getChild("Indexer")
         self._config = config
         try:
-            self._indexer_sensor = wpilib.DigitalInput(config.indexer_sensor_id)
-            self._read_indexer_state = lambda: not self._indexer_sensor.get() if config.indexer_sensor_inverted \
-                else self._indexer_sensor
+            self._feederSensor = wpilib.DigitalInput(config.indexer_sensor_id)
+            self._read_indexer_state = lambda: not self._feederSensor.get() if config.indexer_sensor_inverted \
+                else self._feederSensor
+            self._logger.info("Initialized indexer sensor")
+            print("Initialized indexer sensor")
         except:
             self._logger.error("Could not initialize indexer sensor")
-            self._indexer_sensor = None
+            print("Could not initialize indexer sensor")
+            self._feederSensor = None
             self._read_indexer_state = lambda: False
 
         self._indexer_motor = rev.CANSparkMax(config.motor_config.id, rev.CANSparkMax.MotorType.kBrushless)

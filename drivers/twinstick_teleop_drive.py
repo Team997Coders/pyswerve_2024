@@ -71,14 +71,14 @@ class TwinStickTeleopDrive:
                                                       self._roty_config.output_range)
 
         if rotx_output_value != 0 or roty_output_value != 0:
-            rot = geom.Rotation2d(-rotx_output_value, -roty_output_value)
+            rot = geom.Rotation2d(rotx_output_value, roty_output_value)
             _updated_desired_robot_heading = rot.radians()
             if abs(self._desired_robot_heading - _updated_desired_robot_heading) > (math.pi / 90):
                 # self._angle_pid.reset(self._swerve_drive.pose.rotation().radians())
                 self._desired_robot_heading = _updated_desired_robot_heading
                 self._angle_pid.setGoal(self._desired_robot_heading)
 
-        gyro_radians = self._swerve_drive.gyro_angle_radians
+        gyro_radians = math_help.wrap_angle(self._swerve_drive.gyro_angle_radians, -math.pi)
         measured_chassis_speed = self._swerve_drive.measured_chassis_speed
         self._angle_pid.reset(gyro_radians, measured_chassis_speed.omega)
         self._angle_pid.calculate(gyro_radians, self._desired_robot_heading)
@@ -115,6 +115,7 @@ class TwinStickTeleopDrive:
         SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
         SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
         SmartDashboard.putNumber("gyro", self._swerve_drive.gyro_angle_degrees)
+        SmartDashboard.putNumber("gyro_radians", gyro_radians)
 
     def send_drive_command(self, vx: float, vy: float, theta: float):
 
