@@ -73,7 +73,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                  physical_config: PhysicalConfig, logger: logging.Logger):
         super().__init__()
         self.logger = logger.getChild("swerve")
-        self.__gyro_get_lambda = lambda: -gyro.getAngle() if physical_config.invert_gyro else lambda: gyro.getAngle()
+        self.__gyro_get_lambda = lambda: -gyro.getAngle() if physical_config.invert_gyro\
+            else gyro.getAngle
         self._modules = {}
         self._physical_config = physical_config
         for position, module_config in swerve_config.items():
@@ -136,7 +137,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """
 
         desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-            self.gyro_angle_radians))
+            -self.gyro_angle_radians))
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)

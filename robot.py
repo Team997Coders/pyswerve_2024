@@ -80,7 +80,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
-        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(math.pi, math.pi)
+        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(math.pi * 3, 1.5 * math.pi)
 
         self.rotation_pid = ProfiledPIDControllerRadians(
             Kp=robot_config.default_rotation_pid.p,

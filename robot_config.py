@@ -7,12 +7,12 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Carefull when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
-default_rotation_pid = PIDConfig(p=.05, i=0.00, d=0.00, wrapping=OptionalRange(min=-math.pi, max=math.pi))
+default_rotation_pid = PIDConfig(p=.18, i=0.12, d=0.001, wrapping=OptionalRange(min=-math.pi, max=math.pi))
 default_flywheel_pid = PIDConfig(p=0.5, i=0.0, d=0.05, wrapping=None)
 
 joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
                                          y_deadband=math_help.Range(0.15, 1),
-                                         theta_deadband=math_help.Range(0.05, 1))
+                                         theta_deadband=math_help.Range(0.5, 1))
 gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         y_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
@@ -69,4 +69,4 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,
-                                     invert_gyro=False)
+                                     invert_gyro=True)
