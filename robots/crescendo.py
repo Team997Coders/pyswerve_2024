@@ -73,4 +73,5 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,
-                                     invert_gyro=True)
+                                     invert_gyro=True,
+                                     gyro_on_spi=True)

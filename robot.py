@@ -74,7 +74,10 @@ class MyRobot(commands2.TimedCommandRobot):
         super().robotInit()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
-        self._navx = navx.AHRS.create_spi()
+        if robot_config.physical_properties.gyro_on_spi:
+            self._navx = navx.AHRS.create_spi()
+        else:
+            self._navx = navx.AHRS.create_i2c()
         self.controller = wpilib.XboxController(0)
         self.joystick_one = wpilib.Joystick(0)
         self.joystick_two = wpilib.Joystick(1)
@@ -157,6 +160,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
+        #self.teleop_drive.drive()
         if self.joystick_one.getRawButton(1) and not self.button_state_zero:
             self.button_state_zero = self.joystick_one.getRawButton(1)
             shoot = commands.Shoot(self.shooter, self.indexer, shot_velocity=5, spinup_delay=.2)

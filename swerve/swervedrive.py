@@ -122,11 +122,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
             m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
-
         with self._odemetry_lock:
-            module_positions = tuple([m.position for m in self._ordered_modules])
             self._odemetry.update(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),  # type: ignore
-                                  module_positions)  # type: ignore
+                                  self._measured_module_positions)  # type: ignore
 
     def _scale_velocity_to_drive_speed(self, v_x: float, v_y: float) -> tuple[float, float]:
         """Reduce requested speed if it is too fast"""
@@ -187,7 +185,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         with self._odemetry_lock:
             self._odemetry.resetPosition(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                          # possible cause of teleporting position on field
-                                         tuple(self._measured_module_states),
+                                         self._measured_module_positions,
                                          value)
 
 
@@ -195,6 +193,11 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def _measured_module_states(self) -> Sequence[kinematics.SwerveModuleState]:
         """Current state of the modules"""
         return tuple([m.measured_state for m in self._ordered_modules])
+
+    @property
+    def _measured_module_positions(self) -> Sequence[kinematics.SwerveModuleState]:
+        """Current state of the modules"""
+        return tuple([m.position for m in self._ordered_modules])
 
     @property
     def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:
@@ -206,7 +209,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """chasis speeds desired by the robot"""
         return self._kinematics.toChassisSpeeds(tuple([m.desired_state for m in self._ordered_modules]))
 
-    def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
+    def add_vision_measurement(self, pose: geom.Pose2d, timestamp: float):
         """Add a vision measurement to the odemetry"""
         with self._odemetry_lock:
             self._odemetry.addVisionMeasurement(pose, timestamp)

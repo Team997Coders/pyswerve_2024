@@ -30,7 +30,7 @@ climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=P
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModule(drive_motor=MotorConfig(id=8, inverted=False),
-                                   angle_motor=MotorConfig(id=1, inverted=False),
+                                   angle_motor=MotorConfig(id=1, inverted=True),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
                                    location=(9.5, 9.5),
@@ -38,7 +38,7 @@ swerve_modules = {ModulePosition.front_left:
                                    drive_pid=default_drive_pid),
                   ModulePosition.front_right:
                       SwerveModule(drive_motor=MotorConfig(id=6, inverted=False),
-                                   angle_motor=MotorConfig(id=7, inverted=False),
+                                   angle_motor=MotorConfig(id=7, inverted=True),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
                                    location=(9.5, -9.5),
@@ -46,7 +46,7 @@ swerve_modules = {ModulePosition.front_left:
                                    drive_pid=default_drive_pid),
                   ModulePosition.back_right:
                       SwerveModule(drive_motor=MotorConfig(id=4, inverted=False),
-                                   angle_motor=MotorConfig(id=5, inverted=False),
+                                   angle_motor=MotorConfig(id=5, inverted=True),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
                                    location=(-9.5, -9.5),
@@ -54,7 +54,7 @@ swerve_modules = {ModulePosition.front_left:
                                    drive_pid=default_drive_pid),
                   ModulePosition.back_left:
                       SwerveModule(drive_motor=MotorConfig(id=2, inverted=False),
-                                   angle_motor=MotorConfig(id=3, inverted=False),
+                                   angle_motor=MotorConfig(id=3, inverted=True),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
                                    location=(-9.5, 9.5),
@@ -73,4 +73,5 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,
-                                     invert_gyro=True)
+                                     invert_gyro=True,
+                                     gyro_on_spi=True)

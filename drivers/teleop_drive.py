@@ -56,10 +56,6 @@ class TeleopDrive(commands2.Command):
         requested_speed = math.sqrt(x_output_value ** 2 + y_output_value ** 2)
 
         # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
-        if requested_speed > robot_config.physical_properties.max_drive_speed:
-            scale_factor = robot_config.physical_properties.max_drive_speed / requested_speed
-            x_output_value *= scale_factor
-            y_output_value *= scale_factor
 
         SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, theta_output_value])
         self.send_drive_command(x_output_value, y_output_value, theta_output_value)
