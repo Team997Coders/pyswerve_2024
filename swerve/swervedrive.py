@@ -117,9 +117,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def periodic(self):
         """Call periodically to update the odemetry"""
         self.update_odometry()
-        if __debug__:
-            for m in self._ordered_modules:
-                m.report_to_dashboard()  # type: ignore
+        # if __debug__:
+        for m in self._ordered_modules:
+            m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
 
@@ -128,6 +128,17 @@ class SwerveDrive(commands2.subsystem.Subsystem):
             self._odemetry.update(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),  # type: ignore
                                   module_positions)  # type: ignore
 
+    def _scale_velocity_to_drive_speed(self, v_x: float, v_y: float) -> tuple[float, float]:
+        """Reduce requested speed if it is too fast"""
+        requested_speed = math.sqrt(v_x ** 2 + v_y ** 2)
+
+        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
+        if requested_speed > self._physical_config.max_drive_speed:
+            scale_factor = self._physical_config.max_drive_speed / requested_speed
+            v_x *= scale_factor
+            v_y *= scale_factor
+
+        return v_x, v_y
 
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second,
               run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
@@ -135,6 +146,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         """
+
+        v_x, v_y = self._scale_velocity_to_drive_speed(v_x, v_y)
 
         desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
             -self.gyro_angle_radians))

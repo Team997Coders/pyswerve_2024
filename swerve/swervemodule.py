@@ -96,6 +96,8 @@ class SwerveModule(ISwerveModule):
         if module_config.encoder.conversion_factor is not None:
             self.angle_absolute_encoder.setPositionConversionFactor(module_config.encoder.conversion_factor)
 
+        # self.angle_motor_encoder(module_config.encoder.inverted)
+
         self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
 
         hardware.init_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)

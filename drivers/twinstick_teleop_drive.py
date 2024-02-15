@@ -2,17 +2,16 @@ import sys
 import wpilib
 import wpimath
 
-import math_help
 from config.driver_controls import AxisConfig
-import robot_config
+from robots import crescendo
 import math
+import math_help
 from swerve import SwerveDrive
 from debug import attach_debugger
 from wpilib import SmartDashboard
 from math_help import map_input_to_output_range
 import wpimath.controller
 import wpimath.geometry as geom
-import commands2
 import wpimath._controls._controls.controller
 
 if __debug__ and "run" in sys.argv:
@@ -88,13 +87,6 @@ class TwinStickTeleopDrive:
         ff_value = self._feedforward.calculate(currentVelocity=chassis_velocity, nextVelocity=pid_velocity, dt=0.02)
 
         theta_change = pid_output
-        requested_speed = math.sqrt(x_output_value ** 2 + y_output_value ** 2)
-
-        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
-        if requested_speed > robot_config.physical_properties.max_drive_speed:
-            scale_factor = robot_config.physical_properties.max_drive_speed / requested_speed
-            x_output_value *= scale_factor
-            y_output_value *= scale_factor
 
         ff_value = 0
         self.send_drive_command(x_output_value, y_output_value, theta_change + ff_value)

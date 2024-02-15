@@ -1,7 +1,7 @@
 import sys
 import wpilib
 from config.driver_controls import AxisConfig
-import robot_config
+from robots import crescendo
 import math
 from swerve import SwerveDrive
 from debug import attach_debugger

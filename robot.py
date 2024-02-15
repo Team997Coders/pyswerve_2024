@@ -4,7 +4,6 @@ import wpilib.event
 import commands.shoot
 import subsystems
 from config import AxisConfig
-import robot_config
 import swerve
 import telemetry
 import navx
@@ -18,10 +17,16 @@ from wpilib import SmartDashboard as sd
 import commands2
 from math_help import Range
 
-from wpimath.controller import ProfiledPIDController, ProfiledPIDControllerRadians
+from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
 import math
+
+######################################################################
+# Change the name of the robot here to choose between different robots
+from robots import crescendo as robot_config
+
+######################################################################
 
 if __debug__ and "run" in sys.argv:
     # To enter debug mode, add the --debug flag to the 'deploy' command:
@@ -139,37 +144,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid, self.logger)
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
-
-        # one sitck, only used for testing
-        # self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
-        #                                                    AxisConfig(
-        #                                                        input_range=robot_config.joystick_controls.x_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_drive_speed),
-        #                                                        controller=self.joystick_one,
-        #                                                        axis_index=2),
-        #                                                    AxisConfig(
-        #                                                        input_range=robot_config.joystick_controls.y_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_drive_speed),
-        #                                                        controller=self.joystick_one,
-        #                                                        axis_index=3),
-        #                                                    AxisConfig(
-        #                                                        input_range=robot_config.joystick_controls.theta_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_rotation_speed),
-        #                                                        controller=self.joystick_one,
-        #                                                        axis_index=0),
-        #                                                    AxisConfig(
-        #                                                        input_range=robot_config.joystick_controls.theta_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_rotation_speed),
-        #                                                        controller=self.joystick_one,
-        #                                                        axis_index=1),
-        #                                                    self.rotation_pid)
-
-    # def shoot(self):
-    #     pass
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()
