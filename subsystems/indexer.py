@@ -11,14 +11,14 @@ class Indexer(commands2.Subsystem):
     _indexer_motor: rev.CANSparkMax
     _indexer_encoder: rev.SparkRelativeEncoder
     _indexer_pid: rev.SparkMaxPIDController
-    _config: IndexerConfig
+    config: IndexerConfig
     _indexer_sensor: wpilib.DigitalInput | None
     _logger: logging.Logger
 
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
         self._logger = logger.getChild("Indexer")
-        self._config = config
+        self.config = config
         try:
             self._feederSensor = wpilib.DigitalInput(config.indexer_sensor_id)
             self._read_indexer_state = lambda: not self._feederSensor.get() if config.indexer_sensor_inverted \
@@ -35,7 +35,7 @@ class Indexer(commands2.Subsystem):
         hardware.init_motor(self._indexer_motor, config.motor_config)
         self._indexer_encoder = self._indexer_motor.getEncoder()
         self._indexer_pid = self._indexer_motor.getPIDController()
-        hardware.init_pid(self._indexer_pid, self._config.pid)
+        hardware.init_pid(self._indexer_pid, self.config.pid)
 
     @property
     def ready(self) -> bool:

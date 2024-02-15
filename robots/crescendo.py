@@ -1,6 +1,6 @@
 import math_help
 import math
-from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModule, EncoderConfig, \
+from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig
 
@@ -22,14 +22,18 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=12, inverted=False),
                                right_flywheel_gear_ratio=1,
                                left_flywheel_gear_ratio=1,
                                right_flywheel_diameter_cm=5,
-                               left_flywheel_diameter_cm=5)  # add motor configs
+                               left_flywheel_diameter_cm=5,
+                               defualt_velocity=5,
+                               defualt_fire_time=.3,
+                               defualt_spinup_delay=.2)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=9, inverted=True), indexer_sensor_id=0, indexer_sensor_inverted=True,
-                               pid=PIDConfig(p=1, i=0, d=0, wrapping=None))  # fix feeder_sensor_id
-intake_config = IntakeConfig(MotorConfig(id=10, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None))
+                               pid=PIDConfig(p=1, i=0, d=0, wrapping=None), defualt_velocity=1)  # fix feeder_sensor_id
+intake_config = IntakeConfig(MotorConfig(id=10, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None),
+                             defualt_velocity=1)
 climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=PIDConfig(p=.5, i=0, d=0, wrapping=None))
 
 swerve_modules = {ModulePosition.front_left:
-                      SwerveModule(drive_motor=MotorConfig(id=8, inverted=False),
+                      SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False),
                                    angle_motor=MotorConfig(id=1, inverted=False),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
@@ -37,7 +41,7 @@ swerve_modules = {ModulePosition.front_left:
                                    angle_pid=default_angle_pid,
                                    drive_pid=default_drive_pid),
                   ModulePosition.front_right:
-                      SwerveModule(drive_motor=MotorConfig(id=6, inverted=False),
+                      SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False),
                                    angle_motor=MotorConfig(id=7, inverted=False),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
@@ -45,7 +49,7 @@ swerve_modules = {ModulePosition.front_left:
                                    angle_pid=default_angle_pid,
                                    drive_pid=default_drive_pid),
                   ModulePosition.back_right:
-                      SwerveModule(drive_motor=MotorConfig(id=4, inverted=False),
+                      SwerveModuleConfig(drive_motor=MotorConfig(id=4, inverted=False),
                                    angle_motor=MotorConfig(id=5, inverted=False),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
@@ -53,7 +57,7 @@ swerve_modules = {ModulePosition.front_left:
                                    angle_pid=default_angle_pid,
                                    drive_pid=default_drive_pid),
                   ModulePosition.back_left:
-                      SwerveModule(drive_motor=MotorConfig(id=2, inverted=False),
+                      SwerveModuleConfig(drive_motor=MotorConfig(id=2, inverted=False),
                                    angle_motor=MotorConfig(id=3, inverted=False),
                                    encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
                                                          inverted=False),
@@ -61,7 +65,7 @@ swerve_modules = {ModulePosition.front_left:
                                    angle_pid=default_angle_pid,
                                    drive_pid=default_drive_pid)
 
-                  }  # type: dict[ModulePosition, SwerveModule]
+                  }  # type: dict[ModulePosition, SwerveModuleConfig]
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,

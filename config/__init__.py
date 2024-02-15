@@ -7,7 +7,7 @@ from . import physical
 from .physical import PhysicalConfig
 
 from . import swerve_module
-from .swerve_module import SwerveModule, MotorConfig, \
+from .swerve_module import SwerveModuleConfig, MotorConfig, \
     EncoderConfig, SwerveModuleFloatProperty, \
     ModulePosition, SwerveModuleIntProperty, \
     OptionalSwerveModuleFloatProperty, OptionalSwerveModuleIntProperty

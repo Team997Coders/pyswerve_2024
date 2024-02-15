@@ -7,7 +7,7 @@ import hardware
 import wpilib.sysid
 
 import math_help
-from config import *
+from config import ModulePosition, SwerveModuleConfig, PhysicalConfig
 from wpilib import SmartDashboard as sd
 from math_help import shortest_angle_difference
 import wpimath.geometry as geom
@@ -33,7 +33,7 @@ class SwerveModule(ISwerveModule):
 
     rel_to_absolute_angle_adjustment: float | None  # How far we need to adjust the pid reference to get the absolute encoder to read the correct angle
     rel_to_corrected_angle_adjustment: float | None  # How far we need to adjust the pid reference to get the angle relative to robot chassis
-    config: SwerveModule
+    config: SwerveModuleConfig
     _physical_config: PhysicalConfig
 
     _desired_state: kinematics.SwerveModuleState
@@ -55,7 +55,7 @@ class SwerveModule(ISwerveModule):
         """Module position ID"""
         return self._id
 
-    def __init__(self, position: ModulePosition, module_config: SwerveModule, physical_config: PhysicalConfig,
+    def __init__(self, position: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig,
                  logger: logging.Logger):
         self._id = position
         self._physical_config = physical_config

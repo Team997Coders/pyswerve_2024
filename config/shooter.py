@@ -8,3 +8,6 @@ class ShooterConfig(NamedTuple):
     right_flywheel_gear_ratio: float
     left_flywheel_diameter_cm: float
     right_flywheel_diameter_cm: float
+    defualt_velocity: float
+    defualt_fire_time: float
+    defualt_spinup_delay: float

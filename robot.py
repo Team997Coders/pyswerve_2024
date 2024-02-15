@@ -163,7 +163,7 @@ class MyRobot(commands2.TimedCommandRobot):
         #self.teleop_drive.drive()
         if self.joystick_one.getRawButton(1) and not self.button_state_zero:
             self.button_state_zero = self.joystick_one.getRawButton(1)
-            shoot = commands.Shoot(self.shooter, self.indexer, shot_velocity=5, spinup_delay=.2)
+            shoot = commands.Shoot(self.shooter, self.indexer)
             self._command_scheduler.getInstance().schedule(shoot)
 
         if self.joystick_one.getRawButton(2) and not self.button_state_one:

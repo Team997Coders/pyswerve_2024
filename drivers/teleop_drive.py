@@ -36,14 +36,8 @@ class TeleopDrive(commands2.Command):
         self._theta_config = theta_config
         self._command_scheduler = commands2.CommandScheduler.getInstance()
 
-    def initialize(self):
-        pass
-
     def execute(self):
         self.drive()
-
-    def end(self, interrupted: bool):
-        pass
 
     def drive(self):
         x_input_value = self._x_config.controller.getRawAxis(self._x_config.axis_index)
@@ -54,8 +48,6 @@ class TeleopDrive(commands2.Command):
         theta_output_value = map_input_to_output_range(theta_input_value, self._theta_config.input_range, self._theta_config.output_range)
 
         requested_speed = math.sqrt(x_output_value ** 2 + y_output_value ** 2)
-
-        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
 
         SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, theta_output_value])
         self.send_drive_command(x_output_value, y_output_value, theta_output_value)
@@ -68,4 +60,4 @@ class TeleopDrive(commands2.Command):
         if velocity < 0.1 and theta == 0 and vx == 0 and vx == 0:
             self._swerve_drive.lock_wheels()
         else:
-            self._swerve_drive.drive(-vx, -vy, -theta, None)
+            self._swerve_drive.drive(vx, vy, theta, None)
