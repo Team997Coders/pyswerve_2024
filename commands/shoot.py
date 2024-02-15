@@ -18,15 +18,13 @@ from commands import index
 
 class SpinupShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
-    _shot_velocity: float
 
-    def __init__(self, shooter: subsystems.Shooter, shot_velocity: float):
+    def __init__(self, shooter: subsystems.Shooter):
         super().__init__()
         self._shooter = shooter
-        self._shot_velocity = shot_velocity
 
     def execute(self):
-        self._shooter.velocity = self._shot_velocity
+        self._shooter.velocity = self._shooter.config.defualt_velocity
 
 
 class SpindownShooter(commands2.InstantCommand):
@@ -43,17 +41,16 @@ class SpindownShooter(commands2.InstantCommand):
 class Shoot(commands2.InstantCommand):
     _command: commands2.Command
 
-    def __init__(self, shooter: subsystems.Shooter, indexer: subsystems.Indexer, shot_velocity: float = 5,
-                 spinup_delay: float = 0.2, fire_time: float = 1):
+    def __init__(self, shooter: subsystems.Shooter, indexer: subsystems.Indexer):
         super().__init__()
         self._command = commands2.cmd.sequence(
             commands2.cmd.ParallelCommandGroup(
-                SpinupShooter(shooter, shot_velocity),
+                SpinupShooter(shooter),
                 index.IndexOff(indexer)
             ),
-            commands2.WaitCommand(spinup_delay),
+            commands2.WaitCommand(shooter.config.defualt_spinup_delay),
             index.IndexOn(indexer),
-            commands2.WaitCommand(fire_time),
+            commands2.WaitCommand(shooter.config.defualt_fire_time),
             commands2.cmd.ParallelCommandGroup(
                 SpindownShooter(shooter),
                 index.IndexOff(indexer)

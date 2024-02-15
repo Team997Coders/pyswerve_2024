@@ -11,10 +11,12 @@ class Intake(commands2.Subsystem):
     intake_motor: rev.CANSparkMax
     intake_encoder: rev.SparkRelativeEncoder
     intake_pid: rev.SparkMaxPIDController
+    config: IntakeConfig
     _logger: logging.Logger
 
     def __init__(self, config: IntakeConfig, logger: logging.Logger):
         super().__init__()
+        self.config = config
         self._logger = logger.getChild("Intake")
         self.intake_motor = rev.CANSparkMax(config.motor.id, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self.intake_motor, config.motor)

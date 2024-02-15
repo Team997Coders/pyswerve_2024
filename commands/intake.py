@@ -19,7 +19,7 @@ class Outtake(commands2.InstantCommand):
         self._intake = intake
 
     def execute(self):
-        self._intake.velocity = 1
+        self._intake.velocity = -self._intake.config.defualt_velocity
 
 
 class IntakeOn(commands2.InstantCommand):
@@ -38,7 +38,7 @@ class IntakeOn(commands2.InstantCommand):
         self._intake = intake
 
     def execute(self):
-        self._intake.velocity = -1
+        self._intake.velocity = self._intake.config.defualt_velocity
 
 
 class IntakeOff(commands2.InstantCommand):
