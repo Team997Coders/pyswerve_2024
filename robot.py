@@ -146,8 +146,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
     def robotPeriodic(self) -> None:
-        super().robotPeriodic()
-        self._command_scheduler.getInstance().run()
+        super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.swerve_telemetry.report_to_dashboard()
         self.swerve_drive.periodic()
         self.april_tag_one.periodic()
