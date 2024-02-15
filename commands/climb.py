@@ -1,19 +1,12 @@
-from typing import Optional
 import commands2
-import wpilib
-import wpimath
-import rev
-import logging
-import robot_config
 from math_help import Range
 from config import AxisConfig
 from math_help import shared
 import wpimath.controller
-from commands2 import Command
 from subsystems.climber import Climber
 
 
-class ClimberFollow(commands2.Command):
+class ClimberFollow(commands2.InstantCommand):
     _climber: Climber
     _arm_range: Range
     _arm_position: float

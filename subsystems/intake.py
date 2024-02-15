@@ -31,4 +31,6 @@ class Intake(commands2.Subsystem):
 
     @intake_velocity.setter
     def intake_velocity(self, value: float):
+        if value == 0:
+            self.intake_encoder.setPosition(0)
         self.intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)

@@ -16,7 +16,7 @@ from commands import index
 # 4b. Turn off indexer
 
 
-class SpinupShooter(commands2.Command):
+class SpinupShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
     _shot_velocity: float
 
@@ -29,7 +29,7 @@ class SpinupShooter(commands2.Command):
         self._shooter.velocity = self._shot_velocity
 
 
-class SpindownShooter(commands2.Command):
+class SpindownShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
 
     def __init__(self, shooter: subsystems.Shooter):
@@ -40,7 +40,7 @@ class SpindownShooter(commands2.Command):
         self._shooter.velocity = 0
 
 
-class Shoot(commands2.Command):
+class Shoot(commands2.InstantCommand):
     _command: commands2.Command
 
     def __init__(self, shooter: subsystems.Shooter, indexer: subsystems.Indexer, shot_velocity: float = 5,

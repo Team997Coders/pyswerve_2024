@@ -1,12 +1,10 @@
 import rev
 import wpilib
-import logging
 import commands2
-from typing import Callable, Any
 
 import hardware
 import logging
-from robot_config import IndexerConfig
+from robots.crescendo import IndexerConfig
 
 
 class Indexer(commands2.Subsystem):
@@ -52,17 +50,11 @@ class Indexer(commands2.Subsystem):
         self._indexer_motor.setVoltage(value)
 
     @property
-    def position(self) -> float:
-        return self._indexer_encoder.getPosition()
-
-    @position.setter
-    def position(self, value):
-        self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kPosition)
-
-    @property
     def velocity(self) -> float:
         return self._indexer_encoder.getVelocity()
 
     @velocity.setter
     def velocity(self, value):
+        if value == 0:
+            self._indexer_encoder.setPosition(0)
         self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
