@@ -15,6 +15,7 @@ from debug import attach_debugger
 from wpilib import SmartDashboard
 from wpilib import SmartDashboard as sd
 import commands2
+import commands2.button
 from math_help import Range
 
 from wpimath.controller import ProfiledPIDControllerRadians

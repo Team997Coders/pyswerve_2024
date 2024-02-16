@@ -10,7 +10,7 @@ import rev
 import navx
 from .swervemodule import SwerveModule
 import config
-from config import ModulePosition, PhysicalConfig
+from config import ModulePosition, PhysicalConfig, SwerveModuleConfig
 import time
 from typing import NamedTuple, Callable, Any
 import wpimath.kinematics as kinematics
@@ -69,7 +69,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """Provides a consistent ordering of modules for use with wpilib swerve functions"""
         return self._ordered_modules
 
-    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModule],
+    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig],
                  physical_config: PhysicalConfig, logger: logging.Logger):
         super().__init__()
         self.logger = logger.getChild("swerve")
