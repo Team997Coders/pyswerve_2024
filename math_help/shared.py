@@ -46,7 +46,7 @@ def optimize_state_improved(desired_state: kinematics.SwerveModuleState,
     current_vector = np.array([current_angle.cos(), current_angle.sin()])
     result = np.vdot(desired_vector, current_vector)  # type: float # type: ignore
     if __debug__:
-        assert (-1.00001 <= result <= 1.00001)  # Use an espsilon to account for floating point errors
+        assert (-1.00001 <= result <= 1.00001)  # Use an epsilon to account for floating point errors
 
     desired_speed = desired_state.speed * result
 

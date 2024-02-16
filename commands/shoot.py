@@ -24,7 +24,7 @@ class SpinupShooter(commands2.InstantCommand):
         self._shooter = shooter
 
     def execute(self):
-        self._shooter.velocity = self._shooter.config.defualt_velocity
+        self._shooter.velocity = self._shooter.config.default_velocity
 
 
 class SpindownShooter(commands2.InstantCommand):
@@ -48,9 +48,9 @@ class Shoot(commands2.InstantCommand):
                 SpinupShooter(shooter),
                 index.IndexOff(indexer)
             ),
-            commands2.WaitCommand(shooter.config.defualt_spinup_delay),
+            commands2.WaitCommand(shooter.config.default_spinup_delay),
             index.IndexOn(indexer),
-            commands2.WaitCommand(shooter.config.defualt_fire_time),
+            commands2.WaitCommand(shooter.config.default_fire_time),
             commands2.cmd.ParallelCommandGroup(
                 SpindownShooter(shooter),
                 index.IndexOff(indexer)

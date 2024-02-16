@@ -7,4 +7,4 @@ from config import MotorConfig, PIDConfig
 class IntakeConfig(NamedTuple):
     motor: MotorConfig
     pid: PIDConfig
-    defualt_velocity: float
+    default_velocity: float

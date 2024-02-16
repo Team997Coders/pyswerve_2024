@@ -12,7 +12,7 @@ from wpilib import SmartDashboard
 from math_help import map_input_to_output_range
 import wpimath.controller
 import wpimath.geometry as geom
-import wpimath._controls._controls.controller
+import commands2.button
 
 if __debug__ and "run" in sys.argv:
     # To enter debug mode, add the --debug flag to the 'deploy' command:
@@ -23,7 +23,6 @@ if __debug__ and "run" in sys.argv:
 
 class TwinStickTeleopDrive:
     _swerve_drive: SwerveDrive
-    _controller: wpilib.XboxController
     _x_config: AxisConfig
     _y_config: AxisConfig
     _rotx_config: AxisConfig

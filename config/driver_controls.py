@@ -3,6 +3,7 @@ from typing import NamedTuple
 import enum
 from math_help import Range
 import wpilib
+import commands2.button
 
 
 class ControllerType(enum.IntEnum):
@@ -23,7 +24,7 @@ class AxisConfig(NamedTuple):
     deadband: Range
     # Output range of the axis to the robot
     output_range: Range
-    controller: wpilib.XboxController | wpilib.Joystick
+    controller: commands2.button.CommandXboxController | commands2.button.CommandJoystick
     # index of axis on the controller
     axis_index: int
     input_range: Range = Range(0, 1)

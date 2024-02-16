@@ -12,7 +12,7 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
 
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
-# Be Carefull when adding an i value to the drive pid, it can cause the robot to drive very fast
+# Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 default_rotation_pid = PIDConfig(p=.2, i=0.0, d=0.0, wrapping=OptionalRange(min=-math.pi, max=math.pi))
 default_flywheel_pid = PIDConfig(p=0.5, i=0.0, d=0.05, wrapping=None)
@@ -23,13 +23,13 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=12, inverted=False),
                                left_flywheel_gear_ratio=1,
                                right_flywheel_diameter_cm=5,
                                left_flywheel_diameter_cm=5,
-                               defualt_velocity=5,
-                               defualt_fire_time=.3,
-                               defualt_spinup_delay=.2)  # add motor configs
+                               default_velocity=5,
+                               default_fire_time=.3,
+                               default_spinup_delay=.2)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=True), indexer_sensor_id=14, indexer_sensor_inverted=True,
-                               pid=PIDConfig(p=.5, i=0, d=0, wrapping=None), defualt_velocity=1)
+                               pid=PIDConfig(p=.5, i=0, d=0, wrapping=None), default_velocity=1)
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None),
-                             defualt_velocity=1)
+                             default_velocity=1)
 climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=PIDConfig(p=.5, i=0, d=0, wrapping=None))
 
 swerve_modules = {ModulePosition.front_left:

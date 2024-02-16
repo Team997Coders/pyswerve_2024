@@ -46,9 +46,9 @@ class MyRobot(commands2.TimedCommandRobot):
     twinstick_teleop_drive: TwinStickTeleopDrive
     _navx: navx.AHRS  # Attitude Heading Reference System
 
-    controller: wpilib.XboxController
-    joystick_one: wpilib.Joystick
-    joystick_two: wpilib.Joystick
+    controller: commands2.button.CommandXboxController
+    joystick_one: commands2.button.CommandJoystick
+    joystick_two: commands2.button.CommandJoystick
 
     field: wpilib.Field2d
     april_tag_one: AprilTagDetector
@@ -61,8 +61,8 @@ class MyRobot(commands2.TimedCommandRobot):
     indexer: subsystems.Indexer
 
     # Horrible hack, do not expand this system.  Use an array later.
-    button_state_zero: bool = False
-    button_state_one: bool = False
+    # button_state_zero: bool = False
+    # button_state_one: bool = False
 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
@@ -79,9 +79,9 @@ class MyRobot(commands2.TimedCommandRobot):
             self._navx = navx.AHRS.create_spi()
         else:
             self._navx = navx.AHRS.create_i2c()
-        self.controller = wpilib.XboxController(0)
-        self.joystick_one = wpilib.Joystick(0)
-        self.joystick_two = wpilib.Joystick(1)
+        self.controller = commands2.button.CommandXboxController(0)
+        self.joystick_one = commands2.button.CommandJoystick(0)
+        self.joystick_two = commands2.button.CommandJoystick(1)
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
@@ -161,16 +161,19 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
         self.twinstick_teleop_drive.drive()
-        #self.teleop_drive.drive()
-        if self.joystick_one.getRawButton(1) and not self.button_state_zero:
-            self.button_state_zero = self.joystick_one.getRawButton(1)
-            shoot = commands.Shoot(self.shooter, self.indexer)
-            self._command_scheduler.getInstance().schedule(shoot)
+        #  self.teleop_drive.drive()
 
-        if self.joystick_one.getRawButton(2) and not self.button_state_one:
-            self.button_state_one = self.joystick_one.getRawButton(2)
-            load = commands.Load(self.intake, self.indexer)
-            self._command_scheduler.getInstance().schedule(load)
+        self.joystick_one.button(0).whileTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_one.button(1).whileTrue(commands.Load(self.intake, self.indexer))
+        # if self.joystick_one.getRawButton(1) and not self.button_state_zero:
+        #     self.button_state_zero = self.joystick_one.getRawButton(1)
+        #     shoot = commands.Shoot(self.shooter, self.indexer)
+        #     self._command_scheduler.getInstance().schedule(shoot)
+        #
+        # if self.joystick_one.getRawButton(2) and not self.button_state_one:
+        #     self.button_state_one = self.joystick_one.getRawButton(2)
+        #     load = commands.Load(self.intake, self.indexer)
+        #     self._command_scheduler.getInstance().schedule(load)
 
     #         shoot_event_loop = wpilib.event.EventLoop()
     #         shoot_event_loop.bind(lambda: commands.shoot.Shoot(self.shooter, self.indexer))
