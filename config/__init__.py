@@ -1,7 +1,8 @@
 """This package contains read-only record objects used for configuration"""
 
 from .range import Range, OptionalRange
-from .pid import PIDConfig, FeedForwardConfig
+from .pid import PIDConfig, FeedForwardConfig, ProfiledPIDConfig, \
+                 VelocityAccelerationConfig, PositionVelocityConfig
 
 from . import physical
 from .physical import PhysicalConfig

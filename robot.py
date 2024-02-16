@@ -2,6 +2,8 @@ import sys
 import wpilib
 import wpilib.event
 import commands.shoot
+import config
+import hardware
 import subsystems
 from config import AxisConfig
 import swerve
@@ -18,7 +20,7 @@ import commands2
 import commands2.button
 from math_help import Range
 
-from wpimath.controller import ProfiledPIDControllerRadians
+from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
 import math
@@ -71,6 +73,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def navx(self) -> navx.AHRS:
         return self._navx
 
+
+
     def robotInit(self):
         super().robotInit()
         self._command_scheduler = commands2.CommandScheduler()
@@ -89,16 +93,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
-        self.trapezoid_profile = TrapezoidProfileRadians.Constraints(math.pi * 3, 1.5 * math.pi)
+        self.rotation_pid = hardware.create_profiled_pid_radians(robot_config.default_rotation_pid)
 
-        self.rotation_pid = ProfiledPIDControllerRadians(
-            Kp=robot_config.default_rotation_pid.p,
-            Ki=robot_config.default_rotation_pid.i,
-            Kd=robot_config.default_rotation_pid.d,
-            constraints=self.trapezoid_profile)
-        self.rotation_pid.enableContinuousInput(robot_config.default_rotation_pid.wrapping.min,
-                                                robot_config.default_rotation_pid.wrapping.max)
-        self.rotation_pid.setTolerance(math.pi/180, 0.1)
 
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         self.teleop_drive = TeleopDrive(self.swerve_drive,

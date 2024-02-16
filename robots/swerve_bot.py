@@ -2,7 +2,8 @@ import math_help
 import math
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
-    OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig
+    OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
+    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig
 
 joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
                                          y_deadband=math_help.Range(0.15, 1),
@@ -14,7 +15,11 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
-default_rotation_pid = PIDConfig(p=.2, i=0.0, d=0.0, wrapping=OptionalRange(min=-math.pi, max=math.pi))
+default_rotation_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
+                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
+                                         profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
+                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05)
+                                         )
 default_flywheel_pid = PIDConfig(p=0.5, i=0.0, d=0.05, wrapping=None)
 
 shooter_config = ShooterConfig(left_motor=MotorConfig(id=12, inverted=False),
