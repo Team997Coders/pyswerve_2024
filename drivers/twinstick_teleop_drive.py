@@ -52,21 +52,17 @@ class TwinStickTeleopDrive:
 
         self._angle_pid = angle_pid
 
+    @staticmethod
+    def _input_to_output(axis_config: AxisConfig):
+        "Convert a controller input value into desired robot scale output values"
+        controller_value = axis_config.controller.getRawAxis(axis_config.axis_index)
+        return map_input_to_output_range(controller_value, axis_config.input_range, axis_config.output_range)
+
     def drive(self):
-
-        x_input_value = self._x_config.controller.getRawAxis(self._x_config.axis_index)
-        y_input_value = self._y_config.controller.getRawAxis(self._y_config.axis_index)
-        rotx_input_value = self._rotx_config.controller.getRawAxis(self._rotx_config.axis_index)
-        roty_input_value = self._roty_config.controller.getRawAxis(self._roty_config.axis_index)
-
-        x_output_value = map_input_to_output_range(x_input_value, self._x_config.input_range,
-                                                   self._x_config.output_range)
-        y_output_value = map_input_to_output_range(y_input_value, self._y_config.input_range,
-                                                   self._y_config.output_range)
-        rotx_output_value = map_input_to_output_range(rotx_input_value, self._rotx_config.input_range,
-                                                      self._rotx_config.output_range)
-        roty_output_value = map_input_to_output_range(roty_input_value, self._roty_config.input_range,
-                                                      self._roty_config.output_range)
+        x_output_value = self._input_to_output(self._x_config)
+        y_output_value = self._input_to_output(self._y_config)
+        rotx_output_value = self._input_to_output(self._rotx_config)
+        roty_output_value = self._input_to_output(self._roty_config)
 
         rot_magnitude = math.sqrt((rotx_output_value ** 2) + (roty_output_value ** 2))
 
