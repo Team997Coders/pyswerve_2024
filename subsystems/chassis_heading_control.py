@@ -2,18 +2,15 @@ import math
 import commands2
 import wpilib
 import wpimath.controller
-import wpimath.trajectory
-
+import wpimath.trajectory 
 import config
 import hardware
 from config import FeedForwardConfig
-import swerve
 from typing import Callable
 import math_help
-from wpilib import SmartDashboard
 
 
-class TargetTracker(commands2.ProfiledPIDSubsystem):
+class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
     """A subsystem that tracks a target angle using a PIDController and a feedforward controller.
        Set a requested angle with the target property, and the hardware will move to track the target angle.
        Read the velocity property to determine how fast the hardware must move to reach the target angle."""
@@ -97,29 +94,3 @@ class TargetTracker(commands2.ProfiledPIDSubsystem):
         return self._feedforward.calculate(currentVelocity=chassis_velocity,
                                            nextVelocity=pid_velocity,
                                            dt=0.02)
-
-    # def periodic(self):
-    #     gyro_radians = math_help.wrap_angle(self._get_chassis_angle_measurement(), -math.pi)
-    #     measured_chassis_speed = self._get_chassis_angle_velocity_measurement()
-    #     pid_output = self._angle_pid.calculate(gyro_radians, self._desired_robot_heading)
-    #     chassis_velocity = measured_chassis_speed.omega
-    #     pid_velocity = self._angle_pid.getSetpoint().desired_velocity
-    #     ff_value = self._feedforward.calculate(currentVelocity=chassis_velocity, nextVelocity=pid_velocity, dt=0.02)
-    #
-    #     theta_change = pid_output
-    #
-    #     ff_value = 0
-    #     self.send_drive_command(x_output_value, y_output_value, theta_change + ff_value)
-    #
-    #     SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, self._desired_robot_heading])
-    #     SmartDashboard.putNumber("theta_change", theta_change)
-    #     SmartDashboard.putNumber("Feedforward", ff_value)
-    #     SmartDashboard.putNumber("desired heading", self._desired_robot_heading)
-    #     SmartDashboard.putData("PID controller", self._angle_pid)
-    #     SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
-    #     SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
-    #     SmartDashboard.putNumber("gyro", self._swerve_drive.gyro_angle_degrees)
-    #     SmartDashboard.putNumber("gyro_radians", gyro_radians)
-    #
-    #     # pid_value = SmartDashboard.getData("PID controller")  # type: ProfiledPIDController
-    #     # self._angle_pid.setP(pid_value.)
