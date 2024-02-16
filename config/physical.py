@@ -5,8 +5,6 @@ import math
 class PhysicalConfig:
     wheel_diameter_cm: float # Diameter of the wheel in centimeters
     wheel_grip_coefficient_of_friction: float # Coefficient of friction between the wheel and the ground
-    current_limit: OptionalSwerveModuleIntProperty # Current limit in amps
-    ramp_rate: OptionalSwerveModuleFloatProperty 
     encoder_pulses_per_revolution: SwerveModuleFloatProperty # Pulses per revolution of the encoder
     gear_ratio: SwerveModuleFloatProperty # Ratio of motor rotations to wheel rotations
     max_drive_speed: float # Meters per second
@@ -18,24 +16,16 @@ class PhysicalConfig:
     def __init__(self,
                  wheel_diameter_cm: float,
                  wheel_grip_coefficient_of_friction: float,
-                 
                  encoder_pulses_per_revolution: SwerveModuleFloatProperty, 
                  gear_ratio: SwerveModuleFloatProperty,
-                 ramp_rate: OptionalSwerveModuleFloatProperty | None = None,
-                 current_limit: OptionalSwerveModuleIntProperty | None = None,
                  max_drive_speed: float = 1.0, 
                  max_rotation_speed: float = math.pi / 4, 
                  fw_set_retry_delay_sec : float = 0.01,
                  fw_set_retries: int = 5,
                  invert_gyro: bool = False,
                  gyro_on_spi: bool = True):
-        current_limit = current_limit if current_limit is not None else OptionalSwerveModuleIntProperty(None, None)
-        ramp_rate = ramp_rate if ramp_rate is not None else OptionalSwerveModuleFloatProperty(None, None)
-
         self.wheel_diameter_cm = wheel_diameter_cm
         self.wheel_grip_coefficient_of_friction = wheel_grip_coefficient_of_friction
-        self.current_limit = current_limit
-        self.ramp_rate = ramp_rate
         self.encoder_pulses_per_revolution = encoder_pulses_per_revolution
         self.gear_ratio = gear_ratio 
         self.max_drive_speed = max_drive_speed

@@ -69,8 +69,7 @@ class SwerveModule(ISwerveModule):
         self._angle_motor = rev.CANSparkMax(module_config.angle_motor.id, rev.CANSparkMax.MotorType.kBrushless)
 
         hardware.init_motor(self._drive_motor, module_config.drive_motor)
-        hardware.init_motor(self._angle_motor, module_config.angle_motor)
-        self.init_physical(physical_config)
+        hardware.init_motor(self._angle_motor, module_config.angle_motor) 
 
         self.drive_pid = self._drive_motor.getPIDController()
         self.angle_pid = self._angle_motor.getPIDController()
@@ -245,23 +244,6 @@ class SwerveModule(ISwerveModule):
         sd.putNumber(f"Angle PID {int(self.id)} Reference", math.degrees(self.angle_pid_last_reference))
         # sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
         # sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment)
-
-    def init_physical(self, physical_config: PhysicalConfig):
-
-        if physical_config.current_limit.angle is not None:
-            self._angle_motor.setSmartCurrentLimit(physical_config.current_limit.angle)
-
-        if physical_config.current_limit.drive is not None:
-            self._drive_motor.setSmartCurrentLimit(physical_config.current_limit.drive)
-
-        if physical_config.ramp_rate.drive is not None:
-            self._drive_motor.setOpenLoopRampRate(physical_config.ramp_rate.drive)
-            self._drive_motor.setClosedLoopRampRate(physical_config.ramp_rate.drive)
-
-        if physical_config.ramp_rate.angle is not None:
-            self._angle_motor.setOpenLoopRampRate(physical_config.ramp_rate.angle)
-            self._angle_motor.setClosedLoopRampRate(physical_config.ramp_rate.angle)
-
 
     def initialize(self) -> bool:
         """Returns true if the wheel is in the correct position, false if it needs to be adjusted"""

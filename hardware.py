@@ -28,6 +28,12 @@ def init_motor(motor: rev.CANSparkMax, config: MotorConfig):
     motor.restoreFactoryDefaults()
     motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
     motor.setInverted(config.inverted)
+    if config.open_ramp_rate is not None:
+        motor.setOpenLoopRampRate(config.open_ramp_rate)
+    if config.closed_ramp_rate is not None:
+        motor.setOpenLoopRampRate(config.closed_ramp_rate)
+    if config.current_limit is not None:
+        motor.setOpenLoopRampRate(config.current_limit)
 
 
 def create_profiled_pid_radians(pid_config: ProfiledPIDConfig) -> ProfiledPIDControllerRadians:

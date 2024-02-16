@@ -4,14 +4,20 @@ from .range import Range, OptionalRange
 from .pid import PIDConfig, FeedForwardConfig, ProfiledPIDConfig, \
                  VelocityAccelerationConfig, PositionVelocityConfig
 
+from . import encoder
+from .encoder import EncoderConfig
+
+from . import motor
+from .motor import MotorConfig
+
 from . import physical
 from .physical import PhysicalConfig
 
 from . import swerve_module
-from .swerve_module import SwerveModuleConfig, MotorConfig, \
-    EncoderConfig, SwerveModuleFloatProperty, \
+from .swerve_module import SwerveModuleConfig, SwerveModuleFloatProperty, \
     ModulePosition, SwerveModuleIntProperty, \
     OptionalSwerveModuleFloatProperty, OptionalSwerveModuleIntProperty
+
 
 from . import driver_controls
 from .driver_controls import DriverControlsConfig
