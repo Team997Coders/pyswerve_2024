@@ -57,7 +57,6 @@ class AprilTagDetector:
                     self.apriltag_seen = True
                     self.swerve_drive.pose = pose.estimatedPose.toPose2d()
                 else:
-                    self.swerve_drive.pose = pose.estimatedPose.toPose2d()
                     self.swerve_drive.odemetry.addVisionMeasurement(pose.estimatedPose.toPose2d(),
                                                                     pose.timestampSeconds)
                 
