@@ -28,6 +28,8 @@ import math
 # Change the name of the robot here to choose between different robots
 from robots import crescendo as robot_config
 
+is_test = False
+
 ######################################################################
 
 if __debug__ and "run" in sys.argv:
@@ -105,10 +107,14 @@ class MyRobot(commands2.TimedCommandRobot):
     def navx(self) -> navx.AHRS:
         return self._navx
 
-
+    def update_test_mode(self):
+        """Sets a global variable indicating that the robot is in test mode"""
+        global is_test
+        is_test = self.isTest()
 
     def robotInit(self):
         super().robotInit()
+        self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
         if robot_config.physical_properties.gyro_on_spi:
@@ -196,7 +202,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
-        self.swerve_telemetry.report_to_dashboard()
         self.swerve_drive.periodic()
         self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
