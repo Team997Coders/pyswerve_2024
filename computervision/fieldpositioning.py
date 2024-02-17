@@ -12,7 +12,7 @@ import time
 
 
 class AprilTagDetector:
-
+ 
     photonvision: PhotonCamera
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
     swerve_drive: SwerveDrive 
