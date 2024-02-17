@@ -32,18 +32,16 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                right_motor=MotorConfig(id=12, inverted=False),
                                right_flywheel_gear_ratio=1,
                                left_flywheel_gear_ratio=1,
-                               right_flywheel_diameter_cm=5,
-                               left_flywheel_diameter_cm=5,
-                               default_velocity=.1,
-                               default_fire_time=.3,
-                               default_spinup_delay=.2)  # add motor configs
-indexer_config = IndexerConfig(
-    MotorConfig(id=10, inverted=False, open_ramp_rate=0.25, closed_ramp_rate=0.25, current_limit=4),
-    indexer_sensor_id=0, indexer_sensor_inverted=True,
-    pid=PIDConfig(p=.05, i=0, d=0, wrapping=None, tolerance=PositionVelocityConfig(20000, 1)),
-    default_velocity=60)
-intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.1, i=0, d=0, wrapping=None),
-                             default_velocity=300)
+                               right_flywheel_diameter_cm=12,
+                               left_flywheel_diameter_cm=12,
+                               default_velocity=3,
+                               default_fire_time=1,
+                               default_spinup_delay=1)  # add motor configs
+indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
+                               pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
+                               default_velocity=300)  # fix feeder_sensor_id
+intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
+                             default_velocity=.5)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None))
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,

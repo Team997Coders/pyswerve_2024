@@ -1,6 +1,7 @@
 import commands2
 from wpilib import SmartDashboard
 from subsystems import Intake, Indexer
+from commands import IndexOn, IndexOff
 
 
 class Outtake(commands2.InstantCommand):
@@ -40,7 +41,8 @@ class IntakeOn(commands2.InstantCommand):
         self._intake = intake
 
     def execute(self):
-        self._intake.velocity = self._intake.config.default_velocity
+        # self._intake.velocity = self._intake.config.default_velocity
+        self._intake.voltage = 5
         print("Intake On")
 
 
@@ -54,7 +56,8 @@ class IntakeOff(commands2.InstantCommand):
         self._intake = intake
 
     def execute(self):
-        self._intake.velocity = 0
+        # self._intake.velocity = 0
+        self._intake.voltage = 0
         print("Intake Off")
 
 
@@ -65,13 +68,12 @@ class Load(commands2.InstantCommand):
         super().__init__()
         self.intake_scheduled = True
         self._command = commands2.cmd.sequence(
-            IntakeOn(intake),
-            commands2.cmd.waitUntil(lambda: indexer.ready),
-            IntakeOff(intake)
-        )
-        print("intake cunstructed")
+            commands2.cmd.ParallelCommandGroup(IntakeOn(intake),
+                                               IndexOn(indexer)),
+            commands2.cmd.WaitUntilCommand(lambda: indexer.ready),
+            IntakeOff(intake),
+            IndexOff(indexer)
+        ) 
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)
-        print("Intake Execute")
-        SmartDashboard.putBoolean("intake scheduled", self.intake_scheduled)

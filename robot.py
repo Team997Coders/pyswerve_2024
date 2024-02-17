@@ -1,7 +1,7 @@
 import sys
 import wpilib
 import wpilib.event
-import commands.shoot
+import commands
 import config
 import hardware
 import subsystems
@@ -192,9 +192,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
-        self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-
+        self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer).ignoringDisable(False))
+        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer).ignoringDisable(False))
     #     self.register_subsystems()
     #
     # def register_subsystems(self):
@@ -227,7 +226,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
-                                 lambda: self.joystick_one.button(0))
 
     def updateField(self):
         pass

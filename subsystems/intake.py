@@ -37,3 +37,12 @@ class Intake(commands2.Subsystem):
         print(f"intake velocity value: {value}")
         if value == 0:
             self.intake_encoder.setPosition(0)
+
+    @property
+    def voltage(self) -> float:
+        return 0
+
+    @voltage.setter
+    def voltage(self, value: float) -> float: 
+        return self.intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+

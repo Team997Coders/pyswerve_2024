@@ -23,9 +23,9 @@ class SpinupShooter(commands2.InstantCommand):
         super().__init__()
         self._shooter = shooter
 
-    def execute(self):
-        self._shooter.velocity = self._shooter.config.default_velocity
-        print("SpinupShooter")
+    def execute(self): 
+        self._shooter.setVoltage(5)
+        #self._shooter.velocity = self._shooter.config.default_velocity
 
 class SpindownShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
@@ -36,7 +36,7 @@ class SpindownShooter(commands2.InstantCommand):
 
     def execute(self):
         self._shooter.velocity = 0
-        print("SpinDownShooter")
+        # print("SpinDownShooter")
 
 class Shoot(commands2.InstantCommand):
     _command: commands2.Command
@@ -59,4 +59,4 @@ class Shoot(commands2.InstantCommand):
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)
-        print("Shoot Execute")
+        # print("Shoot Execute")

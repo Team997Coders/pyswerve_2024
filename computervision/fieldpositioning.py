@@ -32,7 +32,9 @@ class AprilTagDetector:
         self.swerve_drive = swerve_drive
         self.apriltag_seen = False
         self.photonvision = PhotonCamera("Camera3")
-        self.photon_pose_estimatior = PhotonPoseEstimator(self.apriltagfieldlayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, self.photonvision, self.cam_position)
+        self.photon_pose_estimatior = PhotonPoseEstimator(self.apriltagfieldlayout,
+                                                          PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                                                          self.photonvision, self.cam_position)
 
     @property
     def best_target(self):

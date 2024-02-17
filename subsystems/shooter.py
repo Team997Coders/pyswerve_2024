@@ -31,16 +31,16 @@ class Shooter(commands2.Subsystem):
         self._right_encoder = self._right_motor.getEncoder()
 
         self._right_encoder.setPositionConversionFactor(
-            1 / config.right_flywheel_gear_ratio * ((config.right_flywheel_diameter_cm / 100) * math.pi))
+            (1 / config.right_flywheel_gear_ratio) * ((config.right_flywheel_diameter_cm / 100) * math.pi))
         self._left_encoder.setPositionConversionFactor(
-            1 / config.left_flywheel_gear_ratio * (config.left_flywheel_diameter_cm / 100) * math.pi)
+            (1 / config.left_flywheel_gear_ratio) * (config.left_flywheel_diameter_cm / 100) * math.pi)
 
         self._right_encoder.setVelocityConversionFactor(
             (1 / config.right_flywheel_gear_ratio) * ((config.right_flywheel_diameter_cm / 100) * math.pi) / 60.0)
         self._left_encoder.setVelocityConversionFactor(
             (1 / config.left_flywheel_gear_ratio) * ((config.left_flywheel_diameter_cm / 100) * math.pi) / 60.0)
 
-        self._pid = self._left_motor.getPIDController()
+        self._pid = self._left_motor.getPIDController() 
         hardware.init_pid(self._pid, pid_config, feedback_device=self._left_encoder)
 
     @property
@@ -48,5 +48,10 @@ class Shooter(commands2.Subsystem):
         return self._left_encoder.getVelocity()
 
     @velocity.setter
-    def velocity(self, value):
+    def velocity(self, value: float):
+        # print(f"Set shooter velocity {value}")
         self._pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+
+    def setVoltage(self, value: float):
+        # print(f"Set shooter voltage {value}")
+        self._pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)

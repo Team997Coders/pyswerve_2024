@@ -1,13 +1,14 @@
 from . import shoot
-from . import intake
-from . import climb
+
 from . import index
+from .index import IndexOn, IndexOff
+
+from . import intake
+from .intake import Load
+
+from . import climb
 from . import drive
 
-from .shoot import Shoot
-from .intake import Load
+from .shoot import Shoot, SpinupShooter
 from .climb import ClimberFollow
-from .index import IndexOn
-from .index import IndexOff
-from .drive import Drive
-from .drive import TwinstickHeadingSetter
+from .drive import Drive, TwinstickHeadingSetter

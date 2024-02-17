@@ -1,6 +1,7 @@
 import rev
 import wpilib
 import commands2
+from typing import Callable
 
 import hardware
 import logging
@@ -14,6 +15,7 @@ class Indexer(commands2.Subsystem):
     config: IndexerConfig
     _indexer_sensor: wpilib.DigitalInput | None
     _logger: logging.Logger
+    _read_indexer_state: Callable[[], bool]
 
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
