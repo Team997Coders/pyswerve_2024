@@ -14,7 +14,7 @@ class IndexOn(commands2.InstantCommand):
 
     def execute(self):
         self._indexer.velocity = self._indexer.config.default_velocity
-
+        print("IndexOn")
 
 class IndexOff(commands2.InstantCommand):
     _indexer: Indexer
@@ -25,3 +25,4 @@ class IndexOff(commands2.InstantCommand):
 
     def execute(self):
         self._indexer.velocity = 0
+        print("IndexOff")

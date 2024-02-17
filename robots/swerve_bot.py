@@ -3,7 +3,7 @@ import math
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
-    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig
+    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, AxisConfig
 
 from .shared import swerve_current_limit, swerve_ramp_rate
 
@@ -17,11 +17,14 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
-default_rotation_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
+default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
-                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05)
-                                         )
+                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05))
+default_heading_feedforward = FeedForwardConfig(kS=0.0,
+                                                kV=0.01,
+                                                kA=0.001)
+
 default_flywheel_pid = PIDConfig(p=0.5, i=0.0, d=0.05, wrapping=None)
 
 shooter_config = ShooterConfig(left_motor=MotorConfig(id=12, inverted=False),
@@ -108,3 +111,9 @@ swerve_modules = {ModulePosition.front_left:
                                          drive_pid=default_drive_pid)
 
                   }  # type: dict[ModulePosition, SwerveModuleConfig]
+
+standard_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.05, 1),
+                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))
+
+standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1),
+                                                output_range=math_help.Range(0, physical_properties.max_drive_speed))

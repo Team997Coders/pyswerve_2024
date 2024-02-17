@@ -51,7 +51,8 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         self._feedforward = wpimath.controller.SimpleMotorFeedforwardMeters(kS=feedforward_config.kS,
                                                                             kA=feedforward_config.kA,
                                                                             kV=feedforward_config.kV)
-        self.target = initial_angle
+        self._desired_velocity = 0
+        self._target = initial_angle
         self._last_update_time = wpilib.Timer.getFPGATimestamp()
 
     def getMeasurement(self) -> float:

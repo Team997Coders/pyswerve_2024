@@ -10,7 +10,7 @@ from commands import index
 # Shooting Sequence
 # 1a. Spin up motor
 # 1b. Turn off indexer
-# 2. Wait 200ms
+# 2. Wait
 # 3. Turn on indexer
 # 4a. Spin down motor
 # 4b. Turn off indexer
@@ -25,7 +25,7 @@ class SpinupShooter(commands2.InstantCommand):
 
     def execute(self):
         self._shooter.velocity = self._shooter.config.default_velocity
-
+        print("SpinupShooter")
 
 class SpindownShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
@@ -36,7 +36,7 @@ class SpindownShooter(commands2.InstantCommand):
 
     def execute(self):
         self._shooter.velocity = 0
-
+        print("SpinDownShooter")
 
 class Shoot(commands2.InstantCommand):
     _command: commands2.Command
@@ -59,3 +59,4 @@ class Shoot(commands2.InstantCommand):
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)
+        print("Shoot Execute")
