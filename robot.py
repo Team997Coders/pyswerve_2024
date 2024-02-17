@@ -121,7 +121,6 @@ class MyRobot(commands2.TimedCommandRobot):
             self._navx = navx.AHRS.create_spi()
         else:
             self._navx = navx.AHRS.create_i2c()
-
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
@@ -191,15 +190,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
-    #     self.register_subsystems()
-    #
-    # def register_subsystems(self):
-    #     self._command_scheduler.registerSubsystem(self.swerve_drive)
-    #     self._command_scheduler.registerSubsystem(self.shooter)
-    #     self._command_scheduler.registerSubsystem(self.indexer)
-    #     self._command_scheduler.registerSubsystem(self.intake)
-
-
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.swerve_drive.periodic()
@@ -220,8 +210,8 @@ class MyRobot(commands2.TimedCommandRobot):
         super().teleopPeriodic()
         # self.twinstick_teleop_drive.drive()
         #  self.teleop_drive.drive()
-        self.joystick_two.button(1).whileTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_one.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_two.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
         # if self.joystick_one.getRawButton(1) and not self.button_state_zero:
         #     self.button_state_zero = self.joystick_one.getRawButton(1)
         #     shoot = commands.Shoot(self.shooter, self.indexer)

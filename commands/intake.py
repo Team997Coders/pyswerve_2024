@@ -69,6 +69,7 @@ class Load(commands2.InstantCommand):
             commands2.cmd.waitUntil(lambda: indexer.ready),
             IntakeOff(intake)
         )
+        print("intake cunstructed")
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)
