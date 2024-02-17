@@ -64,7 +64,7 @@ def create_3dof_command(controller: commands2.button.CommandGenericHID,
     )
 
 
-def create_twinstick_heading_command(controller: commands2.button.CommandJoystick,
+def create_twinstick_heading_command(controller: commands2.button.CommandGenericHID,
                                      heading_control: subsystems.ChassisHeadingControl):
     return commands.drive.TwinstickHeadingSetter(
         set_heading_goal=heading_control.setGoal,
@@ -78,6 +78,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
+    heading_controller_telemetry: telemetry.ChassisHeadingTelemetry
     test_driver: TestDriver
     teleop_drive: TeleopDrive
     twinstick_teleop_drive: TwinStickTeleopDrive
@@ -121,6 +122,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self._navx = navx.AHRS.create_spi()
         else:
             self._navx = navx.AHRS.create_i2c()
+
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
@@ -138,7 +140,7 @@ class MyRobot(commands2.TimedCommandRobot):
             feedforward_config=robot_config.default_heading_feedforward,
             initial_angle=self.swerve_drive.gyro_angle_radians
         )
-
+        self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         # self._command_scheduler.setDefaultCommand(subsystem=self.swerve_drive, defaultCommand=drive_command)
 
@@ -190,6 +192,18 @@ class MyRobot(commands2.TimedCommandRobot):
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
+        self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+
+    #     self.register_subsystems()
+    #
+    # def register_subsystems(self):
+    #     self._command_scheduler.registerSubsystem(self.swerve_drive)
+    #     self._command_scheduler.registerSubsystem(self.shooter)
+    #     self._command_scheduler.registerSubsystem(self.indexer)
+    #     self._command_scheduler.registerSubsystem(self.intake)
+
+
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.swerve_drive.periodic()
@@ -197,6 +211,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
         self.swerve_telemetry.report_to_dashboard()
+        self.heading_controller_telemetry.report_to_dashboard()
+
 
     def teleopInit(self):
         driving_command = create_twinstick_tracking_command(self.joystick_one,
@@ -204,28 +220,14 @@ class MyRobot(commands2.TimedCommandRobot):
                                                             self._heading_control)
         heading_command = create_twinstick_heading_command(self.joystick_two,
                                                            self._heading_control)
-        self._command_scheduler.schedule(heading_command, driving_command)
+        three_dof_command = create_3dof_command(self.joystick_one,
+                                                self.swerve_drive)
+        self._command_scheduler.schedule(heading_command)
+        self._command_scheduler.schedule(driving_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
-        # self.twinstick_teleop_drive.drive()
-        #  self.teleop_drive.drive()
-        self.joystick_two.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-        # if self.joystick_one.getRawButton(1) and not self.button_state_zero:
-        #     self.button_state_zero = self.joystick_one.getRawButton(1)
-        #     shoot = commands.Shoot(self.shooter, self.indexer)
-        #     self._command_scheduler.getInstance().schedule(shoot)
-        #
-        # if self.joystick_one.getRawButton(2) and not self.button_state_one:
-        #     self.button_state_one = self.joystick_one.getRawButton(2)
-        #     load = commands.Load(self.intake, self.indexer)
-        #     self._command_scheduler.getInstance().schedule(load)
-
-    #         shoot_event_loop = wpilib.event.EventLoop()
-    #         shoot_event_loop.bind(lambda: commands.shoot.Shoot(self.shooter, self.indexer))
-    #         commands2.button.trigger.Trigger(shoot_event_loop,
-    #                                          lambda: self.joystick_one.button(0))
+                                 lambda: self.joystick_one.button(0))
 
     def updateField(self):
         pass

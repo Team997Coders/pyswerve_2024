@@ -34,6 +34,7 @@ class Indexer(commands2.Subsystem):
         self._indexer_motor = rev.CANSparkMax(config.motor_config.id, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self._indexer_motor, config.motor_config)
         self._indexer_encoder = self._indexer_motor.getEncoder()
+        self._indexer_encoder.setPositionConversionFactor(3 / 10)
         self._indexer_pid = self._indexer_motor.getPIDController()
         hardware.init_pid(self._indexer_pid, self.config.pid)
 

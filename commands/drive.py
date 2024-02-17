@@ -71,7 +71,6 @@ class SetTarget(commands2.Command):
         tx, ty = self._get_target_xy()
         px, py = self._get_chassis_xy()
         heading_goal = math.atan2(ty - py, tx - px)
-        # TODO: the math to get the heading and set it on the HeadingTracker
         self._set_heading_goal(heading_goal)
 
 
