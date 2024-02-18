@@ -73,8 +73,10 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                  physical_config: PhysicalConfig, logger: logging.Logger):
         super().__init__()
         self.logger = logger.getChild("swerve")
-        self.__gyro_get_lambda = lambda: -gyro.getAngle() if physical_config.invert_gyro\
-            else gyro.getAngle
+        if physical_config.invert_gyro:
+            self.__gyro_get_lambda = lambda: -(gyro.getAngle())
+        else:
+            self.__gyro_get_lambda = gyro.getAngle
         self._modules = {}
         self._physical_config = physical_config
         for position, module_config in swerve_config.items():
