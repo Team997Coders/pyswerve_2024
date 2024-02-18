@@ -4,7 +4,6 @@ from wpilib import SmartDashboard as sd
 from typing import List, Tuple
 import math
 
-
 class ChassisHeadingTelemetry:
     """Report swerve telemetry to the dashboard.  Compatible with WebComponents"""
 

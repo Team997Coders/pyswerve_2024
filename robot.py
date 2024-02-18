@@ -20,6 +20,7 @@ from wpilib import SmartDashboard as sd
 import commands2
 import commands2.button
 from math_help import Range
+from wpilib import DriverStation
 
 from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
@@ -41,9 +42,21 @@ if __debug__ and "run" in sys.argv:
     attach_debugger()
 
 
+def get_alliance_adjusted_axis(controller: commands2.button.CommandGenericHID, i_axis: int) -> float:
+    if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+        return -controller.getRawAxis(i_axis)
+    else:
+        return controller.getRawAxis(i_axis)
+
+
 def create_twinstick_tracking_command(controller: commands2.button.CommandGenericHID,
                                       swerve_drive: swerve.SwerveDrive,
                                       heading_control: subsystems.ChassisHeadingControl):
+    # if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+    #     x_axis_func = lambda: -controller.getRawAxis(1)
+    # else:
+    #     x_axis_func = lambda: controller.getRawAxis(1)
+
     return commands.drive.Drive(
         swerve_drive,
         get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
@@ -71,9 +84,10 @@ def create_twinstick_heading_command(controller: commands2.button.CommandGeneric
     return commands.drive.TwinstickHeadingSetter(
         set_heading_goal=heading_control.setGoal,
         get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
-                                        robot_config.standard_joystick_drive_axis_config),
+                                        robot_config.standard_joystick_rotation_axis_config),
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
-                                        robot_config.standard_joystick_drive_axis_config))
+                                        robot_config.standard_joystick_rotation_axis_config))
+
 
 class MyRobot(commands2.TimedCommandRobot):
     _command_scheduler: commands2.CommandScheduler
@@ -106,7 +120,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     robot_control_commands: list
 
-
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
 
@@ -124,7 +137,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
-        self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(robotpy_apriltag.AprilTagField.k2024Crescendo)
+        self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
+            robotpy_apriltag.AprilTagField.k2024Crescendo)
         if robot_config.physical_properties.gyro_on_spi:
             self._navx = navx.AHRS.create_spi()
         else:
@@ -141,7 +155,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
         self._heading_control = subsystems.ChassisHeadingControl(
-            get_chassis_angle_velocity_measurement=lambda: math.radians(self.swerve_drive.measured_chassis_speed.omega_dps),
+            get_chassis_angle_velocity_measurement=lambda: math.radians(
+                self.swerve_drive.measured_chassis_speed.omega_dps),
             get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
             angle_pid_config=robot_config.default_heading_pid,
             feedforward_config=None,
@@ -204,41 +219,38 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
 
-        #POINTING COMMANDS USING LOCATION FOR RED ON JOYSTICK 2
+        # POINTING COMMANDS USING LOCATION FOR RED ON JOYSTICK 2
         ################################################################################################################
         ###POINT TOWARDS RED SPEAKER ON BUTTON 3 -> STICK 2
         april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                                          aprilTagNumber=4,
-                                                                          apriltagfieldlayout=self.apriltagfieldlayout,
-                                                                          get_xy=lambda: (self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+                                                     aprilTagNumber=4,
+                                                     apriltagfieldlayout=self.apriltagfieldlayout,
+                                                     get_xy=lambda: (
+                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
         april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
         self.joystick_two.button(3).toggleOnTrue(april_tag_pointer)
-
 
         ###POINT TOWARDS RED AMP ON BUTTON 4 -> STICK 2
         april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
                                                      aprilTagNumber=5,
                                                      apriltagfieldlayout=self.apriltagfieldlayout,
                                                      get_xy=lambda: (
-                                                     self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
         april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
         self.joystick_two.button(4).toggleOnTrue(april_tag_pointer)
 
-
-        #STAGE POINTING COMMANDS FOR RED
-
+        # STAGE POINTING COMMANDS FOR RED
 
         ###POINT TOWARDS RED STAGE SOURCE SIDE ON BUTTON 6 -> STICK 2
         april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
                                                      aprilTagNumber=11,
                                                      apriltagfieldlayout=self.apriltagfieldlayout,
                                                      get_xy=lambda: (
-                                                     self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
         april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
         self.joystick_two.button(6).toggleOnTrue(april_tag_pointer)
-
-
 
         ###POINT TOWARDS RED STAGE AMP SIDE ON BUTTON 7 -> STICK 2
         april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
@@ -248,8 +260,6 @@ class MyRobot(commands2.TimedCommandRobot):
                                                          self.swerve_drive.pose.x, self.swerve_drive.pose.y))
         april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
         self.joystick_two.button(7).toggleOnTrue(april_tag_pointer)
-
-
 
         ###POINT TOWARDS RED STAGE FAR SIDE ON BUTTON 8 -> STICK 2
         april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
@@ -268,7 +278,7 @@ class MyRobot(commands2.TimedCommandRobot):
                                                      aprilTagNumber=7,
                                                      apriltagfieldlayout=self.apriltagfieldlayout,
                                                      get_xy=lambda: (
-                                                     self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
         april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
         self.joystick_one.button(6).toggleOnTrue(april_tag_pointer)
 
@@ -311,17 +321,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(10).toggleOnTrue(april_tag_pointer)
         ################################################################################################################
 
-
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
-                                                            self.swerve_drive,
-                                                            self._heading_control)
+                                                                 self.swerve_drive,
+                                                                 self._heading_control)
         self.heading_command = create_twinstick_heading_command(self.joystick_two,
-                                                           self._heading_control)
+                                                                self._heading_control)
 
-        #RETURN COMMAND TO JOYSTICK BUTTON 2
+        # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-
 
     #     self.register_subsystems()
     #
@@ -331,7 +339,6 @@ class MyRobot(commands2.TimedCommandRobot):
     #     self._command_scheduler.registerSubsystem(self.indexer)
     #     self._command_scheduler.registerSubsystem(self.intake)
 
-
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.swerve_drive.periodic()
@@ -340,7 +347,6 @@ class MyRobot(commands2.TimedCommandRobot):
         sd.putData("Field", self.field)
         self.swerve_telemetry.report_to_dashboard()
         self.heading_controller_telemetry.report_to_dashboard()
-
 
     def teleopInit(self):
         driving_command = create_twinstick_tracking_command(self.joystick_one,

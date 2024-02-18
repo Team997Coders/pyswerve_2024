@@ -19,6 +19,7 @@ import commands2.button
 import subsystems
 
 
+
 class Drive(commands2.Command):
     _swerve_drive: swerve.SwerveDrive
     _feedforward: wpimath.controller.SimpleMotorFeedforwardMeters
@@ -92,5 +93,5 @@ class TwinstickHeadingSetter(commands2.Command):
     def execute(self):
         x = self.get_x()
         y = self.get_y()
-        heading = geom.Rotation2d(-x, -y).radians()
+        heading = geom.Rotation2d(-x, y).radians()
         self.set_heading_goal(heading)
