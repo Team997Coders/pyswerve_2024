@@ -23,6 +23,11 @@ def init_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_dev
     else:
         pid.setPositionPIDWrappingEnabled(False)
 
+def adjust_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig):
+    """Configures a SparkMax PID controller with the provided PIDConfig"""
+    pid.setP(pid_config.p)
+    pid.setI(pid_config.i)
+    pid.setD(pid_config.d)
 
 def init_motor(motor: rev.CANSparkMax, config: MotorConfig):
     motor.restoreFactoryDefaults()

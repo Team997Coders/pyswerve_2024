@@ -8,6 +8,8 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
 
 from .shared import swerve_current_limit, swerve_ramp_rate
 
+#Panel is #13
+
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
@@ -29,7 +31,7 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         theta_deadband=math_help.Range(0.10, 1))
 
 shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
-                               right_motor=MotorConfig(id=12, inverted=False),
+                               right_motor=MotorConfig(id=12, inverted=True),
                                right_flywheel_gear_ratio=1,
                                left_flywheel_gear_ratio=1,
                                right_flywheel_diameter_cm=12,

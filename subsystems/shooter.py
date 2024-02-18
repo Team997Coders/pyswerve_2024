@@ -6,6 +6,7 @@ from config import PIDConfig
 import hardware
 import math
 import logging
+from telemetry.pid_telemetry import PIDEditor
 
 
 class Shooter(commands2.Subsystem):
@@ -43,6 +44,13 @@ class Shooter(commands2.Subsystem):
         self._pid = self._left_motor.getPIDController() 
         hardware.init_pid(self._pid, pid_config, feedback_device=self._left_encoder)
 
+        self._pid_editor = PIDEditor("Shooter PID", lambda: self.pid_config,
+                                     lambda new_config: hardware.adjust_pid(self._pid, new_config))
+
+    @property
+    def pid_config(self) -> PIDConfig:
+        return PIDConfig(p=self._pid.getP(), i=self._pid.getI(), d=self._pid.getD())
+
     @property
     def velocity(self):
         return self._left_encoder.getVelocity()
@@ -54,4 +62,6 @@ class Shooter(commands2.Subsystem):
 
     def setVoltage(self, value: float):
         # print(f"Set shooter voltage {value}")
-        self._pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+        #self._pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+        self._left_motor.setVoltage(value)
+        self._right_motor.setVoltage(value)
