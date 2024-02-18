@@ -1,4 +1,6 @@
 import sys
+
+import robotpy_apriltag
 import wpilib
 import wpilib.event
 import commands
@@ -100,6 +102,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
     _heading_control: subsystems.ChassisHeadingControl
 
+    apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
+
+    robot_control_commands: list
+
 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
@@ -118,6 +124,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
+        self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(robotpy_apriltag.AprilTagField.k2024Crescendo)
         if robot_config.physical_properties.gyro_on_spi:
             self._navx = navx.AHRS.create_spi()
         else:
@@ -137,9 +144,12 @@ class MyRobot(commands2.TimedCommandRobot):
             get_chassis_angle_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.omega_dps,
             get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
             angle_pid_config=robot_config.default_heading_pid,
-            feedforward_config=robot_config.default_heading_feedforward,
+            feedforward_config=None,
             initial_angle=self.swerve_drive.gyro_angle_radians
         )
+
+        self._heading_control.enable()
+
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
         # self._command_scheduler.setDefaultCommand(subsystem=self.swerve_drive, defaultCommand=drive_command)
@@ -192,8 +202,27 @@ class MyRobot(commands2.TimedCommandRobot):
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
-        self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer).ignoringDisable(False))
-        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer).ignoringDisable(False))
+        self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+
+        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+                                                                          aprilTagNumber=5,
+                                                                          apriltagfieldlayout=self.apriltagfieldlayout,
+                                                                          get_xy=lambda: (self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        self.joystick_one.button(3).toggleOnTrue(april_tag_pointer)
+
+
+        self.driving_command = create_twinstick_tracking_command(self.joystick_one,
+                                                            self.swerve_drive,
+                                                            self._heading_control)
+        self.heading_command = create_twinstick_heading_command(self.joystick_two,
+                                                           self._heading_control)
+
+        self.joystick_one.button(4).toggleOnTrue(self.heading_command)
+        self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+
+
     #     self.register_subsystems()
     #
     # def register_subsystems(self):
