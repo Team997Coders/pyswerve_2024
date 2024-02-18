@@ -61,6 +61,16 @@ class IntakeOff(commands2.InstantCommand):
         print("Intake Off")
 
 
+class IndexSensorCommand(commands2.WaitUntilCommand):
+    _indexer: Indexer
+
+    def __init__(self, indexer):
+        super().__init__(lambda: indexer.ready)
+        self._indexer = indexer
+
+    def isFinished(self) -> bool:
+        return self._indexer.ready
+
 class Load(commands2.InstantCommand):
     _command: commands2.Command
 
@@ -70,7 +80,7 @@ class Load(commands2.InstantCommand):
         self._command = commands2.cmd.sequence(
             commands2.cmd.ParallelCommandGroup(IntakeOn(intake),
                                                IndexOn(indexer)),
-            commands2.cmd.WaitUntilCommand(lambda: indexer.ready),
+            IndexSensorCommand(indexer),
             IntakeOff(intake),
             IndexOff(indexer)
         ) 
