@@ -8,16 +8,19 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
 
 from .shared import swerve_current_limit, swerve_ramp_rate
 
-#Panel is #13
+# Panel is #13
 
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
 default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
-                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
-                                         profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
-                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05)
-                                         )
+                                        wrapping=OptionalRange(min=-math.pi, max=math.pi),
+                                        profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
+                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05)
+                                        )
+default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
+                                     profile=VelocityAccelerationConfig(velocity=5, acceleration=1),
+                                     tolerance=PositionVelocityConfig(position=0.5, velocity=0.05))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kV=0.01,
                                                 kA=0.001)
@@ -56,8 +59,6 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      fw_set_retry_delay_sec=0.05,
                                      invert_gyro=False,
                                      gyro_on_spi=True)
-
-
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False,
@@ -122,7 +123,8 @@ standard_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.15, 
                                                  output_range=math_help.Range(0, physical_properties.max_drive_speed))
 
 standard_joystick_rotation_axis_config = AxisConfig(deadband=math_help.Range(0.5, 1),
-                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))
+                                                    output_range=math_help.Range(0,
+                                                                                 physical_properties.max_drive_speed))
 
 standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1),
                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))

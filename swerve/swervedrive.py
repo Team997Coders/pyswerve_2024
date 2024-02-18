@@ -142,8 +142,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second,
               run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
-        """Drive the robot using cartesian coordinates
-
+        """
+        Drive the robot using cartesian coordinates
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         """
 
