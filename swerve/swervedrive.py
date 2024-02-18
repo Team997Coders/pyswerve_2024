@@ -150,7 +150,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         v_x, v_y = self._scale_velocity_to_drive_speed(v_x, v_y)
 
         desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-            -self.gyro_angle_radians))
+            self.gyro_angle_radians))
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
