@@ -80,7 +80,7 @@ class Load(commands2.InstantCommand):
         self._command = commands2.cmd.sequence(
             commands2.cmd.ParallelCommandGroup(IntakeOn(intake),
                                                IndexOn(indexer)),
-            IndexSensorCommand(indexer),
+            commands2.cmd.ParallelRaceGroup(IndexSensorCommand(indexer), commands2.cmd.WaitCommand(5)),
             IntakeOff(intake),
             IndexOff(indexer)
         ) 
