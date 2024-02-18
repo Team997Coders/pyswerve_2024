@@ -141,7 +141,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
         self._heading_control = subsystems.ChassisHeadingControl(
-            get_chassis_angle_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.omega_dps,
+            get_chassis_angle_velocity_measurement=lambda: math.radians(self.swerve_drive.measured_chassis_speed.omega_dps),
             get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
             angle_pid_config=robot_config.default_heading_pid,
             feedforward_config=None,
