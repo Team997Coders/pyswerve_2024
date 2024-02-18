@@ -15,10 +15,8 @@ class AxisPositionControl(commands2.ProfiledPIDSubsystem):
        Set a requested position with the target property, and the hardware will move to track the target angle.
        Read the velocity property to determine how fast the hardware must move to reach the target angle."""
 
-    _get_angle_measurement: Callable[[], float]  # Call this function to get the current heading in radians
     _get_chassis_velocity_measurement: Callable[
         [], float]  # Call this function to get the current heading velocity in radians
-    _target: float  # The target angle for the target tracker.  Do not set this outside of the target property accessors
     _desired_velocity: float  # How fast we want the hardware moving in m/s to reach the target.  The combination of PID and feedforward output.
     _position_pid: wpimath.controller.ProfiledPIDController  # The PID controller for the target tracker
     _pid_config: config.ProfiledPIDConfig  # The PID configuration for the target tracker
@@ -66,6 +64,10 @@ class AxisPositionControl(commands2.ProfiledPIDSubsystem):
         """
         return self._get_position_measurement()
 
+    def set_current_position(self, value: float):
+        """Reset the PID to be at the value"""
+        self._position_pid.reset(value)
+
     @property
     def desired_velocity(self) -> float:
         """The current velocity the target tracker would like the chassis to be moving"""
@@ -90,6 +92,9 @@ class AxisPositionControl(commands2.ProfiledPIDSubsystem):
 
         self._target = value
         self.setGoal(value)
+
+    def atTarget(self) -> bool:
+        return self._position_pid.atGoal()
 
     def useOutput(self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State):
         """Use the output from the controller object."""

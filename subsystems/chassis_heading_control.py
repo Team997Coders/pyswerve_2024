@@ -67,6 +67,10 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         angle = math_help.wrap_angle(self._get_angle_measurement(), min_val=self._pid_config.wrapping.min)
         return angle
 
+    def set_current_position(self, value: float):
+        """Reset the PID to be at the value"""
+        self._angle_pid.reset(value)
+
     @property
     def desired_velocity(self) -> float:
         """The current velocity the target tracker would like the chassis to be moving"""
@@ -91,6 +95,9 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
 
         self._target = value
         self.setGoal(value)
+
+    def atTarget(self) -> bool:
+        return self._position_pid.atGoal()
 
     def useOutput(self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State):
         """Use the output from the controller object."""

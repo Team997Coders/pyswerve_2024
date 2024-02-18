@@ -115,6 +115,8 @@ class MyRobot(commands2.TimedCommandRobot):
     indexer: subsystems.Indexer
 
     _heading_control: subsystems.ChassisHeadingControl
+    _x_axis_control: subsystems.AxisPositionControl
+    _y_axis_control: subsystems.AxisPositionControl
 
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
@@ -154,64 +156,14 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
-        self._heading_control = subsystems.ChassisHeadingControl(
-            get_chassis_angle_velocity_measurement=lambda: math.radians(
-                self.swerve_drive.measured_chassis_speed.omega_dps),
-            get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
-            angle_pid_config=robot_config.default_heading_pid,
-            feedforward_config=None,
-            initial_angle=self.swerve_drive.gyro_angle_radians
-        )
+        self.init_positioning_pids()
 
         self._heading_control.enable()
+        self._x_axis_control.enable()
+        self._y_axis_control.enable()
 
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
-        # self._command_scheduler.setDefaultCommand(subsystem=self.swerve_drive, defaultCommand=drive_command)
-
-        # self.teleop_drive = TeleopDrive(self.swerve_drive,
-        #                                 AxisConfig(deadband=robot_config.joystick_controls.x_deadband,
-        #                                            output_range=Range(0,
-        #                                                               robot_config.physical_properties.max_drive_speed),
-        #                                            controller=self.joystick_one,
-        #                                            axis_index=1),
-        #                                 AxisConfig(deadband=robot_config.joystick_controls.y_deadband,
-        #                                            output_range=Range(0,
-        #                                                               robot_config.physical_properties.max_drive_speed),
-        #                                            controller=self.joystick_one,
-        #                                            axis_index=0),
-        #                                 AxisConfig(deadband=robot_config.joystick_controls.theta_deadband,
-        #                                            output_range=Range(0,
-        #                                                               robot_config.physical_properties.max_rotation_speed),
-        #                                            controller=self.joystick_two,
-        #                                            axis_index=0))
-        # # for standard double flight sticks
-        # self.twinstick_teleop_drive = TwinStickTeleopDrive(self.swerve_drive,
-        #                                                    AxisConfig(
-        #                                                        deadband=robot_config.joystick_controls.x_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_drive_speed),
-        #                                                        controller=self.joystick_one,
-        #                                                        axis_index=1),
-        #                                                    AxisConfig(
-        #                                                        deadband=robot_config.joystick_controls.y_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_drive_speed),
-        #                                                        controller=self.joystick_one,
-        #                                                        axis_index=0),
-        #                                                    AxisConfig(
-        #                                                        deadband=robot_config.joystick_controls.theta_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_rotation_speed),
-        #                                                        controller=self.joystick_two,
-        #                                                        axis_index=1),
-        #                                                    AxisConfig(
-        #                                                        deadband=robot_config.joystick_controls.theta_deadband,
-        #                                                        output_range=Range(0,
-        #                                                                           robot_config.physical_properties.max_rotation_speed),
-        #                                                        controller=self.joystick_two,
-        #                                                        axis_index=0),
-        #                                                    self.rotation_pid)
 
         self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid, self.logger)
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
@@ -331,6 +283,33 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
+    def init_positioning_pids(self):
+        self._heading_control = subsystems.ChassisHeadingControl(
+            get_chassis_angle_velocity_measurement=lambda: math.radians(
+                self.swerve_drive.measured_chassis_speed.omega_dps),
+            get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
+            angle_pid_config=robot_config.default_heading_pid,
+            feedforward_config=None,
+            initial_angle=self.swerve_drive.gyro_angle_radians
+        )
+
+        # TODO: update intial position again after photonvision
+        self._x_axis_control = subsystems.AxisPositionControl(
+            get_chassis_position_measurement=lambda: self.swerve_drive.pose.x,
+            get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vx,
+            pid_config=robot_config.default_axis_pid,
+            feedforward_config=None,
+            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().x
+        )
+
+        self._y_axis_control = subsystems.AxisPositionControl(
+            get_chassis_position_measurement=lambda: self.swerve_drive.pose.y,
+            get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vy,
+            pid_config=robot_config.default_axis_pid,
+            feedforward_config=None,
+            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().y
+        )
+
     #     self.register_subsystems()
     #
     # def register_subsystems(self):
@@ -367,6 +346,17 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousInit(self):
         super().autonomousInit()
+
+        estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
+        self._x_axis_control.set_current_position(estimated_pose.x)
+        self._y_axis_control.set_current_position(estimated_pose.y)
+
+        cmd = commands2.cmd.SequentialCommandGroup(
+            commands.DeadReckonX(self.swerve_drive, 5)
+        )
+
+        self._command_scheduler.schedule(cmd)
+
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()
