@@ -48,9 +48,13 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         self._pid_config = angle_pid_config
         self._get_angle_measurement = get_chassis_angle_measurement
         self._get_chassis_angle_velocity_measurement = get_chassis_angle_velocity_measurement
-        self._feedforward = wpimath.controller.SimpleMotorFeedforwardMeters(kS=feedforward_config.kS,
+        if feedforward_config is not None:
+            self._feedforward = wpimath.controller.SimpleMotorFeedforwardMeters(kS=feedforward_config.kS,
                                                                             kA=feedforward_config.kA,
                                                                             kV=feedforward_config.kV)
+        else:
+            self._feedforward = None
+
         self._desired_velocity = 0
         self._target = initial_angle
         self._last_update_time = wpilib.Timer.getFPGATimestamp()
@@ -60,7 +64,8 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         Get the angle from the gyro and ensure it falls in the expected range for the PID.
         WPI docs indicate software pids become undefined when passed values outside the wrapping range
         """
-        return math_help.wrap_angle(self._get_angle_measurement(), min_val=self._pid_config.wrapping.min)
+        angle = math_help.wrap_angle(self._get_angle_measurement(), min_val=self._pid_config.wrapping.min)
+        return angle
 
     @property
     def desired_velocity(self) -> float:
@@ -74,6 +79,13 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
 
     @target.setter
     def target(self, value: float):
+        if self._target == value:
+            return
+
+        self._target = value
+        self.setGoal(value)
+
+    def setTarget(self, value:float):
         if self._target == value:
             return
 

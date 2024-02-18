@@ -9,7 +9,7 @@ import subsystems.chassis_heading_control
 
 class AprilTagPointer(commands2.Command):
 
-    set_heading_goal: Callable[[float], None]
+    _set_heading_goal: Callable[[float], None]
     _aprilTagNumber: int
     _apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
     _get_xy: Callable[[], Tuple[float, float]]
@@ -21,16 +21,17 @@ class AprilTagPointer(commands2.Command):
                  get_xy: Callable[[], Tuple[float, float]]):
 
         super().__init__()
-        self.set_heading_goal = set_heading_goal
+        self._set_heading_goal = set_heading_goal
         self._aprilTagNumber = aprilTagNumber
         self._apriltagfieldlayout = apriltagfieldlayout
         self._get_xy = get_xy
-       # self.requirementsn={subsystems.chassis_heading_control.ChassisHeadingControl}
+
 
     def execute(self):
+        print("execute turn apriltags")
         tx, ty = self._get_xy()
         pose = self._apriltagfieldlayout.getTagPose(self._aprilTagNumber)
-        px= pose.x
+        px = pose.x
         py = pose.y
         heading_goal = math.atan2(ty - py, tx - px)
         # TODO: the math to get the heading and set it on the HeadingTracker
