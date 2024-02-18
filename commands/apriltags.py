@@ -28,7 +28,7 @@ class AprilTagPointer(commands2.Command):
 
 
     def execute(self):
-        print("execute turn apriltags")
+        #print("execute turn apriltags")
         tx, ty = self._get_xy()
         pose = self._apriltagfieldlayout.getTagPose(self._aprilTagNumber)
         px = pose.x
