@@ -7,7 +7,7 @@ import hardware
 import wpilib.sysid
 
 import math_help
-from config import *
+from config import ModulePosition, SwerveModuleConfig, PhysicalConfig
 from wpilib import SmartDashboard as sd
 from math_help import shortest_angle_difference
 import wpimath.geometry as geom
@@ -33,7 +33,7 @@ class SwerveModule(ISwerveModule):
 
     rel_to_absolute_angle_adjustment: float | None  # How far we need to adjust the pid reference to get the absolute encoder to read the correct angle
     rel_to_corrected_angle_adjustment: float | None  # How far we need to adjust the pid reference to get the angle relative to robot chassis
-    config: SwerveModule
+    config: SwerveModuleConfig
     _physical_config: PhysicalConfig
 
     _desired_state: kinematics.SwerveModuleState
@@ -55,7 +55,7 @@ class SwerveModule(ISwerveModule):
         """Module position ID"""
         return self._id
 
-    def __init__(self, position: ModulePosition, module_config: SwerveModule, physical_config: PhysicalConfig,
+    def __init__(self, position: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig,
                  logger: logging.Logger):
         self._id = position
         self._physical_config = physical_config
@@ -69,8 +69,7 @@ class SwerveModule(ISwerveModule):
         self._angle_motor = rev.CANSparkMax(module_config.angle_motor.id, rev.CANSparkMax.MotorType.kBrushless)
 
         hardware.init_motor(self._drive_motor, module_config.drive_motor)
-        hardware.init_motor(self._angle_motor, module_config.angle_motor)
-        self.init_physical(physical_config)
+        hardware.init_motor(self._angle_motor, module_config.angle_motor) 
 
         self.drive_pid = self._drive_motor.getPIDController()
         self.angle_pid = self._angle_motor.getPIDController()
@@ -78,7 +77,7 @@ class SwerveModule(ISwerveModule):
         self.drive_motor_encoder = self._drive_motor.getEncoder()
         self.angle_motor_encoder = self._angle_motor.getEncoder()
 
-        self.drive_motor_encoder.setPositionConversionFactor(1.0 / (physical_config.gear_ratio.drive * ((physical_config.wheel_diameter_cm / 100) * math.pi)))
+        self.drive_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.drive) * ((physical_config.wheel_diameter_cm / 100) * math.pi))
         # Use the line below to report number of rotations for wheel rotation tests
         # self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive) * (
@@ -95,6 +94,8 @@ class SwerveModule(ISwerveModule):
 
         if module_config.encoder.conversion_factor is not None:
             self.angle_absolute_encoder.setPositionConversionFactor(module_config.encoder.conversion_factor)
+
+        # self.angle_motor_encoder(module_config.encoder.inverted)
 
         self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
 
@@ -243,23 +244,6 @@ class SwerveModule(ISwerveModule):
         sd.putNumber(f"Angle PID {int(self.id)} Reference", math.degrees(self.angle_pid_last_reference))
         # sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
         # sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment)
-
-    def init_physical(self, physical_config: PhysicalConfig):
-
-        if physical_config.current_limit.angle is not None:
-            self._angle_motor.setSmartCurrentLimit(physical_config.current_limit.angle)
-
-        if physical_config.current_limit.drive is not None:
-            self._drive_motor.setSmartCurrentLimit(physical_config.current_limit.drive)
-
-        if physical_config.ramp_rate.drive is not None:
-            self._drive_motor.setOpenLoopRampRate(physical_config.ramp_rate.drive)
-            self._drive_motor.setClosedLoopRampRate(physical_config.ramp_rate.drive)
-
-        if physical_config.ramp_rate.angle is not None:
-            self._angle_motor.setOpenLoopRampRate(physical_config.ramp_rate.angle)
-            self._angle_motor.setClosedLoopRampRate(physical_config.ramp_rate.angle)
-
 
     def initialize(self) -> bool:
         """Returns true if the wheel is in the correct position, false if it needs to be adjusted"""

@@ -5,6 +5,7 @@ import time
 
 import wpilib
 
+import robot
 from swerve import SwerveDrive, ModulePosition
 from typing import Callable, Iterable, Any, NamedTuple, Sequence
 
@@ -274,10 +275,10 @@ class TestDriver:
         ]
 
         # Use the generic test group by default
-        self.current_test_group_index = 1  # len(self.test_groups) - 1
+        self.current_test_group_index = 4  # len(self.test_groups) - 1
         self._chooser = create_test_selection_widget("Test Group", self.test_groups)
 
-        if not wpilib.RobotBase.isTest:
+        if not robot.is_test:
             self._chooser.onChange(self.on_test_change)
 
     def testInit(self):

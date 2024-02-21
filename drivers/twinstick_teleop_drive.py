@@ -2,18 +2,17 @@ import sys
 import wpilib
 import wpimath
 
-import math_help
 from config.driver_controls import AxisConfig
-import robot_config
+from robots import crescendo
 import math
+import math_help
 from swerve import SwerveDrive
 from debug import attach_debugger
 from wpilib import SmartDashboard
 from math_help import map_input_to_output_range
 import wpimath.controller
 import wpimath.geometry as geom
-import commands2
-import wpimath._controls._controls.controller
+import commands2.button
 
 if __debug__ and "run" in sys.argv:
     # To enter debug mode, add the --debug flag to the 'deploy' command:
@@ -24,7 +23,6 @@ if __debug__ and "run" in sys.argv:
 
 class TwinStickTeleopDrive:
     _swerve_drive: SwerveDrive
-    _controller: wpilib.XboxController
     _x_config: AxisConfig
     _y_config: AxisConfig
     _rotx_config: AxisConfig
@@ -54,23 +52,24 @@ class TwinStickTeleopDrive:
 
         self._angle_pid = angle_pid
 
+    @staticmethod
+    def _input_to_output(axis_config: AxisConfig):
+        "Convert a controller input value into desired robot scale output values"
+        controller_value = axis_config.controller.getRawAxis(axis_config.axis_index)
+        return map_input_to_output_range(controller_value, axis_config.input_range, axis_config.output_range)
+
+    @classmethod
+
+
     def drive(self):
+        x_output_value = self._input_to_output(self._x_config)
+        y_output_value = self._input_to_output(self._y_config)
+        rotx_output_value = self._input_to_output(self._rotx_config)
+        roty_output_value = self._input_to_output(self._roty_config)
 
-        x_input_value = self._x_config.controller.getRawAxis(self._x_config.axis_index)
-        y_input_value = self._y_config.controller.getRawAxis(self._y_config.axis_index)
-        rotx_input_value = self._rotx_config.controller.getRawAxis(self._rotx_config.axis_index)
-        roty_input_value = self._roty_config.controller.getRawAxis(self._roty_config.axis_index)
+        rot_magnitude = math.sqrt((rotx_output_value ** 2) + (roty_output_value ** 2))
 
-        x_output_value = map_input_to_output_range(x_input_value, self._x_config.input_range,
-                                                   self._x_config.output_range)
-        y_output_value = map_input_to_output_range(y_input_value, self._y_config.input_range,
-                                                   self._y_config.output_range)
-        rotx_output_value = map_input_to_output_range(rotx_input_value, self._rotx_config.input_range,
-                                                      self._rotx_config.output_range)
-        roty_output_value = map_input_to_output_range(roty_input_value, self._roty_config.input_range,
-                                                      self._roty_config.output_range)
-
-        if rotx_output_value != 0 or roty_output_value != 0:
+        if rotx_output_value != 0 or roty_output_value != 0 and rot_magnitude > 0.5:
             rot = geom.Rotation2d(-rotx_output_value, -roty_output_value)
             _updated_desired_robot_heading = rot.radians()
             if abs(self._desired_robot_heading - _updated_desired_robot_heading) > (math.pi / 90):
@@ -78,33 +77,16 @@ class TwinStickTeleopDrive:
                 self._desired_robot_heading = _updated_desired_robot_heading
                 self._angle_pid.setGoal(self._desired_robot_heading)
 
-        gyro_radians = self._swerve_drive.gyro_angle_radians
+        gyro_radians = math_help.wrap_angle(self._swerve_drive.gyro_angle_radians, -math.pi)
         measured_chassis_speed = self._swerve_drive.measured_chassis_speed
-        self._angle_pid.reset(gyro_radians, measured_chassis_speed.omega)
-        self._angle_pid.calculate(gyro_radians, self._desired_robot_heading)
+        pid_output = self._angle_pid.calculate(gyro_radians, self._desired_robot_heading)
         chassis_velocity = measured_chassis_speed.omega
         pid_velocity = self._angle_pid.getSetpoint().velocity
         ff_value = self._feedforward.calculate(currentVelocity=chassis_velocity, nextVelocity=pid_velocity, dt=0.02)
 
-        theta_change = 0 if self._angle_pid.atGoal() else self._angle_pid.getSetpoint().velocity
-        ff_value = 0 if self._angle_pid.atGoal() else ff_value
+        theta_change = pid_output
 
-        # So if push the stick directly vertically or horizontally what is supposed to happen?
-
-            # See: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/profiled-pidcontroller.html
-            # "Goal vs Setpoint" and "Getting/Using the Setpoint"
-
-        # if self._desired_robot_heading < 0:
-        #     self._desired_robot_heading += math.pi * 2
-
-        requested_speed = math.sqrt(x_output_value ** 2 + y_output_value ** 2)
-
-        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
-        if requested_speed > robot_config.physical_properties.max_drive_speed:
-            scale_factor = robot_config.physical_properties.max_drive_speed / requested_speed
-            x_output_value *= scale_factor
-            y_output_value *= scale_factor
-
+        ff_value = 0
         self.send_drive_command(x_output_value, y_output_value, theta_change + ff_value)
 
         SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, self._desired_robot_heading])
@@ -115,6 +97,10 @@ class TwinStickTeleopDrive:
         SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
         SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
         SmartDashboard.putNumber("gyro", self._swerve_drive.gyro_angle_degrees)
+        SmartDashboard.putNumber("gyro_radians", gyro_radians)
+
+        #pid_value = SmartDashboard.getData("PID controller")  # type: ProfiledPIDController
+        #self._angle_pid.setP(pid_value.)
 
     def send_drive_command(self, vx: float, vy: float, theta: float):
 

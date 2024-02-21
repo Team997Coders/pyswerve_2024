@@ -7,3 +7,4 @@ class IndexerConfig(NamedTuple):
     indexer_sensor_id: int
     indexer_sensor_inverted: bool
     pid: PIDConfig
+    default_velocity: float

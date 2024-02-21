@@ -3,6 +3,7 @@ from typing import NamedTuple
 import enum
 from math_help import Range
 import wpilib
+import commands2.button
 
 
 class ControllerType(enum.IntEnum):
@@ -21,11 +22,8 @@ class DriverControlsConfig(NamedTuple):
 class AxisConfig(NamedTuple):
     #Range we wamt to allow from controller input, absolute value is used and then negated if input was negative
     deadband: Range
-    # Output range of the axis to the robot
+    # Output range of the axis, should be in units meaningful to the robot
     output_range: Range
-    controller: wpilib.XboxController | wpilib.Joystick
-    # index of axis on the controller
-    axis_index: int
     input_range: Range = Range(0, 1)
 
 

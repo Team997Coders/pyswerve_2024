@@ -6,6 +6,7 @@ from config import PIDConfig
 import hardware
 import math
 import logging
+from telemetry.pid_telemetry import PIDEditor
 
 
 class Shooter(commands2.Subsystem):
@@ -15,9 +16,11 @@ class Shooter(commands2.Subsystem):
     _right_encoder: rev.SparkRelativeEncoder
     _pid: rev.SparkMaxPIDController
     _logger: logging.Logger
+    config: ShooterConfig
 
     def __init__(self, config: ShooterConfig, pid_config: PIDConfig, logger: logging.Logger):
         super().__init__()
+        self.config = config
         self._logger = logger.getChild("Shooter")
         self._left_motor = rev.CANSparkMax(config.left_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self._right_motor = rev.CANSparkMax(config.right_motor.id, rev.CANSparkMax.MotorType.kBrushless)
@@ -29,22 +32,36 @@ class Shooter(commands2.Subsystem):
         self._right_encoder = self._right_motor.getEncoder()
 
         self._right_encoder.setPositionConversionFactor(
-            1 / config.right_flywheel_gear_ratio * ((config.right_flywheel_diameter_cm / 100) * math.pi))
+            (1 / config.right_flywheel_gear_ratio) * ((config.right_flywheel_diameter_cm / 100) * math.pi))
         self._left_encoder.setPositionConversionFactor(
-            1 / config.left_flywheel_gear_ratio * (config.left_flywheel_diameter_cm / 100) * math.pi)
+            (1 / config.left_flywheel_gear_ratio) * (config.left_flywheel_diameter_cm / 100) * math.pi)
 
         self._right_encoder.setVelocityConversionFactor(
             (1 / config.right_flywheel_gear_ratio) * ((config.right_flywheel_diameter_cm / 100) * math.pi) / 60.0)
         self._left_encoder.setVelocityConversionFactor(
             (1 / config.left_flywheel_gear_ratio) * ((config.left_flywheel_diameter_cm / 100) * math.pi) / 60.0)
 
-        self._pid = self._left_motor.getPIDController()
+        self._pid = self._left_motor.getPIDController() 
         hardware.init_pid(self._pid, pid_config, feedback_device=self._left_encoder)
+
+        self._pid_editor = PIDEditor("Shooter PID", lambda: self.pid_config,
+                                     lambda new_config: hardware.adjust_pid(self._pid, new_config))
+
+    @property
+    def pid_config(self) -> PIDConfig:
+        return PIDConfig(p=self._pid.getP(), i=self._pid.getI(), d=self._pid.getD())
 
     @property
     def velocity(self):
         return self._left_encoder.getVelocity()
 
     @velocity.setter
-    def velocity(self, value):
+    def velocity(self, value: float):
+        # print(f"Set shooter velocity {value}")
         self._pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+
+    def setVoltage(self, value: float):
+        # print(f"Set shooter voltage {value}")
+        #self._pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+        self._left_motor.setVoltage(value)
+        self._right_motor.setVoltage(value)

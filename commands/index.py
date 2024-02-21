@@ -1,20 +1,8 @@
-from typing import Optional
-import time
 import commands2
-import wpilib
-import wpimath.controller
-import rev
-import logging
-import robot_config
-from robot_config import shooter_config
-from robot_config import intake_config
-from robot_config import indexer_config
-from commands2 import Command
-from subsystems.shooter import Shooter
 from subsystems.indexer import Indexer
 
 
-class IndexOn(commands2.Command):
+class IndexOn(commands2.InstantCommand):
     _indexer: Indexer
 
     def __init__(self, indexer: Indexer):
@@ -25,10 +13,11 @@ class IndexOn(commands2.Command):
         self._indexer = indexer
 
     def execute(self):
-        self._indexer.velocity = 1
+       #self._indexer.velocity = self._indexer.config.default_velocity
+        self._indexer.voltage = 5
+        print("IndexOn")
 
-
-class IndexOff(commands2.Command):
+class IndexOff(commands2.InstantCommand):
     _indexer: Indexer
 
     def __init__(self, indexer: Indexer):
@@ -37,3 +26,5 @@ class IndexOff(commands2.Command):
 
     def execute(self):
         self._indexer.velocity = 0
+
+        print("IndexOff")

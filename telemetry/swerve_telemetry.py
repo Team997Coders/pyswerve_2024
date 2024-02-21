@@ -38,7 +38,7 @@ class SwerveTelemetry:
         sd.putNumberArray("swerve/measuredStates", self.unpack_tuples(
             [(m.measured_state.angle.degrees(), m.measured_state.speed) for m in self.swerve_drive.ordered_modules]))
         sd.putNumberArray("swerve/desiredStates", self.unpack_tuples([(m.desired_state.angle.degrees(), m.desired_state.speed) for m in self.swerve_drive.ordered_modules]))
-        sd.putNumber("swerve/robotRotation", 0)
+        sd.putNumber("swerve/robotRotation", self.swerve_drive.gyro_angle_degrees)
         sd.putString("swerve/rotationUnit", "degrees") 
         measured_chassis_speed = self.swerve_drive.measured_chassis_speed
         sd.putNumberArray("swerve/measuredChassisSpeeds", [measured_chassis_speed.vx, measured_chassis_speed.vy, measured_chassis_speed.omega])

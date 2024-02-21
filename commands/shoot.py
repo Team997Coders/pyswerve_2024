@@ -10,26 +10,23 @@ from commands import index
 # Shooting Sequence
 # 1a. Spin up motor
 # 1b. Turn off indexer
-# 2. Wait 200ms
+# 2. Wait
 # 3. Turn on indexer
 # 4a. Spin down motor
 # 4b. Turn off indexer
 
 
-class SpinupShooter(commands2.Command):
+class SpinupShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
-    _shot_velocity: float
-
-    def __init__(self, shooter: subsystems.Shooter, shot_velocity: float):
+    def __init__(self, shooter: subsystems.Shooter):
         super().__init__()
         self._shooter = shooter
-        self._shot_velocity = shot_velocity
 
     def execute(self):
-        self._shooter.velocity = self._shot_velocity
+        self._shooter.setVoltage(12)
+        #self._shooter.velocity = self._shooter.config.default_velocity
 
-
-class SpindownShooter(commands2.Command):
+class SpindownShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
 
     def __init__(self, shooter: subsystems.Shooter):
@@ -37,23 +34,23 @@ class SpindownShooter(commands2.Command):
         self._shooter = shooter
 
     def execute(self):
-        self._shooter.velocity = 0
+        #self._shooter.velocity = 0
+        self._shooter.setVoltage(0)
+        # print("SpinDownShooter")
 
-
-class Shoot(commands2.Command):
+class Shoot(commands2.InstantCommand):
     _command: commands2.Command
 
-    def __init__(self, shooter: subsystems.Shooter, indexer: subsystems.Indexer, shot_velocity: float = 5,
-                 spinup_delay: float = 0.2, fire_time: float = 1):
+    def __init__(self, shooter: subsystems.Shooter, indexer: subsystems.Indexer):
         super().__init__()
         self._command = commands2.cmd.sequence(
             commands2.cmd.ParallelCommandGroup(
-                SpinupShooter(shooter, shot_velocity),
+                SpinupShooter(shooter),
                 index.IndexOff(indexer)
             ),
-            commands2.WaitCommand(spinup_delay),
+            commands2.WaitCommand(shooter.config.default_spinup_delay),
             index.IndexOn(indexer),
-            commands2.WaitCommand(fire_time),
+            commands2.WaitCommand(shooter.config.default_fire_time),
             commands2.cmd.ParallelCommandGroup(
                 SpindownShooter(shooter),
                 index.IndexOff(indexer)
@@ -62,3 +59,4 @@ class Shoot(commands2.Command):
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)
+        # print("Shoot Execute")

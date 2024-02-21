@@ -10,7 +10,7 @@ import rev
 import navx
 from .swervemodule import SwerveModule
 import config
-from config import ModulePosition, PhysicalConfig
+from config import ModulePosition, PhysicalConfig, SwerveModuleConfig
 import time
 from typing import NamedTuple, Callable, Any
 import wpimath.kinematics as kinematics
@@ -35,7 +35,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     _ordered_modules: list[ISwerveModule]
 
     _odemetry: estimator.SwerveDrive4PoseEstimator
-    
+
     _physical_config: PhysicalConfig
 
     _odemetry_lock: threading.Lock = threading.Lock()
@@ -69,11 +69,14 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """Provides a consistent ordering of modules for use with wpilib swerve functions"""
         return self._ordered_modules
 
-    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModule],
+    def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig],
                  physical_config: PhysicalConfig, logger: logging.Logger):
         super().__init__()
         self.logger = logger.getChild("swerve")
-        self.__gyro_get_lambda = lambda: -gyro.getAngle() if physical_config.invert_gyro else lambda: gyro.getAngle()
+        if physical_config.invert_gyro:
+            self.__gyro_get_lambda = lambda: -(gyro.getAngle())
+        else:
+            self.__gyro_get_lambda = gyro.getAngle
         self._modules = {}
         self._physical_config = physical_config
         for position, module_config in swerve_config.items():
@@ -116,27 +119,42 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def periodic(self):
         """Call periodically to update the odemetry"""
         self.update_odometry()
-        if __debug__:
-            for m in self._ordered_modules:
-                m.report_to_dashboard()  # type: ignore
+        # if __debug__:
+        for m in self._ordered_modules:
+            m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
-
         with self._odemetry_lock:
-            module_positions = tuple([m.position for m in self._ordered_modules])
             self._odemetry.update(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),  # type: ignore
-                                  module_positions)  # type: ignore
+                                  self._measured_module_positions)  # type: ignore
 
+    def _scale_velocity_to_drive_speed(self, v_x: float, v_y: float) -> tuple[float, float]:
+        """Reduce requested speed if it is too fast"""
+        requested_speed = math.sqrt(v_x ** 2 + v_y ** 2)
+
+        # Scale the vector vx, vy so that the magnitude of the vector does not exceed robot_config.physical_properties.max_drive_speed
+        if requested_speed > self._physical_config.max_drive_speed:
+            scale_factor = self._physical_config.max_drive_speed / requested_speed
+            v_x *= scale_factor
+            v_y *= scale_factor
+
+        return v_x, v_y
 
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second,
               run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
-        """Drive the robot using cartesian coordinates
-
+        """
+        Drive the robot using cartesian coordinates
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         """
 
-        desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-            self.gyro_angle_radians))
+        v_x, v_y = self._scale_velocity_to_drive_speed(v_x, v_y)
+
+        # desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
+        #    -self.gyro_angle_radians))
+
+        desired_chasis_speeds = kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
+            -self.gyro_angle_radians))  # keep this one
+
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
@@ -161,7 +179,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(-quarter_pi))
         self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi - quarter_pi))
         self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi + quarter_pi))
-  
+
+
     @property
     def pose(self) -> geom.Pose2d:
         """Current pose of the robot"""
@@ -173,7 +192,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         with self._odemetry_lock:
             self._odemetry.resetPosition(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                          # possible cause of teleporting position on field
-                                         tuple(self._measured_module_states),
+                                         self._measured_module_positions,
                                          value)
 
 
@@ -181,6 +200,11 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def _measured_module_states(self) -> Sequence[kinematics.SwerveModuleState]:
         """Current state of the modules"""
         return tuple([m.measured_state for m in self._ordered_modules])
+
+    @property
+    def _measured_module_positions(self) -> Sequence[kinematics.SwerveModuleState]:
+        """Current state of the modules"""
+        return tuple([m.position for m in self._ordered_modules])
 
     @property
     def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:
@@ -192,7 +216,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """chasis speeds desired by the robot"""
         return self._kinematics.toChassisSpeeds(tuple([m.desired_state for m in self._ordered_modules]))
 
-    def add_vision_measurement(self, timestamp: float, pose: geom.Pose2d):
+    def add_vision_measurement(self, pose: geom.Pose2d, timestamp: float):
         """Add a vision measurement to the odemetry"""
         with self._odemetry_lock:
             self._odemetry.addVisionMeasurement(pose, timestamp)
