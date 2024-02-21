@@ -41,10 +41,10 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                left_flywheel_diameter_cm=12,
                                default_velocity=3,
                                default_fire_time=1,
-                               default_spinup_delay=1)  # add motor configs
+                               default_spinup_delay=2)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
-                               default_velocity=300)  # fix feeder_sensor_id
+                               default_velocity=500)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
                              default_velocity=.5)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None))
@@ -53,7 +53,7 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
                                      encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                      gear_ratio=SwerveModuleFloatProperty(angle=150.0 / 7, drive=6.75),
-                                     max_drive_speed=3,
+                                     max_drive_speed=5,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,

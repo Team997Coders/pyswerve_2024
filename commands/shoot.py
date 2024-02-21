@@ -23,8 +23,8 @@ class SpinupShooter(commands2.InstantCommand):
         super().__init__()
         self._shooter = shooter
 
-    def execute(self): 
-        self._shooter.setVoltage(11)
+    def execute(self):
+        self._shooter.setVoltage(12)
         #self._shooter.velocity = self._shooter.config.default_velocity
 
 class SpindownShooter(commands2.InstantCommand):
