@@ -180,6 +180,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi - quarter_pi))
         self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi + quarter_pi))
 
+
     @property
     def pose(self) -> geom.Pose2d:
         """Current pose of the robot"""

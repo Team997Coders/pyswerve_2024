@@ -18,7 +18,6 @@ from commands import index
 
 class SpinupShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
-
     def __init__(self, shooter: subsystems.Shooter):
         super().__init__()
         self._shooter = shooter

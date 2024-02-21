@@ -21,7 +21,7 @@ import commands2
 import commands2.button
 from math_help import Range
 from wpilib import DriverStation
-
+from commands import reset_gyro
 from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
@@ -117,7 +117,7 @@ class MyRobot(commands2.TimedCommandRobot):
     shooter: subsystems.Shooter
     intake: subsystems.Intake
     indexer: subsystems.Indexer
-
+    reset_gyro: commands.reset_gyro
     _heading_control: subsystems.ChassisHeadingControl
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
@@ -178,10 +178,9 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
         self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
-
+        self.joystick_one.button(4).toggleOnTrue(self.reset_gyro)
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-
 
         # POINTING COMMANDS USING LOCATION FOR RED ON JOYSTICK 2
         ################################################################################################################
