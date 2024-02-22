@@ -126,7 +126,7 @@ class MyRobot(commands2.TimedCommandRobot):
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
     robot_control_commands: list
-
+    auto_chooser: wpilib.SendableChooser
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
 
@@ -142,7 +142,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self):
         super().robotInit()
 
-        telemetry.create_selector("autos", autos.auto_paths)
+        self.auto_chooser = telemetry.create_selector("autos", autos.auto_paths)
 
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
@@ -361,6 +361,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousInit(self):
         super().autonomousInit()
+
+
+        auto_path_index = self.auto_chooser.getSelected()
+        sd.putString("selected auto",str(autos.auto_paths[auto_path_index]))
 
         estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
         self._x_axis_control.set_current_position(estimated_pose.x)
