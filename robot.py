@@ -1,5 +1,6 @@
 import sys
 
+import autos
 import robotpy_apriltag
 import wpilib
 import wpilib.event
@@ -140,6 +141,9 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
+
+        telemetry.create_selector("autos", autos.auto_paths)
+
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
@@ -178,7 +182,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
         self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
-        self.joystick_one.button(4).toggleOnTrue(self.reset_gyro)
+     #  self.joystick_one.button(4).toggleOnTrue(self.reset_gyro)
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
 
