@@ -194,7 +194,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                                          # possible cause of teleporting position on field
                                          self._measured_module_positions,
                                          value)
-
+    @pose.setter
+    def reset_pose(self):
+        self.pose = 0
 
     @property
     def _measured_module_states(self) -> Sequence[kinematics.SwerveModuleState]:
