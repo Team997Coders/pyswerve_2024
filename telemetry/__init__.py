@@ -2,7 +2,7 @@ from .swerve_telemetry import SwerveTelemetry
 # from .pid_telemetry import PIDTelemetry
 from . import chassis_heading_telemetry
 from .chassis_heading_telemetry import ChassisHeadingTelemetry
-
+import wpilib
 
 def create_selector(sd_path: str, autos : list[str]) -> wpilib.SendableChooser:
     """Creates a widget in smart dashboard that can select which test group to run from a list
