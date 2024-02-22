@@ -103,6 +103,7 @@ class MyRobot(commands2.TimedCommandRobot):
     controller: commands2.button.CommandXboxController
     joystick_one: commands2.button.CommandJoystick
     joystick_two: commands2.button.CommandJoystick
+    operator_control: commands2.button.CommandJoystick
 
     field: wpilib.Field2d
     april_tag_one: AprilTagDetector
@@ -147,6 +148,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
+        self.operator_control = commands2.button.CommandJoystick(2)
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
@@ -217,108 +219,115 @@ class MyRobot(commands2.TimedCommandRobot):
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
-        self.joystick_one.button(2).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_one.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-        self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
+        self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        # self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
+
+        self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_one.button(3).toggleOnTrue(commands2.cmd.ParallelRaceGroup(
+            commands.Outtake(self.intake, self.indexer),
+            commands2.WaitCommand(4)
+        ))
 
         # POINTING COMMANDS USING LOCATION FOR RED ON JOYSTICK 2
         ################################################################################################################
         ###POINT TOWARDS RED SPEAKER ON BUTTON 3 -> STICK 2
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=4,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_two.button(3).toggleOnTrue(april_tag_pointer)
-
-        ###POINT TOWARDS RED AMP ON BUTTON 4 -> STICK 2
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=5,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_two.button(4).toggleOnTrue(april_tag_pointer)
-
-        # STAGE POINTING COMMANDS FOR RED
-
-        ###POINT TOWARDS RED STAGE SOURCE SIDE ON BUTTON 6 -> STICK 2
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=11,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_two.button(6).toggleOnTrue(april_tag_pointer)
-
-        ###POINT TOWARDS RED STAGE AMP SIDE ON BUTTON 7 -> STICK 2
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=12,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_two.button(7).toggleOnTrue(april_tag_pointer)
-
-        ###POINT TOWARDS RED STAGE FAR SIDE ON BUTTON 8 -> STICK 2
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=13,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_two.button(8).toggleOnTrue(april_tag_pointer)
-        ################################################################################################################
-
-        # POINTING COMMANDS USING LOCATION FOR BLUE JOYSTICK 1
-        ################################################################################################################
-        ###POINT TOWARDS BLUE SPEAKER ON BUTTON 6 -> STICK 1
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=7,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_one.button(6).toggleOnTrue(april_tag_pointer)
-
-        ###POINT TOWARDS BLUE AMP ON BUTTON 7 -> STICK 1
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=6,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_one.button(7).toggleOnTrue(april_tag_pointer)
-
-        # STAGE POINTING COMMANDS FOR RED
-
-        ###POINT TOWARDS BLUE STAGE SOURCE SIDE ON BUTTON 8 -> STICK 1
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=16,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_one.button(8).toggleOnTrue(april_tag_pointer)
-
-        ###POINT TOWARDS BLUE STAGE AMP SIDE ON BUTTON 9 -> STICK 1
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=15,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_one.button(9).toggleOnTrue(april_tag_pointer)
-
-        ###POINT TOWARDS BLUE STAGE FAR SIDE ON BUTTON 10 -> STICK 1
-        april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                     aprilTagNumber=14,
-                                                     apriltagfieldlayout=self.apriltagfieldlayout,
-                                                     get_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        self.joystick_one.button(10).toggleOnTrue(april_tag_pointer)
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=4,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_two.button(3).toggleOnTrue(april_tag_pointer)
+        #
+        # ###POINT TOWARDS RED AMP ON BUTTON 4 -> STICK 2
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=5,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_two.button(4).toggleOnTrue(april_tag_pointer)
+        #
+        # # STAGE POINTING COMMANDS FOR RED
+        #
+        # ###POINT TOWARDS RED STAGE SOURCE SIDE ON BUTTON 6 -> STICK 2
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=11,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_two.button(6).toggleOnTrue(april_tag_pointer)
+        #
+        # ###POINT TOWARDS RED STAGE AMP SIDE ON BUTTON 7 -> STICK 2
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=12,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_two.button(7).toggleOnTrue(april_tag_pointer)
+        #
+        # ###POINT TOWARDS RED STAGE FAR SIDE ON BUTTON 8 -> STICK 2
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=13,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_two.button(8).toggleOnTrue(april_tag_pointer)
+        # ################################################################################################################
+        #
+        # # POINTING COMMANDS USING LOCATION FOR BLUE JOYSTICK 1
+        # ################################################################################################################
+        # ###POINT TOWARDS BLUE SPEAKER ON BUTTON 6 -> STICK 1
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=7,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_one.button(6).toggleOnTrue(april_tag_pointer)
+        #
+        # ###POINT TOWARDS BLUE AMP ON BUTTON 7 -> STICK 1
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=6,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_one.button(7).toggleOnTrue(april_tag_pointer)
+        #
+        # # STAGE POINTING COMMANDS FOR RED
+        #
+        # ###POINT TOWARDS BLUE STAGE SOURCE SIDE ON BUTTON 8 -> STICK 1
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=16,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_one.button(8).toggleOnTrue(april_tag_pointer)
+        #
+        # ###POINT TOWARDS BLUE STAGE AMP SIDE ON BUTTON 9 -> STICK 1
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=15,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_one.button(9).toggleOnTrue(april_tag_pointer)
+        #
+        # ###POINT TOWARDS BLUE STAGE FAR SIDE ON BUTTON 10 -> STICK 1
+        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+        #                                              aprilTagNumber=14,
+        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
+        #                                              get_xy=lambda: (
+        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+        # self.joystick_one.button(10).toggleOnTrue(april_tag_pointer)
         ################################################################################################################
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
@@ -331,6 +340,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
+        telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
     #     self.register_subsystems()
     #
     # def register_subsystems(self):

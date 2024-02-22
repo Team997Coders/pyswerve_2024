@@ -27,6 +27,9 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
     _feedforward_component: float = 0  # The feedforward component of the most recent output
     _pid_component: float = 0  # The PID component of the most recent output
 
+    def pid(self) -> wpimath.controller.ProfiledPIDController:
+        return self._angle_pid
+
     def __init__(self,
                  get_chassis_angle_measurement: Callable[[], float],
                  get_chassis_angle_velocity_measurement: Callable[[], float],

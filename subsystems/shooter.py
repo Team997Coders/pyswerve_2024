@@ -6,7 +6,6 @@ from config import PIDConfig
 import hardware
 import math
 import logging
-from telemetry.pid_telemetry import PIDEditor
 
 
 class Shooter(commands2.Subsystem):
@@ -17,6 +16,10 @@ class Shooter(commands2.Subsystem):
     _pid: rev.SparkMaxPIDController
     _logger: logging.Logger
     config: ShooterConfig
+
+    @property
+    def pid(self) -> rev.SparkMaxPIDController:
+        return self._pid
 
     def __init__(self, config: ShooterConfig, pid_config: PIDConfig, logger: logging.Logger):
         super().__init__()
@@ -43,9 +46,6 @@ class Shooter(commands2.Subsystem):
 
         self._pid = self._left_motor.getPIDController() 
         hardware.init_pid(self._pid, pid_config, feedback_device=self._left_encoder)
-
-        self._pid_editor = PIDEditor("Shooter PID", lambda: self.pid_config,
-                                     lambda new_config: hardware.adjust_pid(self._pid, new_config))
 
     @property
     def pid_config(self) -> PIDConfig:

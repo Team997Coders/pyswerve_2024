@@ -1,4 +1,6 @@
 import rev
+
+import config
 from config import PIDConfig, MotorConfig, ProfiledPIDConfig
 from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController, PIDController
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
@@ -22,6 +24,17 @@ def init_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_dev
 
     else:
         pid.setPositionPIDWrappingEnabled(False)
+
+
+def read_pid(pid: rev.SparkMaxPIDController) -> PIDConfig:
+    """Configures a SparkMax PID controller with the provided PIDConfig"""
+    wrapping = pid.getPositionPIDWrappingEnabled()
+    if wrapping:
+        min_wrap = pid.getPositionPIDWrappingMinInput()
+        max_wrap = pid.getPositionPIDWrappingMaxInput()
+
+    return PIDConfig(p=pid.getP(), i=pid.getI(), d=pid.getD(),
+                     wrapping=config.OptionalRange(min_wrap, max_wrap) if wrapping else None)
 
 def adjust_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig):
     """Configures a SparkMax PID controller with the provided PIDConfig"""

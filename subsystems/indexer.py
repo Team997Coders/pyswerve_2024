@@ -17,6 +17,10 @@ class Indexer(commands2.Subsystem):
     _logger: logging.Logger
     _read_indexer_state: Callable[[], bool]
 
+    @property
+    def pid(self) -> rev.SparkMaxPIDController:
+        return self._indexer_pid
+
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
         self._logger = logger.getChild("Indexer")

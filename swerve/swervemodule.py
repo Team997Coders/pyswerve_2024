@@ -55,6 +55,14 @@ class SwerveModule(ISwerveModule):
         """Module position ID"""
         return self._id
 
+    def angle_pid(self) -> rev.SparkMaxPIDController:
+        """This is exposed only for SmartDashboard to edit PID values"""
+        return self.angle_pid
+
+    def drive_pid(self) -> rev.SparkMaxPIDController:
+        """This is exposed only for SmartDashboard to edit PID values"""
+        return self.drive_pid
+
     def __init__(self, position: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig,
                  logger: logging.Logger):
         self._id = position

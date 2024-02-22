@@ -65,7 +65,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         return self._odemetry
 
     @property
-    def ordered_modules(self) -> list[ISwerveModule]:
+    def ordered_modules(self) -> list[SwerveModule]:
         """Provides a consistent ordering of modules for use with wpilib swerve functions"""
         return self._ordered_modules
 
@@ -149,8 +149,12 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
         v_x, v_y = self._scale_velocity_to_drive_speed(v_x, v_y)
 
-        desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-            -self.gyro_angle_radians))
+        # desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
+        #     self.gyro_angle_radians))
+
+        desired_chasis_speeds = kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
+             -self.gyro_angle_radians))
+
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
