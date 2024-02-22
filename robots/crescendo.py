@@ -39,7 +39,7 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                left_flywheel_gear_ratio=1,
                                right_flywheel_diameter_cm=12,
                                left_flywheel_diameter_cm=12,
-                               default_velocity=1, #default velocity has too be a number between -1 and 1
+                               default_velocity=3,
                                default_fire_time=1,
                                default_spinup_delay=2)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
