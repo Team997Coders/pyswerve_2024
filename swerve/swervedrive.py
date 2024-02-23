@@ -35,7 +35,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     _ordered_modules: list[ISwerveModule]
 
     _odemetry: estimator.SwerveDrive4PoseEstimator
-    
+
     _physical_config: PhysicalConfig
 
     _odemetry_lock: threading.Lock = threading.Lock()
@@ -142,18 +142,18 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     def drive(self, v_x: float, v_y: float, rotation: wpimath.units.radians_per_second,
               run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
-        """Drive the robot using cartesian coordinates
-
+        """
+        Drive the robot using cartesian coordinates
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         """
 
         v_x, v_y = self._scale_velocity_to_drive_speed(v_x, v_y)
 
         # desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-        #     self.gyro_angle_radians))
+        #    -self.gyro_angle_radians))
 
         desired_chasis_speeds = kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-             -self.gyro_angle_radians))
+            -self.gyro_angle_radians))  # keep this one
 
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
 
@@ -179,7 +179,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(-quarter_pi))
         self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi - quarter_pi))
         self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi + quarter_pi))
-  
+
+
     @property
     def pose(self) -> geom.Pose2d:
         """Current pose of the robot"""

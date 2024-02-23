@@ -18,13 +18,12 @@ from commands import index
 
 class SpinupShooter(commands2.InstantCommand):
     _shooter: subsystems.Shooter
-
     def __init__(self, shooter: subsystems.Shooter):
         super().__init__()
         self._shooter = shooter
 
-    def execute(self): 
-        self._shooter.setVoltage(11)
+    def execute(self):
+        self._shooter.setVoltage(12)
         #self._shooter.velocity = self._shooter.config.default_velocity
 
 class SpindownShooter(commands2.InstantCommand):

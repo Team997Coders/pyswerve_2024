@@ -5,7 +5,7 @@ from typing import Callable
 
 import hardware
 import logging
-from robots.crescendo import IndexerConfig
+from config import IndexerConfig
 
 
 class Indexer(commands2.Subsystem):
