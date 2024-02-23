@@ -16,3 +16,5 @@ from .axis_position_control import AxisPositionControl
 from . import shooter
 from .shooter import Shooter
 
+from . import sysid
+from .sysid import swerve_system_id

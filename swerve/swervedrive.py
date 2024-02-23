@@ -156,6 +156,13 @@ class SwerveDrive(commands2.subsystem.Subsystem):
             -self.gyro_angle_radians))  # keep this one
 
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
+        self.drive_with_module_states(module_states, run_modules=run_modules)
+
+    def drive_with_module_states(self, module_states: tuple[kinematics.SwerveModuleState, kinematics.SwerveModuleState, kinematics.SwerveModuleState, kinematics.SwerveModuleState],
+                                run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
+        """
+        Drive the robot using module states.  Module states must be passed in the same order as self._ordered_modules
+        """
 
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
 
@@ -226,7 +233,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         for module in self._modules.values():
             module.drive_set_distance(meters, angle)
 
-    def drive_at_voltage(self, voltage: float, angle: float):
+    def drive_at_voltage(self, voltage: float):
         """Provide the drive motors a set voltage at the requested angle"""
         for module in self._modules.values():
             module.drive_at_voltage(voltage)

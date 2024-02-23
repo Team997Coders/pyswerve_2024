@@ -154,7 +154,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
         self.operator_control = commands2.button.CommandJoystick(2)
-
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
@@ -177,8 +176,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-
-		
         self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
         self.joystick_one.button(4).toggleOnTrue(self.reset_gyro)
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
@@ -282,7 +279,7 @@ class MyRobot(commands2.TimedCommandRobot):
         #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
         # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
         # self.joystick_one.button(10).toggleOnTrue(april_tag_pointer)
-
+        ################################################################################################################
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -295,34 +292,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
         telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
-
-    def init_positioning_pids(self):
-        self._heading_control = subsystems.ChassisHeadingControl(
-            get_chassis_angle_velocity_measurement=lambda: math.radians(
-                self.swerve_drive.measured_chassis_speed.omega_dps),
-            get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
-            angle_pid_config=robot_config.default_heading_pid,
-            feedforward_config=None,
-            initial_angle=self.swerve_drive.gyro_angle_radians
-        )
-
-        # TODO: update intial position again after photonvision
-        self._x_axis_control = subsystems.AxisPositionControl(
-            get_chassis_position_measurement=lambda: self.swerve_drive.pose.x,
-            get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vx,
-            pid_config=robot_config.default_axis_pid,
-            feedforward_config=None,
-            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().x
-        )
-
-        self._y_axis_control = subsystems.AxisPositionControl(
-            get_chassis_position_measurement=lambda: self.swerve_drive.pose.y,
-            get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vy,
-            pid_config=robot_config.default_axis_pid,
-            feedforward_config=None,
-            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().y
-        )
-
     #     self.register_subsystems()
     #
     # def register_subsystems(self):
@@ -341,7 +310,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_controller_telemetry.report_to_dashboard()
 
     def teleopInit(self):
-
         driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                             self.swerve_drive,
                                                             self._heading_control)
@@ -349,7 +317,6 @@ class MyRobot(commands2.TimedCommandRobot):
                                                            self._heading_control)
         three_dof_command = create_3dof_command(self.joystick_one,
                                                 self.swerve_drive)
-        # self._command_scheduler.cancel(cmd)
         self._command_scheduler.schedule(heading_command)
         self._command_scheduler.schedule(driving_command)
 
