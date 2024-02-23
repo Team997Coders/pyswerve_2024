@@ -48,5 +48,5 @@ class Intake(commands2.Subsystem):
 
     @voltage.setter
     def voltage(self, value: float) -> float: 
-        return self.intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+        return self._intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
 

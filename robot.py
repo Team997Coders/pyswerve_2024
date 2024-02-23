@@ -248,6 +248,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
+        telemetry.UpdateMechanismPIDs()
         self.swerve_drive.periodic()
         self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
