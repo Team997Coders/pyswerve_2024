@@ -1,41 +1,51 @@
 
 from typing import Callable
-from config import PIDConfig
-from wpilib import SmartDashboard as sd
-import commands2
-import rev
+import ntcore
 
-class float_editbox(commands2.Command):
+
+class FloatEntry:
+    """ This is a class that is used to publish float values to the network table"""
+    _value: float
     _get_value: Callable[[], float]
     _set_value: Callable[[float], None]
-    _last_known_value: float
-    _name: str
 
-    def __init__(self, name: str,
-                       get_value: Callable[[], float],
-                       set_value: Callable[[float], None],
-                       default_value: float | None = 0.0):
-        self._name = name
-        self._set_value = set_value
-        self._get_value = get_value
+    _value_entry: ntcore.DoubleEntry
 
-        if default_value is not None:
-            sd.setDefaultNumber(name, default_value)
+    def __init__(self, subtable: str, name: str, get_value: Callable[[], float] | None, set_value: Callable[[float], None], default_value: float | None = 0.0):
+        self._value = get_value() if get_value is not None else default_value
 
-        self._last_known_value = self._get_value()
-        sd.putNumber(name, get_value())
+        nt_instance = ntcore.NetworkTableInstance.getDefault()
+        table_instance = nt_instance.getTable("SmartDashboard").getSubTable(subtable)
 
-    def execute(self):
+        value_topic = table_instance.getDoubleTopic(name)
 
-        new_value = sd.getNumber(self._name, self._get_value())
-        if new_value != self._last_known_value:
-            self._last_known_value = new_value
-            self._set_value(sd.getNumber(self._name, self._get_value()))
-            print("Updating {self._name} to {new_value}")
+        value_topic.publish(ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
 
-        else:
-            #No change, display the most recent value
-            current_value = self._get_value()
-            if current_value != self._last_known_value:
-                self._last_known_value = current_value
-                sd.putNumber(self._name, current_value)
+        self._value_entry = value_topic.getEntry(self._pid_values.p,
+                                             ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
+
+        self._value_entry.set(self._pid_values.p, 0)
+
+    def handle_updates(self, entry: ntcore.DoubleEntry, current_val: float,
+                       setter: Callable[[float], None]) -> float:
+        result = entry.get()
+        if result != current_val:
+            # print(f"Setting {result} to {setter}")
+            setter(result)
+            return result
+
+        return current_val
+
+    def periodic(self):
+        # entries support all the same methods as subscribers:
+        self._value = self.handle_updates(self._value_entry, self._value, self._set_value)
+
+    def unpublish(self):
+        # you can stop publishing while keeping the subscriber alive
+        self._value_entry.unpublish()
+
+    # often not required in robot code, unless this class doesn't exist for
+    # the lifetime of the entire robot program, in which case close() needs to be
+    # called to stop subscribing
+    def close(self):
+        self._value_entry.close()

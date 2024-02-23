@@ -97,7 +97,11 @@ class MyRobot(commands2.TimedCommandRobot):
 
     swerve_drive: SwerveDrive
     swerve_telemetry: telemetry.SwerveTelemetry
+
     heading_controller_telemetry: telemetry.ChassisHeadingTelemetry
+    x_axis_telemetry: telemetry.AxisPositionTelemetry
+    y_axis_telemetry: telemetry.AxisPositionTelemetry
+
     test_driver: TestDriver
     teleop_drive: TeleopDrive
     twinstick_teleop_drive: TwinStickTeleopDrive
@@ -169,6 +173,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
         self.init_positioning_pids()
+        self.init_position_control_telemetry()
 
         self._heading_control.enable()
         self._x_axis_control.enable()
@@ -246,6 +251,16 @@ class MyRobot(commands2.TimedCommandRobot):
             initial_position=self.swerve_drive.odemetry.getEstimatedPosition().y
         )
 
+    def init_position_control_telemetry(self):
+        self.x_axis_telemetry = telemetry.AxisPositionTelemetry("X", self._x_axis_control)
+        self.y_axis_telemetry = telemetry.AxisPositionTelemetry("Y", self._y_axis_control)
+        self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
+
+    def report_position_control_to_dashboard(self):
+        self.x_axis_telemetry.report_to_dashboard()
+        self.y_axis_telemetry.report_to_dashboard()
+        self.heading_controller_telemetry.report_to_dashboard()
+
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         telemetry.UpdateMechanismPIDs()
@@ -254,6 +269,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.field.setRobotPose(self.swerve_drive.pose)
         sd.putData("Field", self.field)
         self.swerve_telemetry.report_to_dashboard()
+        self.report_position_control_to_dashboard()
+
         self.heading_controller_telemetry.report_to_dashboard()
 
     def teleopInit(self):
