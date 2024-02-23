@@ -234,7 +234,6 @@ class SwerveModule(ISwerveModule):
     def drive_set_distance(self, meters: float, angle: float):
         """Drive the wheel a specific distance in meters.  If you use this call, desired state speed will be incorrect until
            you set desired_state again. This is because the PID controller will be driving the wheel to the specified distance."""
-        self.drive_motor_encoder.setPosition(0)
         self.drive_pid.setReference(meters, rev.CANSparkMax.ControlType.kPosition)
         self.angle = angle
 

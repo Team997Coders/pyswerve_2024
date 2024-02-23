@@ -21,7 +21,7 @@ import commands2
 import commands2.button
 from math_help import Range
 from wpilib import DriverStation
-from commands import reset_gyro
+# from commands import ResetGyro
 from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
@@ -121,6 +121,8 @@ class MyRobot(commands2.TimedCommandRobot):
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
 
+    _tag_mappings: dict[tuple[commands2.button.CommandGenericHID, int], int]
+
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
     robot_control_commands: list
@@ -128,14 +130,20 @@ class MyRobot(commands2.TimedCommandRobot):
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
 
-    @property
-    def navx(self) -> navx.AHRS:
-        return self._navx
-
     def update_test_mode(self):
         """Sets a global variable indicating that the robot is in test mode"""
         global is_test
         is_test = self.isTest()
+
+    def bind_apriltags(self, mapping_dict: dict[tuple[commands2.button.CommandGenericHID, int], int]) -> None:
+        for (controller, button), tag_num in mapping_dict.items():
+            april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
+                                                         aprilTagNumber=tag_num,
+                                                         apriltagfieldlayout=self.apriltagfieldlayout,
+                                                         get_xy=lambda: (
+                                                             self.swerve_drive.pose.x, self.swerve_drive.pose.y))
+            april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+            controller.button(button).toggleOnTrue(april_tag_pointer)
 
     def robotInit(self):
         super().robotInit()
@@ -175,109 +183,29 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-        self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
+        # self.joystick_one.button(3).toggleOnTrue(commands.ResetGyro())
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
 
-        # POINTING COMMANDS USING LOCATION FOR RED ON JOYSTICK 2
-        ################################################################################################################
-        ###POINT TOWARDS RED SPEAKER ON BUTTON 3 -> STICK 2
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=4,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_two.button(3).toggleOnTrue(april_tag_pointer)
-        #
-        # ###POINT TOWARDS RED AMP ON BUTTON 4 -> STICK 2
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=5,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_two.button(4).toggleOnTrue(april_tag_pointer)
-        #
-        # # STAGE POINTING COMMANDS FOR RED
-        #
-        # ###POINT TOWARDS RED STAGE SOURCE SIDE ON BUTTON 6 -> STICK 2
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=11,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_two.button(6).toggleOnTrue(april_tag_pointer)
-        #
-        # ###POINT TOWARDS RED STAGE AMP SIDE ON BUTTON 7 -> STICK 2
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=12,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_two.button(7).toggleOnTrue(april_tag_pointer)
-        #
-        # ###POINT TOWARDS RED STAGE FAR SIDE ON BUTTON 8 -> STICK 2
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=13,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_two.button(8).toggleOnTrue(april_tag_pointer)
-        # ################################################################################################################
-        #
-        # # POINTING COMMANDS USING LOCATION FOR BLUE JOYSTICK 1
-        # ################################################################################################################
-        # ###POINT TOWARDS BLUE SPEAKER ON BUTTON 6 -> STICK 1
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=7,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_one.button(6).toggleOnTrue(april_tag_pointer)
-        #
-        # ###POINT TOWARDS BLUE AMP ON BUTTON 7 -> STICK 1
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=6,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_one.button(7).toggleOnTrue(april_tag_pointer)
-        #
-        # # STAGE POINTING COMMANDS FOR RED
-        #
-        # ###POINT TOWARDS BLUE STAGE SOURCE SIDE ON BUTTON 8 -> STICK 1
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=16,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_one.button(8).toggleOnTrue(april_tag_pointer)
-        #
-        # ###POINT TOWARDS BLUE STAGE AMP SIDE ON BUTTON 9 -> STICK 1
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=15,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_one.button(9).toggleOnTrue(april_tag_pointer)
-        #
-        # ###POINT TOWARDS BLUE STAGE FAR SIDE ON BUTTON 10 -> STICK 1
-        # april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-        #                                              aprilTagNumber=14,
-        #                                              apriltagfieldlayout=self.apriltagfieldlayout,
-        #                                              get_xy=lambda: (
-        #                                                  self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-        # april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-        # self.joystick_one.button(10).toggleOnTrue(april_tag_pointer)
-        ################################################################################################################
+        self._tag_mappings = {
+            #  blue tag mappings
+            (self.joystick_two, 3): 4,
+            (self.joystick_two, 4): 5,
+            #  red tag mappings
+            (self.joystick_two, 6): 11,
+            (self.joystick_two, 7): 12,
+            (self.joystick_two, 8): 13,
+
+            #  blue tag mappings
+            (self.joystick_one, 6): 7,
+            (self.joystick_one, 7): 6,
+            #  red tag mappings
+            (self.joystick_one, 8): 16,
+            (self.joystick_one, 9): 15,
+            (self.joystick_one, 10): 14
+        }
+
+        self.bind_apriltags(self._tag_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -290,14 +218,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
         telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
-    #     self.register_subsystems()
-    #
-    # def register_subsystems(self):
-    #     self._command_scheduler.registerSubsystem(self.swerve_drive)
-    #     self._command_scheduler.registerSubsystem(self.shooter)
-    #     self._command_scheduler.registerSubsystem(self.indexer)
-    #     self._command_scheduler.registerSubsystem(self.intake)
-
+   
     def init_positioning_pids(self):
         self._heading_control = subsystems.ChassisHeadingControl(
             get_chassis_angle_velocity_measurement=lambda: math.radians(
@@ -324,7 +245,6 @@ class MyRobot(commands2.TimedCommandRobot):
             feedforward_config=None,
             initial_position=self.swerve_drive.odemetry.getEstimatedPosition().y
         )
-
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
@@ -366,13 +286,13 @@ class MyRobot(commands2.TimedCommandRobot):
                 commands.Shoot(self.shooter, self.indexer),
                 commands2.cmd.ParallelCommandGroup(
                     commands.Load(self.intake, self.indexer),
-                    commands.DeadReckonX(self.swerve_drive, .5)
+                    commands.GotoXYTheta(self.swerve_drive, (.5, 0, math.pi),
+                                         self._x_axis_control, self._y_axis_control, self._heading_control),
                 ),
             ),
             commands2.cmd.WaitCommand(15)
         )
-
-        # self._command_scheduler.schedule(cmd)
+        self._command_scheduler.schedule(cmd)
 
 
     def autonomousPeriodic(self):
