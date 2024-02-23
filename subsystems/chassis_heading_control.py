@@ -97,7 +97,7 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         self.setGoal(value)
 
     def atTarget(self) -> bool:
-        return self._position_pid.atGoal()
+        return self._angle_pid.atGoal()
 
     def useOutput(self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State):
         """Use the output from the controller object."""
