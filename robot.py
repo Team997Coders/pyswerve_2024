@@ -131,6 +131,8 @@ class MyRobot(commands2.TimedCommandRobot):
 
     robot_control_commands: list
 
+    sysid: subsystems.swerve_system_id
+
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
 
@@ -179,6 +181,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self._x_axis_control.enable()
         self._y_axis_control.enable()
 
+        self.sysid = subsystems.swerve_system_id(self.swerve_drive, "swerve")
+
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
 
@@ -217,6 +221,10 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                  self._heading_control)
         self.heading_command = create_twinstick_heading_command(self.joystick_two,
                                                                 self._heading_control)
+
+        #Unbind before competition
+        self.joystick_two.button(5).toggleOnTrue(self.sysid.create_dynamic_measurement_command())
+        self.joystick_one.button(5).toggleOnTrue(self.sysid.create_quasistatic_measurement_command())
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
