@@ -14,10 +14,10 @@ class ChassisHeadingTelemetry:
 
     def __init__(self, chassis_heading_control: ChassisHeadingControl) -> None:
         self.chassis_heading_control = chassis_heading_control
+        sd.putData("CH: PID", self.chassis_heading_control.pid)
 
     def report_to_dashboard(self):
         """Write all module info to net tables"""
-        sd.putData("CH: PID", self.chassis_heading_control.pid)
         sd.putNumber("CH: measured rotation", math.degrees(self.chassis_heading_control.getMeasurement()))
         sd.putNumber("CH: target angle for the target tracker", math.degrees(self.chassis_heading_control.target))
         sd.putNumber("CH: feedforward component", self.chassis_heading_control._feedforward_component)
@@ -32,10 +32,10 @@ class AxisPositionTelemetry:
     def __init__(self, name: str, axis_heading_control: AxisPositionControl) -> None:
         self.name = name
         self.axis_heading = axis_heading_control
+        sd.putData(f"{self.name}: position PID", self.axis_heading.pid)
 
     def report_to_dashboard(self):
         """Write all module info to net tables"""
-        sd.putData(f"{self.name}: position PID", self.axis_heading.pid)
         sd.putNumber(f"{self.name}: measured position",  self.axis_heading.getMeasurement())
         sd.putNumber(f"{self.name}: target position", self.axis_heading.target)
         sd.putNumber(f"{self.name}: feedforward component", self.axis_heading._feedforward_component)

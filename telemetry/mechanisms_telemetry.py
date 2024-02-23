@@ -16,13 +16,7 @@ def ShowMechansimPIDs(r):
     indexer_pid_entry = SparkMaxPIDEntry("Indexer PID", r.indexer.pid, rev.CANSparkMax.ControlType.kVelocity)
     intake_pid_entry = SparkMaxPIDEntry("Intake PID", r.intake.pid, rev.CANSparkMax.ControlType.kVelocity)
 
-def UpdateMechanismPIDs():
-    """Update the PIDs for the mechanisms on the dashboard"""
-    global shooter_pid_entry, indexer_pid_entry, intake_pid_entry
+    sd.putData("Shooter PID", shooter_pid_entry)
+    sd.putData("Indexer PID", indexer_pid_entry)
+    sd.putData("Intake PID", intake_pid_entry)
 
-    if shooter_pid_entry:
-        shooter_pid_entry.periodic()
-    if indexer_pid_entry:
-        indexer_pid_entry.periodic()
-    if intake_pid_entry:
-        intake_pid_entry.periodic()
