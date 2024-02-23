@@ -300,6 +300,34 @@ class MyRobot(commands2.TimedCommandRobot):
     #     self._command_scheduler.registerSubsystem(self.indexer)
     #     self._command_scheduler.registerSubsystem(self.intake)
 
+    def init_positioning_pids(self):
+        self._heading_control = subsystems.ChassisHeadingControl(
+            get_chassis_angle_velocity_measurement=lambda: math.radians(
+                self.swerve_drive.measured_chassis_speed.omega_dps),
+            get_chassis_angle_measurement=lambda: self.swerve_drive.gyro_angle_radians,
+            angle_pid_config=robot_config.default_heading_pid,
+            feedforward_config=None,
+            initial_angle=self.swerve_drive.gyro_angle_radians
+        )
+
+        # TODO: update intial position again after photonvision
+        self._x_axis_control = subsystems.AxisPositionControl(
+            get_chassis_position_measurement=lambda: self.swerve_drive.pose.x,
+            get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vx,
+            pid_config=robot_config.default_axis_pid,
+            feedforward_config=None,
+            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().x
+        )
+
+        self._y_axis_control = subsystems.AxisPositionControl(
+            get_chassis_position_measurement=lambda: self.swerve_drive.pose.y,
+            get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vy,
+            pid_config=robot_config.default_axis_pid,
+            feedforward_config=None,
+            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().y
+        )
+
+
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.swerve_drive.periodic()
@@ -329,6 +357,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def autonomousInit(self):
         super().autonomousInit()
 
+        #Hopefully at this point we've gotten an april tag fix.  Use that
+        #information to update our positioning pids
         estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
         self._x_axis_control.set_current_position(estimated_pose.x)
         self._y_axis_control.set_current_position(estimated_pose.y)

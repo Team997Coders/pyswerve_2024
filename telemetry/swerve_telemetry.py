@@ -34,9 +34,9 @@ class SwerveTelemetry:
         sd.putNumber("swerve/sizeFrontBack", maxx - minx)
         sd.putString("swerve/rotationUnit", "degrees")
 
-        #for m in self.swerve_drive.ordered_modules:
-            #sd.putData(f"swerve/{m.position}/angle_pid", m.angle_pid)
-            #sd.putData(f"swerve/{m.position}/drive_pid", m.drive_pid)
+        # for m in self.swerve_drive.ordered_modules:
+        #     sd.putData(f"swerve/{m.position}/angle_pid", m.angle_pid)
+        #     sd.putData(f"swerve/{m.position}/drive_pid", m.drive_pid)
     
     def report_to_dashboard(self):
         """Write all module info to nettables"""

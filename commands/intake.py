@@ -76,6 +76,7 @@ class IndexSensorCommand(commands2.WaitUntilCommand):
         return self._indexer.ready
 
 class Load(commands2.InstantCommand):
+    """Loads a note (ring) into the robot and prepares it to be fired"""
     _command: commands2.Command
 
     def __init__(self, intake: Intake, indexer: Indexer):

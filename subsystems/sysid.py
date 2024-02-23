@@ -2,7 +2,7 @@ import wpilib.sysid
 import commands2.sysid
 import commands2
 from swerve.swervedrive import SwerveDrive
-from commands.drive import SetSwerveModuleAngle
+from commands.drive import SetSwerveModuleAngles
 
 class swerve_system_id(commands2.subsystem.Subsystem):
     """This class is a wrapper for the wpilib.sysid module."""
@@ -15,7 +15,7 @@ class swerve_system_id(commands2.subsystem.Subsystem):
     def create_quasistatic_measurement_command(self):
         """Creates a command that aligns the wheels and performs a series of kinetic measurements."""
         return commands2.SequentialCommandGroup(
-            SetSwerveModuleAngle(self._swerve_drive, angle=0),
+            SetSwerveModuleAngles(self._swerve_drive, angle=0),
             commands2.cmd.WaitCommand(1),
             self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
             self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kReverse),
@@ -26,7 +26,7 @@ class swerve_system_id(commands2.subsystem.Subsystem):
     def create_dynamic_measurement_command(self):
         """Creates a command that aligns the wheels and performs a series of kinetic measurements."""
         return commands2.SequentialCommandGroup(
-            SetSwerveModuleAngle(self._swerve_drive, angle=0),
+            SetSwerveModuleAngles(self._swerve_drive, angle=0),
             commands2.cmd.WaitCommand(1),
             self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
             self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kReverse),
