@@ -197,9 +197,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer)) 
-        self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter)) 
+        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_one.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.operator_control.button(1).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
 
         self._tag_mappings = {
@@ -295,9 +296,9 @@ class MyRobot(commands2.TimedCommandRobot):
                 commands.IndexOff(self.indexer),
                 commands.SpindownShooter(self.shooter),
                 commands.IntakeOff(self.intake)
-            ),
-
+            )
         )
+        self._command_scheduler.cancelAll()
 
     def teleopInit(self):
         driving_command = create_twinstick_tracking_command(self.joystick_one,
@@ -337,7 +338,7 @@ class MyRobot(commands2.TimedCommandRobot):
                 commands2.cmd.ParallelCommandGroup(
                     commands.Load(self.intake, self.indexer),
                     commands2.cmd.sequence(
-                        commands.GotoXYTheta(self.swerve_drive, (1, 0, 0),
+                        commands.GotoXYTheta(self.swerve_drive, (1, 1, 0),
                                              self._x_axis_control, self._y_axis_control, self._heading_control)
                         # commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
                         #                      self._x_axis_control, self._y_axis_control, self._heading_control),
