@@ -25,7 +25,7 @@ class Outtake(commands2.InstantCommand):
     def execute(self):
         # self._intake.velocity = -self._intake.config.default_velocity
         self._intake.velocity = -self._intake.config.default_velocity
-        self._index.velocity = -self._index.config.default_intake_velocity
+        self._index.velocity = -self._index.config.default_shoot_velocity
         print("Outtake Run")
 
 

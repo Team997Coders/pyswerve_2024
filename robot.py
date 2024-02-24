@@ -62,8 +62,6 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
     return commands.drive.Drive(
         swerve_drive,
         get_x=x_axis_func,
-        # get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
-        #                                 robot_config.standard_joystick_drive_axis_config),
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
                                         robot_config.standard_joystick_drive_axis_config),
         get_theta=lambda: heading_control.desired_velocity)
@@ -90,6 +88,15 @@ def create_twinstick_heading_command(controller: commands2.button.CommandGeneric
                                         robot_config.standard_joystick_rotation_axis_config),
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
                                         robot_config.standard_joystick_rotation_axis_config))
+
+
+def create_climber_command(controller: commands2.button.CommandGenericHID,
+                           climber: subsystems.Climber):
+    return commands.ClimberFollow(
+        climber=climber,
+        height_getter=lambda: drivers.map_input(lambda: controller.getRawAxis(3),
+                                                robot_config.standard_joystick_climber_axis_config)
+    )
 
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -121,6 +128,7 @@ class MyRobot(commands2.TimedCommandRobot):
     shooter: subsystems.Shooter
     intake: subsystems.Intake
     indexer: subsystems.Indexer
+    climber: subsystems.Climber
     _heading_control: subsystems.ChassisHeadingControl
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
@@ -195,10 +203,12 @@ class MyRobot(commands2.TimedCommandRobot):
         self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid, self.logger)
         self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
+        self.climber = subsystems.Climber(robot_config.climber_config, self.logger)
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
         self.joystick_one.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
+
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.operator_control.button(1).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
