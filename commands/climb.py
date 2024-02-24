@@ -4,12 +4,13 @@ from config import AxisConfig
 from math_help import shared
 import wpimath.controller
 from subsystems.climber import Climber
+from typing import Callable
 
 
 class ClimberFollow(commands2.InstantCommand):
     _climber: Climber
 
-    def __init__(self, climber, height_getter: callable[[], float]):
+    def __init__(self, climber, height_getter: Callable[[], float]):
         super().__init__()
         self._climber = climber
         self._climb_input = height_getter()

@@ -48,7 +48,6 @@ indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_senso
                                intake_velocity=.5, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
                              intake_velocity=1, outtake_velocity=-1)
-                             default_velocity=1)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_encoder_ticks=1000)
 
@@ -124,15 +123,17 @@ swerve_modules = {ModulePosition.front_left:
                   }  # type: dict[ModulePosition, SwerveModuleConfig]
 
 standard_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
-                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))
+                                                 output_range=math_help.Range(0,
+                                                                              physical_properties.max_drive_speed))
 
 standard_joystick_rotation_axis_config = AxisConfig(deadband=math_help.Range(0.5, 1),
                                                     output_range=math_help.Range(0,
                                                                                  physical_properties.max_drive_speed))
 
 standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1),
-                                                output_range=math_help.Range(0, physical_properties.max_drive_speed))
+                                                output_range=math_help.Range(0,
+                                                                             physical_properties.max_drive_speed))
 
 standard_joystick_climber_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
                                                    output_range=math_help.Range(0,
-                                                                                physical_properties.climber_encoder_ticks))
+                                                                                climber_config.climber_encoder_ticks))
