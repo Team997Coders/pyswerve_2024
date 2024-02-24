@@ -13,7 +13,7 @@ class IndexOnIntake(commands2.InstantCommand):
         self._indexer = indexer
 
     def execute(self):
-        self._indexer.velocity = self._indexer.config.intake_velocity
+        self._indexer.speed = self._indexer.config.intake_velocity
         # self._indexer.voltage = 5
         print("IndexOn")
 
@@ -29,7 +29,7 @@ class IndexOnShoot(commands2.InstantCommand):
         self._indexer = indexer
 
     def execute(self):
-        self._indexer.velocity = self._indexer.config.shoot_velocity
+        self._indexer.speed = self._indexer.config.shoot_velocity
         # self._indexer.voltage = 5
         print("IndexOn")
 
@@ -41,6 +41,6 @@ class IndexOff(commands2.InstantCommand):
         self._indexer = indexer
 
     def execute(self):
-        self._indexer.velocity = 0
+        self._indexer.speed = 0
 
         print("IndexOff")
