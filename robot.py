@@ -197,9 +197,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer)) 
-        self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter)) 
+        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_one.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+        self.operator_control.button(1).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
 
         self._tag_mappings = {
