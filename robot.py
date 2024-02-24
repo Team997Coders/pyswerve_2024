@@ -287,8 +287,16 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_controller_telemetry.report_to_dashboard()
         self.shooter_telemetry.periodic()
 
-    def disabledPeriodic(self):
-        self._command_scheduler.cancelAll()
+    def disabledInit(self):
+        super().disabledInit()
+        self._command_scheduler.schedule(
+            commands2.cmd.ParallelCommandGroup(
+                commands.IndexOff(self.indexer),
+                commands.SpindownShooter(self.shooter),
+                commands.IntakeOff(self.intake)
+            ),
+
+        )
 
     def teleopInit(self):
         driving_command = create_twinstick_tracking_command(self.joystick_one,
@@ -321,13 +329,13 @@ class MyRobot(commands2.TimedCommandRobot):
         self._y_axis_control.set_current_position(estimated_pose.y)
 
         cmd = commands2.cmd.ParallelRaceGroup(
-            commands2.cmd.SequentialCommandGroup(
+            commands2.cmd.sequence(
                 commands.Shoot(self.shooter, self.indexer),
                 commands2.cmd.WaitCommand(
                     robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
                 commands2.cmd.ParallelCommandGroup(
                     commands.Load(self.intake, self.indexer),
-                    commands2.cmd.SequentialCommandGroup(
+                    commands2.cmd.sequence(
                         commands.GotoXYTheta(self.swerve_drive, (1, 0, 0),
                                              self._x_axis_control, self._y_axis_control, self._heading_control)
                         # commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
