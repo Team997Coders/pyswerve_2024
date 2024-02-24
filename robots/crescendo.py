@@ -125,6 +125,12 @@ standard_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.15, 
 standard_joystick_rotation_axis_config = AxisConfig(deadband=math_help.Range(0.5, 1),
                                                     output_range=math_help.Range(0,
                                                                                  physical_properties.max_drive_speed))
+slow_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
+                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed/2))
+
+slow_joystick_rotation_axis_config = AxisConfig(deadband=math_help.Range(0.5, 1),
+                                                    output_range=math_help.Range(0,
+                                                                                 physical_properties.max_drive_speed/2))
 
 standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1),
                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))

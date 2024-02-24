@@ -1,4 +1,4 @@
-from . import climber
+
 from .climber import Climber
 
 from . import indexer

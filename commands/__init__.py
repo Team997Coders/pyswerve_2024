@@ -1,4 +1,3 @@
-from . import shoot
 from . import auto
 
 from . import index

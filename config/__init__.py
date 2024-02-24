@@ -37,5 +37,5 @@ from .indexer import IndexerConfig
 from . import climber
 from .climber import ClimberConfig
 
-from . import bar
-from .bar import BarConfig
+# from . import bar
+# from .bar import BarConfig

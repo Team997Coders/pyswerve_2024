@@ -59,6 +59,7 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
         x_axis_func = lambda: drivers.map_input(lambda: controller.getRawAxis(1),
                                                 robot_config.standard_joystick_drive_axis_config)
 
+
     return commands.drive.Drive(
         swerve_drive,
         get_x=x_axis_func,
@@ -68,7 +69,23 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
                                         robot_config.standard_joystick_drive_axis_config),
         get_theta=lambda: heading_control.desired_velocity)
 
-
+def create_twinstick_tracking_command_slow(controller: commands2.button.CommandGenericHID,
+                                      swerve_drive: swerve.SwerveDrive,
+                                      heading_control: subsystems.ChassisHeadingControl):
+    if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+        x_axis_func = lambda: drivers.map_input(lambda: -controller.getRawAxis(1),
+                                                robot_config.slow_joystick_drive_axis_config)
+    else:
+        x_axis_func = lambda: drivers.map_input(lambda: controller.getRawAxis(1),
+                                                robot_config.slow_joystick_drive_axis_config)
+    return commands.drive.Drive(
+        swerve_drive,
+        get_x=x_axis_func,
+        # get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
+        #                                 robot_config.standard_joystick_drive_axis_config),
+        get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
+                                        robot_config.slow_joystick_drive_axis_config),
+        get_theta=lambda: heading_control.desired_velocity)
 def create_3dof_command(controller: commands2.button.CommandGenericHID,
                         swerve_drive: swerve.SwerveDrive):
     return commands.drive.Drive(
@@ -90,6 +107,17 @@ def create_twinstick_heading_command(controller: commands2.button.CommandGeneric
                                         robot_config.standard_joystick_rotation_axis_config),
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
                                         robot_config.standard_joystick_rotation_axis_config))
+
+
+def create_twinstick_heading_command_slow(controller: commands2.button.CommandGenericHID,
+                                     heading_control: subsystems.ChassisHeadingControl):
+    return commands.drive.TwinstickHeadingSetter(
+        set_heading_goal=heading_control.setGoal,
+        get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
+                                        robot_config.slow_joystick_rotation_axis_config),
+        get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
+                                        robot_config.slow_joystick_rotation_axis_config)
+    )
 
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -117,7 +145,6 @@ class MyRobot(commands2.TimedCommandRobot):
     shooter: subsystems.Shooter
     intake: subsystems.Intake
     indexer: subsystems.Indexer
-    reset_gyro: commands.reset_gyro
     _heading_control: subsystems.ChassisHeadingControl
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
@@ -176,12 +203,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_one.button(2).toggleOnTrue(self.swerve_drive.reset_pose())
         self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter))
-        self.joystick_one.button(4).toggleOnTrue(self.reset_gyro)
+
+        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.joystick_two.button(2).toggleOnTrue(create_twinstick_tracking_command_slow())
+        self.joystick_two.button(3).toggleOnTrue(create_twinstick_heading_command_slow())
+
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-
         # POINTING COMMANDS USING LOCATION FOR RED ON JOYSTICK 2
         ################################################################################################################
         ###POINT TOWARDS RED SPEAKER ON BUTTON 3 -> STICK 2
@@ -287,7 +317,6 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                  self._heading_control)
         self.heading_command = create_twinstick_heading_command(self.joystick_two,
                                                                 self._heading_control)
-
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
