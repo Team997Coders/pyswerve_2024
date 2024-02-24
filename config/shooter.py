@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ShooterConfig():
+class ShooterConfig:
     left_motor: MotorConfig
     right_motor: MotorConfig
     left_flywheel_gear_ratio: float

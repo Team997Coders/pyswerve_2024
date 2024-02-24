@@ -1,3 +1,7 @@
+"""
+Telemetry contains classes that are used to send data to the smart dashboard
+"""
+
 from .sparkmaxpid import SparkMaxPIDEntry
 from .swerve_telemetry import SwerveTelemetry
 from .mechanisms_telemetry import ShowMechansimPIDs, UpdateMechansimPIDs
