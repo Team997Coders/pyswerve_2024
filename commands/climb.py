@@ -8,24 +8,11 @@ from subsystems.climber import Climber
 
 class ClimberFollow(commands2.InstantCommand):
     _climber: Climber
-    _arm_range: Range
-    _arm_position: float
 
-    def __init__(self, climber, config: AxisConfig, pid: wpimath.controller.PIDController, ticks_to_climb: float):
+    def __init__(self, climber, height_getter: callable[[], float]):
         super().__init__()
         self._climber = climber
-        self._config = config
-        self._pid = pid
-        self._ticks_to_climb = ticks_to_climb
-        self._arm_range = Range(0, 1)
-        self._arm_position = 0.0
-
-    def initialize(self):
-        self._arm_range = Range(min_val=self._climber.climber_encoder, max_val=self._ticks_to_climb)
-
+        self._climb_input = height_getter()
 
     def execute(self):
-        input = self._config.controller.getRawAxis(self._config.axis_index)
-        output = shared.map_input_to_output_range(input, self._config.input_range, self._arm_range)
-        self._pid.setGoal(output)
-        self._climber.velocity = self._pid.calculate(self._climber.velocity, self._climber.climber_encoder)
+        self._climber.position = self._climb_input

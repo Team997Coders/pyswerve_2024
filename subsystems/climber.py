@@ -1,6 +1,7 @@
 import rev
 import wpilib
 import subsystems
+import logging
 import commands2
 import config
 from config import ClimberConfig
@@ -11,13 +12,16 @@ class Climber(commands2.Subsystem):
     climber_motor: rev.CANSparkMax
     climber_encoder: rev.RelativeEncoder.EncoderType.kHallSensor
     config: config.ClimberConfig
+    _logger: logging.Logger
 
-    def __init__(self, config: ClimberConfig):
+    def __init__(self, config: ClimberConfig, logger: logging.Logger):
         super().__init__()
         self.config = config
+        self._logger = logger.getChild("Climber")
         self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(0)
+        self.climber_encoder.setPositionConversionFactor(config.climber_encoder_ticks)
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
@@ -38,3 +42,12 @@ class Climber(commands2.Subsystem):
     @velocity.setter
     def velocity(self, value):
         self._pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        # self.climber_motor.set(value)
+
+    @property
+    def position(self):
+        return self.climber_encoder.getPosition()
+
+    @position.setter
+    def position(self, value):
+        self._pid.setReference(value, rev.CANSparkMax.ControlType.kPosition)
