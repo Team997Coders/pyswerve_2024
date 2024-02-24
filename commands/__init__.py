@@ -2,10 +2,12 @@ from . import shoot
 from . import auto
 
 from . import index
-from .index import IndexOn, IndexOff
+from .index import IndexOnIntake, IndexOnShoot, IndexOff
 
 from . import intake
 from .intake import Load, Outtake
+# from . import reset_gyro
+# from .reset_gyro import ResetGyro
 
 from . import climb
 from . import drive

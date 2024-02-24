@@ -1,7 +1,7 @@
 import commands2
 from wpilib import SmartDashboard
 from subsystems import Intake, Indexer
-from commands import IndexOn, IndexOff
+from commands import IndexOnIntake, IndexOff
 
 
 class Outtake(commands2.InstantCommand):
@@ -84,7 +84,7 @@ class Load(commands2.InstantCommand):
         self.intake_scheduled = True
         self._command = commands2.cmd.sequence(
             commands2.cmd.ParallelCommandGroup(IntakeOn(intake),
-                                               IndexOn(indexer)),
+                                               IndexOnIntake(indexer)),
             commands2.cmd.ParallelRaceGroup(IndexSensorCommand(indexer), commands2.cmd.WaitCommand(5)),
             IntakeOff(intake),
             IndexOff(indexer)

@@ -49,7 +49,7 @@ class Shoot(commands2.InstantCommand):
                 index.IndexOff(indexer)
             ),
             commands2.WaitCommand(shooter.config.default_spinup_delay),
-            index.IndexOn(indexer),
+            index.IndexOnShoot(indexer),
             commands2.WaitCommand(shooter.config.default_fire_time),
             commands2.cmd.ParallelCommandGroup(
                 SpindownShooter(shooter),
