@@ -39,6 +39,7 @@ class Indexer(commands2.Subsystem):
 
         self._indexer_motor = rev.CANSparkMax(config.motor_config.id, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self._indexer_motor, config.motor_config)
+        self._indexer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self._indexer_encoder = self._indexer_motor.getEncoder()
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
         self._indexer_pid = self._indexer_motor.getPIDController()
@@ -62,6 +63,7 @@ class Indexer(commands2.Subsystem):
 
     @velocity.setter
     def velocity(self, value):
-        if value == 0:
-            self._indexer_encoder.setPosition(0)
-        self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        # if value == 0:
+        # self._indexer_encoder.setPosition(0)
+        # self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        self._indexer_motor.set(1)
