@@ -29,7 +29,7 @@ class Intake(commands2.Subsystem):
         hardware.init_pid(self._intake_pid, self.config.pid, feedback_device=self.intake_encoder)
 
         self.intake_encoder.setPositionConversionFactor(1)
-        # self.intake_encoder.setVelocityConversionFactor(1)
+        self.intake_encoder.setVelocityConversionFactor(1)
 
     @property
     def intake_velocity(self) -> float:
@@ -37,17 +37,18 @@ class Intake(commands2.Subsystem):
 
     @intake_velocity.setter
     def intake_velocity(self, value: float):
-        # self._intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        self._intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        if value == 0:  #If we are stopping, reset the encoder
+            self.intake_encoder.setPosition(0)
+
+    def speed(self, value: float):
         self.intake_motor.set(value)
-        print(f"intake velocity value: {value}")
-        # if value == 0:
-        #     self.intake_encoder.setPosition(0)
 
     @property
     def voltage(self) -> float:
-        return 0
+        return self.intake_motor.getBusVoltage()
 
     @voltage.setter
     def voltage(self, value: float) -> float: 
-        return self._intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+        return self.intake_motor.setVoltage(value)
 

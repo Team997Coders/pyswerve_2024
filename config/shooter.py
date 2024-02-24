@@ -1,4 +1,3 @@
-from typing import NamedTuple
 from config import MotorConfig
 from dataclasses import dataclass
 

@@ -1,10 +1,10 @@
-from typing import NamedTuple
-
-import wpilib
-import rev
 from config import MotorConfig, PIDConfig
+from dataclasses import dataclass
 
-class IntakeConfig(NamedTuple):
+
+@dataclass
+class IntakeConfig:
     motor: MotorConfig
     pid: PIDConfig
-    default_velocity: float
+    intake_velocity: float  # Speed for pulling the note off the ground
+    outtake_velocity: float # How fast to run the motor when ejecting a note without shooting it

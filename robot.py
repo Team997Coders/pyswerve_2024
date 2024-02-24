@@ -102,6 +102,10 @@ class MyRobot(commands2.TimedCommandRobot):
     x_axis_telemetry: telemetry.AxisPositionTelemetry
     y_axis_telemetry: telemetry.AxisPositionTelemetry
 
+    shooter_telemetry: telemetry.ShooterTelemetry
+    indexer_telemetry: telemetry.IndexerTelemetry
+    intake_telemetry:  telemetry.IntakeTelemetry
+
     test_driver: TestDriver
     teleop_drive: TeleopDrive
     twinstick_teleop_drive: TwinStickTeleopDrive
@@ -134,7 +138,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     sysid: subsystems.swerve_system_id
 
-    shooter_telemetry: telemetry.ShooterTelemetry
  
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
@@ -162,6 +165,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
+        sd.putData("Field", self.field)  # TODO: Does this only need to be called once?
+
         self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
             robotpy_apriltag.AprilTagField.k2024Crescendo)
         if robot_config.physical_properties.gyro_on_spi:
@@ -237,8 +242,19 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
+        self.init_mechanism_telemetry()
+
+    def init_mechanism_telemetry(self):
         telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
+        self.intake_telemetry = telemetry.IntakeTelemetry(self.intake.config)
+        self.indexer_telemetry = telemetry.IndexerTelemetry(self.indexer.config)
         self.shooter_telemetry = telemetry.ShooterTelemetry(self.shooter.config)
+
+    def mechanism_telemetry_periodic(self):
+        self.intake_telemetry.periodic()
+        self.indexer_telemetry.periodic()
+        self.shooter_telemetry.periodic()
+        telemetry.UpdateMechansimPIDs(self)
    
     def init_positioning_pids(self):
         self._heading_control = subsystems.ChassisHeadingControl(
@@ -250,7 +266,8 @@ class MyRobot(commands2.TimedCommandRobot):
             initial_angle=self.swerve_drive.gyro_angle_radians
         )
 
-        # TODO: update intial position again after photonvision
+        # TODO: update intial position again after photonvision.  This is currently done in AutonoumousInit,
+        # but there may be a better way to do this.  Do we check in every initializer?
         self._x_axis_control = subsystems.AxisPositionControl(
             get_chassis_position_measurement=lambda: self.swerve_drive.pose.x,
             get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vx,
@@ -282,12 +299,9 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_drive.periodic()
         self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
-        sd.putData("Field", self.field)
         self.swerve_telemetry.report_to_dashboard()
         self.report_position_control_to_dashboard()
-        self.heading_controller_telemetry.report_to_dashboard()
-        self.shooter_telemetry.periodic()
-        telemetry.UpdateMechansimPIDs(self)
+        self.mechanism_telemetry_periodic()
 
     def disabledInit(self):
         super().disabledInit()

@@ -47,6 +47,7 @@ class Indexer(commands2.Subsystem):
         self._indexer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self._indexer_encoder = self._indexer_motor.getEncoder()
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
+        self._indexer_encoder.setVelocityConversionFactor(3 / 10)
         self._indexer_pid = self._indexer_motor.getPIDController()
         hardware.init_pid(self._indexer_pid, self.config.pid)
 
@@ -67,12 +68,20 @@ class Indexer(commands2.Subsystem):
         self._indexer_motor.setVoltage(value)
 
     @property
+    def speed(self) -> float:
+        return self._indexer_motor.get()
+
+    @speed.setter
+    def speed(self, value: float):
+        self._indexer_motor.set(value)
+
+    @property
     def velocity(self) -> float:
         return self._indexer_encoder.getVelocity()
 
     @velocity.setter
     def velocity(self, value):
-        # if value == 0:
-        # self._indexer_encoder.setPosition(0)
-        # self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
-        self._indexer_motor.set(value)
+        if value == 0:  #Reset the encoder if we are stopping
+            self._indexer_encoder.setPosition(0)
+
+        self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)

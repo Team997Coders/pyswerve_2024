@@ -1,11 +1,14 @@
-from typing import NamedTuple
 from config import MotorConfig, PIDConfig
+from dataclasses import dataclass
 
 
-class IndexerConfig(NamedTuple):
+@dataclass
+class IndexerConfig:
     motor_config: MotorConfig
     indexer_sensor_id: int
     indexer_sensor_inverted: bool
     pid: PIDConfig
-    default_intake_velocity: float
-    default_shoot_velocity: float
+    intake_velocity: float #We tend to load slower to ensure breakbeam is triggered
+    shoot_velocity:  float #We tend to shoot faster to ensure we get the power we want
+    outtake_velocity: float #How fast to run the motor when ejecting a note without shooting it
+

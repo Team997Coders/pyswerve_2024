@@ -44,9 +44,9 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                default_spinup_delay=.5)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
-                               default_intake_velocity=.5, default_shoot_velocity=1)  # fix feeder_sensor_id
+                               intake_velocity=.5, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
-                             default_velocity=1)
+                             intake_velocity=1, outtake_velocity=-1)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None))
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,

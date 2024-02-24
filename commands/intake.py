@@ -24,8 +24,8 @@ class Outtake(commands2.InstantCommand):
 
     def execute(self):
         # self._intake.velocity = -self._intake.config.default_velocity
-        self._intake.velocity = -self._intake.config.default_velocity
-        self._index.velocity = -self._index.config.default_intake_velocity
+        self._intake.velocity = self._intake.config.outtake_velocity
+        self._index.velocity = self._index.config.outtake_velocity
         print("Outtake Run")
 
 
@@ -46,7 +46,7 @@ class IntakeOn(commands2.InstantCommand):
 
     def execute(self):
         # self._intake.velocity = 1  # self._intake.config.default_velocity
-        self._intake.voltage = 5
+        self._intake.speed = self._intake.config.intake_velocity
         print("Intake On")
 
 
