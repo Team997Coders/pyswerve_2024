@@ -37,10 +37,11 @@ class Intake(commands2.Subsystem):
 
     @intake_velocity.setter
     def intake_velocity(self, value: float):
-        self.intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        # self._intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        self.intake_motor.set(value)
         print(f"intake velocity value: {value}")
-        if value == 0:
-            self.intake_encoder.setPosition(0)
+        # if value == 0:
+        #     self.intake_encoder.setPosition(0)
 
     @property
     def voltage(self) -> float:

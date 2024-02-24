@@ -58,7 +58,8 @@ class Shooter(commands2.Subsystem):
     @velocity.setter
     def velocity(self, value: float):
         # print(f"Set shooter velocity {value}")
-        self._pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        # self._pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
+        self._left_motor.set(value)
 
     def setVoltage(self, value: float):
         # print(f"Set shooter voltage {value}")

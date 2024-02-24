@@ -66,4 +66,4 @@ class Indexer(commands2.Subsystem):
         # if value == 0:
         # self._indexer_encoder.setPosition(0)
         # self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
-        self._indexer_motor.set(1)
+        self._indexer_motor.set(value)

@@ -33,8 +33,8 @@ class IntakeOn(commands2.InstantCommand):
     _intake: Intake
 
     def __init__(self, intake):
-        """Pass other subsystems and a logger to this subsystem for debugging
-
+        """
+        Pass other subsystems and a logger to this subsystem for debugging
         :param command_scheduler: Defined in robot.py, allows registering the subsystem and schedules commands
         :param logger: A python built-in package that handles writing logging messages to netconsole
         """
@@ -45,7 +45,7 @@ class IntakeOn(commands2.InstantCommand):
         self._intake = intake
 
     def execute(self):
-        # self._intake.velocity = self._intake.config.default_velocity
+        # self._intake.velocity = 1  # self._intake.config.default_velocity
         self._intake.voltage = 5
         print("Intake On")
 
@@ -60,8 +60,8 @@ class IntakeOff(commands2.InstantCommand):
         self._intake = intake
 
     def execute(self):
-        # self._intake.velocity = 0
-        self._intake.voltage = 0
+        self._intake.velocity = 0
+        # self._intake.voltage = 0
         print("Intake Off")
 
 
