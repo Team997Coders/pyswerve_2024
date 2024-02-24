@@ -4,6 +4,7 @@ from .mechanisms_telemetry import ShowMechansimPIDs
 from .generic_telemetry import FloatEntry
 from . import chassis_heading_telemetry 
 from .chassis_heading_telemetry import ChassisHeadingTelemetry, AxisPositionTelemetry
+from .shooter_telemetry import ShooterTelemetry
 import wpilib
 
 def create_selector(sd_path: str, autos : list[str]) -> wpilib.SendableChooser:

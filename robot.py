@@ -133,6 +133,8 @@ class MyRobot(commands2.TimedCommandRobot):
     auto_chooser: wpilib.SendableChooser 
 
     sysid: subsystems.swerve_system_id
+
+    shooter_telemetry: telemetry.ShooterTelemetry
  
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
@@ -235,6 +237,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
         telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
+        self.shooter_telemetry = telemetry.ShooterTelemetry(self.shooter.config)
    
     def init_positioning_pids(self):
         self._heading_control = subsystems.ChassisHeadingControl(
@@ -282,6 +285,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_telemetry.report_to_dashboard()
         self.report_position_control_to_dashboard()
         self.heading_controller_telemetry.report_to_dashboard()
+        self.shooter_telemetry.periodic()
 
     def disabledPeriodic(self):
         self._command_scheduler.cancelAll()

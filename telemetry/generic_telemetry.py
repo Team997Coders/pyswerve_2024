@@ -13,7 +13,8 @@ class FloatEntry:
 
     def __init__(self, subtable: str, name: str, get_value: Callable[[], float] | None, set_value: Callable[[float], None], default_value: float | None = 0.0):
         self._value = get_value() if get_value is not None else default_value
-
+        self._get_value = get_value
+        self._set_value = set_value
         nt_instance = ntcore.NetworkTableInstance.getDefault()
         table_instance = nt_instance.getTable("SmartDashboard").getSubTable(subtable)
 
@@ -21,10 +22,10 @@ class FloatEntry:
 
         value_topic.publish(ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
 
-        self._value_entry = value_topic.getEntry(self._pid_values.p,
+        self._value_entry = value_topic.getEntry(self._value,
                                              ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
 
-        self._value_entry.set(self._pid_values.p, 0)
+        self._value_entry.set(self._value, 0)
 
     def handle_updates(self, entry: ntcore.DoubleEntry, current_val: float,
                        setter: Callable[[float], None]) -> float:
