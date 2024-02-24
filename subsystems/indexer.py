@@ -16,10 +16,15 @@ class Indexer(commands2.Subsystem):
     _indexer_sensor: wpilib.DigitalInput | None
     _logger: logging.Logger
     _read_indexer_state: Callable[[], bool]
+    _last_sensor_state: bool = False
 
     @property
     def pid(self) -> rev.SparkMaxPIDController:
         return self._indexer_pid
+
+    @property
+    def last_sensor_state(self) -> bool:
+        return self._last_sensor_state
 
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
@@ -44,6 +49,10 @@ class Indexer(commands2.Subsystem):
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
         self._indexer_pid = self._indexer_motor.getPIDController()
         hardware.init_pid(self._indexer_pid, self.config.pid)
+
+    def periodic(self) -> None:
+        super().periodic()
+        self._last_sensor_state = self._read_indexer_state()
 
     @property
     def ready(self) -> bool:

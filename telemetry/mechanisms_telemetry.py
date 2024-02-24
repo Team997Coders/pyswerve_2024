@@ -1,6 +1,7 @@
 from wpilib import SmartDashboard as sd
 from telemetry import SparkMaxPIDEntry
 import rev
+import ntcore
 
 shooter_pid_entry = None
 indexer_pid_entry = None
@@ -19,4 +20,7 @@ def ShowMechansimPIDs(r):
     sd.putData("Shooter PID", shooter_pid_entry)
     sd.putData("Indexer PID", indexer_pid_entry)
     sd.putData("Intake PID", intake_pid_entry)
+
+def UpdateMechansimPIDs(r):
+    sd.putBoolean("Intake Sensor", r.indexer.last_sensor_state)
 

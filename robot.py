@@ -286,6 +286,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.report_position_control_to_dashboard()
         self.heading_controller_telemetry.report_to_dashboard()
         self.shooter_telemetry.periodic()
+        telemetry.UpdateMechansimPIDs(self)
 
     def disabledInit(self):
         super().disabledInit()
