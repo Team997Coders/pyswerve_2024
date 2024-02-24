@@ -17,10 +17,10 @@ class swerve_system_id(commands2.subsystem.Subsystem):
         return commands2.SequentialCommandGroup(
             SetSwerveModuleAngles(self._swerve_drive, angle=0),
             commands2.cmd.WaitCommand(1),
-            self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
             self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kReverse),
             self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
             self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kReverse),
+            self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
         )
 
     def create_dynamic_measurement_command(self):
@@ -28,10 +28,10 @@ class swerve_system_id(commands2.subsystem.Subsystem):
         return commands2.SequentialCommandGroup(
             SetSwerveModuleAngles(self._swerve_drive, angle=0),
             commands2.cmd.WaitCommand(1),
-            self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
             self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kReverse),
             self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
             self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kReverse),
+            self.drive_forward_routine.dynamic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
         )
 
     def __init__(self, swerve_drive: SwerveDrive, log_name: str):
