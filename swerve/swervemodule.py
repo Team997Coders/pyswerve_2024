@@ -55,6 +55,14 @@ class SwerveModule(ISwerveModule):
         """Module position ID"""
         return self._id
 
+    def angle_pid(self) -> rev.SparkMaxPIDController:
+        """This is exposed only for SmartDashboard to edit PID values"""
+        return self.angle_pid
+
+    def drive_pid(self) -> rev.SparkMaxPIDController:
+        """This is exposed only for SmartDashboard to edit PID values"""
+        return self.drive_pid
+
     def __init__(self, position: ModulePosition, module_config: SwerveModuleConfig, physical_config: PhysicalConfig,
                  logger: logging.Logger):
         self._id = position
@@ -226,7 +234,6 @@ class SwerveModule(ISwerveModule):
     def drive_set_distance(self, meters: float, angle: float):
         """Drive the wheel a specific distance in meters.  If you use this call, desired state speed will be incorrect until
            you set desired_state again. This is because the PID controller will be driving the wheel to the specified distance."""
-        self.drive_motor_encoder.setPosition(0)
         self.drive_pid.setReference(meters, rev.CANSparkMax.ControlType.kPosition)
         self.angle = angle
 

@@ -16,6 +16,15 @@ class Indexer(commands2.Subsystem):
     _indexer_sensor: wpilib.DigitalInput | None
     _logger: logging.Logger
     _read_indexer_state: Callable[[], bool]
+    _last_sensor_state: bool = False
+
+    @property
+    def pid(self) -> rev.SparkMaxPIDController:
+        return self._indexer_pid
+
+    @property
+    def last_sensor_state(self) -> bool:
+        return self._last_sensor_state
 
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
@@ -35,10 +44,16 @@ class Indexer(commands2.Subsystem):
 
         self._indexer_motor = rev.CANSparkMax(config.motor_config.id, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self._indexer_motor, config.motor_config)
+        self._indexer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self._indexer_encoder = self._indexer_motor.getEncoder()
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
+        self._indexer_encoder.setVelocityConversionFactor(3 / 10)
         self._indexer_pid = self._indexer_motor.getPIDController()
         hardware.init_pid(self._indexer_pid, self.config.pid)
+
+    def periodic(self) -> None:
+        super().periodic()
+        self._last_sensor_state = self._read_indexer_state()
 
     @property
     def ready(self) -> bool:
@@ -53,11 +68,20 @@ class Indexer(commands2.Subsystem):
         self._indexer_motor.setVoltage(value)
 
     @property
+    def speed(self) -> float:
+        return self._indexer_motor.get()
+
+    @speed.setter
+    def speed(self, value: float):
+        self._indexer_motor.set(value)
+
+    @property
     def velocity(self) -> float:
         return self._indexer_encoder.getVelocity()
 
     @velocity.setter
     def velocity(self, value):
-        if value == 0:
+        if value == 0:  #Reset the encoder if we are stopping
             self._indexer_encoder.setPosition(0)
+
         self._indexer_pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)

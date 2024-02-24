@@ -15,7 +15,8 @@ default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, 
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
 default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
-                                        profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
+                                        profile=VelocityAccelerationConfig(velocity=math.pi * 4,
+                                                                           acceleration=3 * math.pi),
                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05)
                                         )
 default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
@@ -39,15 +40,16 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                left_flywheel_gear_ratio=1,
                                right_flywheel_diameter_cm=12,
                                left_flywheel_diameter_cm=12,
-                               default_velocity=3,
-                               default_fire_time=1,
-                               default_spinup_delay=2)  # add motor configs
+                               default_velocity=1,
+                               default_fire_time=.6,
+                               default_spinup_delay=.8)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
-                               default_velocity=500)  # fix feeder_sensor_id
+                               intake_velocity=.5, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
-                             default_velocity=.5)
-climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None))
+                             intake_velocity=1, outtake_velocity=-1)
+climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
+                               climber_encoder_ticks=1000)
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
@@ -58,7 +60,8 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,
                                      invert_gyro=False,
-                                     gyro_on_spi=True)
+                                     gyro_on_spi=True,
+                                     )
 
 swerve_modules = {ModulePosition.front_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False,
@@ -120,11 +123,17 @@ swerve_modules = {ModulePosition.front_left:
                   }  # type: dict[ModulePosition, SwerveModuleConfig]
 
 standard_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
-                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))
+                                                 output_range=math_help.Range(0,
+                                                                              physical_properties.max_drive_speed))
 
 standard_joystick_rotation_axis_config = AxisConfig(deadband=math_help.Range(0.5, 1),
                                                     output_range=math_help.Range(0,
                                                                                  physical_properties.max_drive_speed))
 
 standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1),
-                                                output_range=math_help.Range(0, physical_properties.max_drive_speed))
+                                                output_range=math_help.Range(0,
+                                                                             physical_properties.max_drive_speed))
+
+standard_joystick_climber_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
+                                                   output_range=math_help.Range(0,
+                                                                                climber_config.climber_encoder_ticks))

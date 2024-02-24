@@ -32,18 +32,27 @@ class SwerveTelemetry:
         maxy = max([l.Y() for l in locations])
         sd.putNumber("swerve/sizeLeftRight", maxy - miny)
         sd.putNumber("swerve/sizeFrontBack", maxx - minx)
+        sd.putString("swerve/rotationUnit", "degrees")
+
+        # for m in self.swerve_drive.ordered_modules:
+        #     sd.putData(f"swerve/{m.position}/angle_pid", m.angle_pid)
+        #     sd.putData(f"swerve/{m.position}/drive_pid", m.drive_pid)
     
     def report_to_dashboard(self):
         """Write all module info to nettables"""
         sd.putNumberArray("swerve/measuredStates", self.unpack_tuples(
             [(m.measured_state.angle.degrees(), m.measured_state.speed) for m in self.swerve_drive.ordered_modules]))
-        sd.putNumberArray("swerve/desiredStates", self.unpack_tuples([(m.desired_state.angle.degrees(), m.desired_state.speed) for m in self.swerve_drive.ordered_modules]))
+        sd.putNumberArray("swerve/desiredStates", self.unpack_tuples([(m.desired_state.angle.degrees(),
+                                                                       m.desired_state.speed)
+                                                                      for m in self.swerve_drive.ordered_modules]))
         sd.putNumber("swerve/robotRotation", self.swerve_drive.gyro_angle_degrees)
-        sd.putString("swerve/rotationUnit", "degrees") 
         measured_chassis_speed = self.swerve_drive.measured_chassis_speed
-        sd.putNumberArray("swerve/measuredChassisSpeeds", [measured_chassis_speed.vx, measured_chassis_speed.vy, measured_chassis_speed.omega])
+        sd.putNumberArray("swerve/measuredChassisSpeeds", [measured_chassis_speed.vx,
+                                                           measured_chassis_speed.vy,
+                                                           measured_chassis_speed.omega])
          
         #sd.putString("swerve/forwardDirection", forwardDirection)
         #sd.putNumber("swerve/maxAngularVelocity", maxAngularVelocity)
         # sd.putNumberArray("swerve/measuredChassisSpeeds", measuredChassisSpeeds)
-        #sd.putNumberArray("swerve/desiredChassisSpeeds", desiredChassisSpeeds)
+        desired_chassis_speeds = self.swerve_drive.desired_chassis_speed
+        sd.putNumberArray("swerve/desiredChassisSpeeds", desired_chassis_speeds)

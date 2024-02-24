@@ -12,11 +12,30 @@ from debug import attach_debugger
 from wpilib import SmartDashboard
 from math_help import map_input_to_output_range
 import wpimath.controller
+import wpimath.kinematics as kinematics
 import wpimath.geometry as geom
 from typing import Callable
 import commands2
 import commands2.button
 import subsystems
+
+
+class SetSwerveModuleAngles(commands2.InstantCommand):
+    """Tell the swerve drive to set the angle of each module.  This is useful for
+       running calibration and test routines such as SysID that only move drive motors"""
+    _swerve_drive: swerve.SwerveDrive
+    _angle: float
+
+    def __init__(self, swerve_drive: swerve.SwerveDrive, angle: float):
+        super().__init__()
+        self._swerve_drive = swerve_drive
+        self._angle = angle
+        self.requirements = {swerve_drive}
+
+    def execute(self):
+        desired_states = tuple([kinematics.SwerveModuleState(0, wpimath.geometry.Rotation2d(self._angle)) for m in self._swerve_drive.modules])
+        self._swerve_drive.drive_with_module_states(desired_states, None) # type: ignore
+
 
 
 class Drive(commands2.Command):
@@ -44,7 +63,6 @@ class Drive(commands2.Command):
         self.send_drive_command(x, y, theta)
 
     def send_drive_command(self, vx: float, vy: float, vtheta: float):
-
         chassis_speeds = self._swerve_drive.measured_chassis_speed
         velocity = math.sqrt(chassis_speeds.vx ** 2 + chassis_speeds.vy ** 2)
 
@@ -94,5 +112,6 @@ class TwinstickHeadingSetter(commands2.Command):
         y = self.get_y()
         if x == 0 and y == 0:
             return
-        heading = geom.Rotation2d(-x, y).radians()
-        self.set_heading_goal(heading)
+        else:
+            heading = geom.Rotation2d(-x, y).radians()
+            self.set_heading_goal(heading)

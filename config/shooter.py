@@ -1,7 +1,9 @@
-from typing import NamedTuple
 from config import MotorConfig
+from dataclasses import dataclass
 
-class ShooterConfig(NamedTuple):
+
+@dataclass
+class ShooterConfig:
     left_motor: MotorConfig
     right_motor: MotorConfig
     left_flywheel_gear_ratio: float

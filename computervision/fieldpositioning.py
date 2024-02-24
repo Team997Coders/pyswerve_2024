@@ -31,7 +31,7 @@ class AprilTagDetector:
         self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(robotpy_apriltag.AprilTagField.k2024Crescendo)
         self.swerve_drive = swerve_drive
         self.apriltag_seen = False
-        self.photonvision = PhotonCamera("Front camera")
+        self.photonvision = PhotonCamera("Front Camera")
         self.photon_pose_estimatior = PhotonPoseEstimator(self.apriltagfieldlayout,
                                                           PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                                                           self.photonvision, self.cam_position)
