@@ -1,5 +1,6 @@
 import sys
 
+import autos
 import robotpy_apriltag
 import wpilib
 import wpilib.event
@@ -128,10 +129,11 @@ class MyRobot(commands2.TimedCommandRobot):
 
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
-    robot_control_commands: list
+    robot_control_commands: list 
+    auto_chooser: wpilib.SendableChooser 
 
     sysid: subsystems.swerve_system_id
-
+ 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
 
@@ -152,6 +154,9 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotInit(self):
         super().robotInit()
+
+        self.auto_chooser = telemetry.create_selector("autos", autos.auto_paths)
+
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
@@ -190,8 +195,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
 
         self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-        # self.joystick_one.button(3).toggleOnTrue(commands.ResetGyro())
+        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer)) 
+        self.joystick_one.button(3).toggleOnTrue(commands.SpinupShooter(self.shooter)) 
         self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
         self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
 
@@ -300,9 +305,13 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousInit(self):
         super().autonomousInit()
+ 
 
+        auto_path_index = self.auto_chooser.getSelected()
+        sd.putString("selected auto",str(autos.auto_paths[auto_path_index])) 
+    
         #  Hopefully at this point we've gotten an april tag fix.  Use that
-        #  information to update our positioning pids
+        #  information to update our positioning pids 
         estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
         self._x_axis_control.set_current_position(estimated_pose.x)
         self._y_axis_control.set_current_position(estimated_pose.y)

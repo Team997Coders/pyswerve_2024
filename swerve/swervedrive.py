@@ -155,6 +155,10 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         desired_chasis_speeds = kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
             -self.gyro_angle_radians))  # keep this one
 
+        self.drive_with_chassis_speeds(desired_chasis_speeds, run_modules)
+
+    def drive_with_chassis_speeds(self, desired_chasis_speeds: kinematics.ChassisSpeeds,
+              run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
         self.drive_with_module_states(module_states, run_modules=run_modules)
 

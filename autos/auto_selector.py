@@ -1,12 +1,7 @@
-from .sparkmaxpid import SparkMaxPIDEntry
-from .swerve_telemetry import SwerveTelemetry
-from .mechanisms_telemetry import ShowMechansimPIDs
-from .generic_telemetry import FloatEntry
-from . import chassis_heading_telemetry 
-from .chassis_heading_telemetry import ChassisHeadingTelemetry, AxisPositionTelemetry
 import wpilib
 
-def create_selector(sd_path: str, autos : list[str]) -> wpilib.SendableChooser:
+
+def create_auto_selector(sd_path: str, autos : list[str]) -> wpilib.SendableChooser:
     """Creates a widget in smart dashboard that can select which test group to run from a list
     :param sd_path: The path in smart dashboard to write the selected test group to
     """
@@ -18,4 +13,4 @@ def create_selector(sd_path: str, autos : list[str]) -> wpilib.SendableChooser:
     path = autos[-1]  # The last test in the test group is the default
     chooser.setDefaultOption(path, len(autos) - 1)
     wpilib.SmartDashboard.putData(sd_path, chooser)
-    return chooser 
+    return chooser
