@@ -278,8 +278,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.report_position_control_to_dashboard()
         self.heading_controller_telemetry.report_to_dashboard()
 
-    def disabledInit(self):
-        super().disabledInit()
+    def disabledPeriodic(self):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
@@ -302,8 +301,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def autonomousInit(self):
         super().autonomousInit()
 
-        #Hopefully at this point we've gotten an april tag fix.  Use that
-        #information to update our positioning pids
+        #  Hopefully at this point we've gotten an april tag fix.  Use that
+        #  information to update our positioning pids
         estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
         self._x_axis_control.set_current_position(estimated_pose.x)
         self._y_axis_control.set_current_position(estimated_pose.y)
@@ -316,14 +315,14 @@ class MyRobot(commands2.TimedCommandRobot):
                 commands2.cmd.ParallelCommandGroup(
                     commands.Load(self.intake, self.indexer),
                     commands2.cmd.SequentialCommandGroup(
-                        commands.GotoXYTheta(self.swerve_drive, (.5, 0, 0),
-                                             self._x_axis_control, self._y_axis_control, self._heading_control),
-                        commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
-                                             self._x_axis_control, self._y_axis_control, self._heading_control),
-                        commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
-                                             self._x_axis_control, self._y_axis_control, self._heading_control),
-                        commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+                        commands.GotoXYTheta(self.swerve_drive, (1, 0, 0),
                                              self._x_axis_control, self._y_axis_control, self._heading_control)
+                        # commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
+                        #                      self._x_axis_control, self._y_axis_control, self._heading_control),
+                        # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
+                        #                      self._x_axis_control, self._y_axis_control, self._heading_control),
+                        # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+                        #                      self._x_axis_control, self._y_axis_control, self._heading_control)
 
                     ),
                 ),
