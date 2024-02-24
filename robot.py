@@ -21,7 +21,6 @@ import commands2
 import commands2.button
 from math_help import Range
 from wpilib import DriverStation
-# from commands import ResetGyro
 from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController
 from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from computervision.fieldpositioning import AprilTagDetector
@@ -309,10 +308,21 @@ class MyRobot(commands2.TimedCommandRobot):
         cmd = commands2.cmd.ParallelRaceGroup(
             commands2.cmd.SequentialCommandGroup(
                 commands.Shoot(self.shooter, self.indexer),
+                commands2.cmd.WaitCommand(
+                    robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
                 commands2.cmd.ParallelCommandGroup(
                     commands.Load(self.intake, self.indexer),
-                    commands.GotoXYTheta(self.swerve_drive, (.5, 0, math.pi),
-                                         self._x_axis_control, self._y_axis_control, self._heading_control),
+                    commands2.cmd.SequentialCommandGroup(
+                        commands.GotoXYTheta(self.swerve_drive, (.5, 0, math.pi),
+                                             self._x_axis_control, self._y_axis_control, self._heading_control),
+                        commands.GotoXYTheta(self.swerve_drive, (.5, .5, math.pi),
+                                             self._x_axis_control, self._y_axis_control, self._heading_control),
+                        commands.GotoXYTheta(self.swerve_drive, (0, .5, math.pi),
+                                             self._x_axis_control, self._y_axis_control, self._heading_control),
+                        commands.GotoXYTheta(self.swerve_drive, (0, 0, math.pi),
+                                             self._x_axis_control, self._y_axis_control, self._heading_control)
+
+                    ),
                 ),
             ),
             commands2.cmd.WaitCommand(15)
