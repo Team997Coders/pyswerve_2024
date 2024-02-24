@@ -25,6 +25,10 @@ class AxisPositionControl(commands2.ProfiledPIDSubsystem):
     _feedforward_component: float = 0  # The feedforward component of the most recent output
     _pid_component: float = 0  # The PID component of the most recent output
 
+    @property
+    def pid(self) -> wpimath.controller.ProfiledPIDController:
+        return self._position_pid
+
     def __init__(self,
                  get_chassis_position_measurement: Callable[[], float],
                  get_chassis_velocity_measurement: Callable[[], float],

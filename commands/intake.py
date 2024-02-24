@@ -6,8 +6,9 @@ from commands import IndexOn, IndexOff
 
 class Outtake(commands2.InstantCommand):
     _intake: Intake
+    _index: Indexer
 
-    def __init__(self, intake):
+    def __init__(self, intake, index):
         """
         Pass other subsystems and a logger to this subsystem for debugging
 
@@ -19,9 +20,12 @@ class Outtake(commands2.InstantCommand):
         super().__init__()
 
         self._intake = intake
+        self._index = index
 
     def execute(self):
-        self._intake.velocity = -self._intake.config.default_velocity
+        # self._intake.velocity = -self._intake.config.default_velocity
+        self._intake.voltage = -5
+        self._index.voltage = -5
         print("Outtake Run")
 
 
@@ -72,6 +76,7 @@ class IndexSensorCommand(commands2.WaitUntilCommand):
         return self._indexer.ready
 
 class Load(commands2.InstantCommand):
+    """Loads a note (ring) into the robot and prepares it to be fired"""
     _command: commands2.Command
 
     def __init__(self, intake: Intake, indexer: Indexer):

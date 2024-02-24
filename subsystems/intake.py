@@ -10,9 +10,13 @@ from config import IntakeConfig
 class Intake(commands2.Subsystem):
     intake_motor: rev.CANSparkMax
     intake_encoder: rev.SparkRelativeEncoder
-    intake_pid: rev.SparkMaxPIDController
+    _intake_pid: rev.SparkMaxPIDController
     config: IntakeConfig
     _logger: logging.Logger
+
+    @property
+    def pid(self) -> rev.SparkMaxPIDController:
+        return self._intake_pid
 
     def __init__(self, config: IntakeConfig, logger: logging.Logger):
         super().__init__()
@@ -21,8 +25,8 @@ class Intake(commands2.Subsystem):
         self.intake_motor = rev.CANSparkMax(config.motor.id, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self.intake_motor, config.motor)
         self.intake_encoder = self.intake_motor.getEncoder()
-        self.intake_pid = self.intake_motor.getPIDController()
-        hardware.init_pid(self.intake_pid, self.config.pid, feedback_device=self.intake_encoder)
+        self._intake_pid = self.intake_motor.getPIDController()
+        hardware.init_pid(self._intake_pid, self.config.pid, feedback_device=self.intake_encoder)
 
         self.intake_encoder.setPositionConversionFactor(1)
         # self.intake_encoder.setVelocityConversionFactor(1)
@@ -44,5 +48,5 @@ class Intake(commands2.Subsystem):
 
     @voltage.setter
     def voltage(self, value: float) -> float: 
-        return self.intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
+        return self._intake_pid.setReference(value, rev.CANSparkMax.ControlType.kVoltage)
 

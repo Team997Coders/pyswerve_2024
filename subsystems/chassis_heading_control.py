@@ -27,6 +27,10 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
     _feedforward_component: float = 0  # The feedforward component of the most recent output
     _pid_component: float = 0  # The PID component of the most recent output
 
+    @property
+    def pid(self) -> wpimath.controller.ProfiledPIDController:
+        return self._angle_pid
+
     def __init__(self,
                  get_chassis_angle_measurement: Callable[[], float],
                  get_chassis_angle_velocity_measurement: Callable[[], float],
@@ -50,8 +54,8 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         self._get_chassis_angle_velocity_measurement = get_chassis_angle_velocity_measurement
         if feedforward_config is not None:
             self._feedforward = wpimath.controller.SimpleMotorFeedforwardMeters(kS=feedforward_config.kS,
-                                                                            kA=feedforward_config.kA,
-                                                                            kV=feedforward_config.kV)
+                                                                                kA=feedforward_config.kA,
+                                                                                kV=feedforward_config.kV)
         else:
             self._feedforward = None
 
@@ -97,7 +101,7 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         self.setGoal(value)
 
     def atTarget(self) -> bool:
-        return self._position_pid.atGoal()
+        return self._angle_pid.atGoal()
 
     def useOutput(self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State):
         """Use the output from the controller object."""
