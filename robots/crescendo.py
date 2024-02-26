@@ -10,6 +10,10 @@ from .shared import swerve_current_limit, swerve_ramp_rate
 
 # Panel is #13
 
+#Set to true if the robot has mechanisms beyond navigation, vision, and swerve
+has_mechanisms = True
+
+
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)

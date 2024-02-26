@@ -7,6 +7,9 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
 
 from .shared import swerve_current_limit, swerve_ramp_rate
 
+#Set to true if the robot has mechanisms beyond navigation, vision, and swerve
+has_mechanisms = False
+
 joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.15, 1),
                                          y_deadband=math_help.Range(0.15, 1),
                                          theta_deadband=math_help.Range(0.05, 1))
@@ -22,8 +25,8 @@ default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05))
 default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
-                                     profile=VelocityAccelerationConfig(velocity=5, acceleration=1),
-                                     tolerance=PositionVelocityConfig(position=0.5, velocity=0.05))
+                                     profile=VelocityAccelerationConfig(velocity=1, acceleration=2.5),
+                                     tolerance=PositionVelocityConfig(position=0.5, velocity=0.1))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kV=0.01,
                                                 kA=0.001)

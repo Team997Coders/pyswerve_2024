@@ -31,7 +31,7 @@ import math
 # Change the name of the robot here to choose between different robots
 from robots import crescendo as robot_config
 
-is_test = False
+is_test = True
 
 ######################################################################
 
@@ -109,9 +109,10 @@ class MyRobot(commands2.TimedCommandRobot):
     x_axis_telemetry: telemetry.AxisPositionTelemetry
     y_axis_telemetry: telemetry.AxisPositionTelemetry
 
-    shooter_telemetry: telemetry.ShooterTelemetry
-    indexer_telemetry: telemetry.IndexerTelemetry
-    intake_telemetry:  telemetry.IntakeTelemetry
+    shooter_telemetry: telemetry.ShooterTelemetry | None = None
+    indexer_telemetry: telemetry.IndexerTelemetry | None = None
+    intake_telemetry: telemetry.IntakeTelemetry | None = None
+    climber_telemetry: telemetry.ClimberTelemetry | None = None
 
     test_driver: TestDriver
     teleop_drive: TeleopDrive
@@ -121,7 +122,7 @@ class MyRobot(commands2.TimedCommandRobot):
     controller: commands2.button.CommandXboxController
     joystick_one: commands2.button.CommandJoystick
     joystick_two: commands2.button.CommandJoystick
-    operator_control: commands2.button.CommandJoystick
+    operator_control: commands2.button.CommandJoystick | None = None
 
     field: wpilib.Field2d
     april_tag_one: AprilTagDetector
@@ -129,10 +130,10 @@ class MyRobot(commands2.TimedCommandRobot):
     trapezoid_profile: TrapezoidProfile.Constraints
     rotation_pid: ProfiledPIDControllerRadians
 
-    shooter: subsystems.Shooter
-    intake: subsystems.Intake
-    indexer: subsystems.Indexer
-    climber: subsystems.Climber
+    shooter: subsystems.Shooter = None
+    intake: subsystems.Intake = None
+    indexer: subsystems.Indexer = None
+    climber: subsystems.Climber = None
     _heading_control: subsystems.ChassisHeadingControl
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
@@ -141,12 +142,11 @@ class MyRobot(commands2.TimedCommandRobot):
 
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
-    robot_control_commands: list 
-    auto_chooser: wpilib.SendableChooser 
+    robot_control_commands: list
+    auto_chooser: wpilib.SendableChooser
 
     sysid: subsystems.swerve_system_id
 
- 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
 
@@ -186,10 +186,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
         self.operator_control = commands2.button.CommandJoystick(2)
+
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
-        SmartDashboard.putData("Field", self.field)
         self.swerve_drive.initialize()
         self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
 
@@ -205,18 +205,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
 
-        self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid, self.logger)
-        self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
-        self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
-        self.climber = subsystems.Climber(robot_config.climber_config, self.logger)
-
-        self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-        self.joystick_one.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
-
-        self.operator_control.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-        self.operator_control.button(1).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
-        self.operator_control.button(2).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+        self.try_init_mechanisms()
 
         self._tag_mappings = {
             #  blue tag mappings
@@ -244,7 +233,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_command = create_twinstick_heading_command(self.joystick_two,
                                                                 self._heading_control)
 
-        #Unbind before competition
+        # Unbind before competition
         self.joystick_two.button(5).toggleOnTrue(self.sysid.create_dynamic_measurement_command())
         self.joystick_one.button(5).toggleOnTrue(self.sysid.create_quasistatic_measurement_command())
 
@@ -252,20 +241,35 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
 
-        self.init_mechanism_telemetry()
+    def try_init_mechanisms(self):
+        """Initialize mechanisms if they are present in the robot config"""
+        if robot_config.has_mechanisms:
+            self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid,
+                                              self.logger)
+            self.indexer = subsystems.Indexer(robot_config.indexer_config, self.logger)
+            self.intake = subsystems.Intake(robot_config.intake_config, self.logger)
+            self.climber = subsystems.Climber(robot_config.climber_config, self.logger)
+            self.init_mechanism_telemetry()
+
+            self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+            self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
+            self.joystick_one.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
 
     def init_mechanism_telemetry(self):
-        telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
-        self.intake_telemetry = telemetry.IntakeTelemetry(self.intake.config)
-        self.indexer_telemetry = telemetry.IndexerTelemetry(self.indexer.config)
-        self.shooter_telemetry = telemetry.ShooterTelemetry(self.shooter.config)
+        if robot_config.has_mechanisms:
+            telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
+            self.intake_telemetry = telemetry.IntakeTelemetry(self.intake.config)
+            self.indexer_telemetry = telemetry.IndexerTelemetry(self.indexer)
+            self.shooter_telemetry = telemetry.ShooterTelemetry(self.shooter.config)
+            self.climber_telemetry = telemetry.ClimberTelemetry(self.climber.config)
 
     def mechanism_telemetry_periodic(self):
-        self.intake_telemetry.periodic()
-        self.indexer_telemetry.periodic()
-        self.shooter_telemetry.periodic()
-        telemetry.UpdateMechansimPIDs(self)
-   
+        if robot_config.has_mechanisms:
+            self.intake_telemetry.periodic()
+            self.indexer_telemetry.periodic()
+            self.shooter_telemetry.periodic()
+            self.climber_telemetry.periodic()
+
     def init_positioning_pids(self):
         self._heading_control = subsystems.ChassisHeadingControl(
             get_chassis_angle_velocity_measurement=lambda: math.radians(
@@ -325,59 +329,81 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
-        driving_command = create_twinstick_tracking_command(self.joystick_one,
-                                                            self.swerve_drive,
-                                                            self._heading_control)
-        heading_command = create_twinstick_heading_command(self.joystick_two,
-                                                           self._heading_control)
-        three_dof_command = create_3dof_command(self.joystick_one,
-                                                self.swerve_drive)
-        self._command_scheduler.schedule(heading_command)
+        driving_command = create_3dof_command(self.joystick_one, self.swerve_drive)
         self._command_scheduler.schedule(driving_command)
+
+        # driving_command = create_twinstick_tracking_command(self.joystick_one,
+        #                                                     self.swerve_drive,
+        #                                                     self._heading_control)
+        # heading_command = create_twinstick_heading_command(self.joystick_two,
+        #                                                    self._heading_control)
+        # three_dof_command = create_3dof_command(self.joystick_one,
+        #                                         self.swerve_drive)
+        # self._command_scheduler.schedule(heading_command)
+        # self._command_scheduler.schedule(driving_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
 
+
     def updateField(self):
         pass
 
-    def autonomousInit(self):
-        super().autonomousInit()
- 
-
-        auto_path_index = self.auto_chooser.getSelected()
-        sd.putString("selected auto",str(autos.auto_paths[auto_path_index])) 
-    
-        #  Hopefully at this point we've gotten an april tag fix.  Use that
-        #  information to update our positioning pids 
+    def reset_pose_pids_to_current_position(self):
+        """Sets the current position of the driving pids to the estimated position of the robot"""
         estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
         self._x_axis_control.set_current_position(estimated_pose.x)
         self._y_axis_control.set_current_position(estimated_pose.y)
+        self._heading_control.set_current_position(self.swerve_drive.gyro_angle_radians)
 
-        cmd = commands2.cmd.ParallelRaceGroup(
-            commands2.cmd.sequence(
-                commands.Shoot(self.shooter, self.indexer),
-                commands2.cmd.WaitCommand(
-                    robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
-                commands2.cmd.ParallelCommandGroup(
-                    commands.Load(self.intake, self.indexer),
-                    commands2.cmd.sequence(
-                        commands.GotoXYTheta(self.swerve_drive, (1, 1, 0),
-                                             self._x_axis_control, self._y_axis_control, self._heading_control)
-                        # commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
-                        #                      self._x_axis_control, self._y_axis_control, self._heading_control),
-                        # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
-                        #                      self._x_axis_control, self._y_axis_control, self._heading_control),
-                        # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
-                        #                      self._x_axis_control, self._y_axis_control, self._heading_control)
+    def autonomousInit(self):
+        super().autonomousInit()
 
-                    ),
-                ),
-            ),
-            commands2.cmd.WaitCommand(15)
+        print("Auto Init")
+        # auto_path_index = self.auto_chooser.getSelected()
+        # sd.putString("selected auto",str(autos.auto_paths[auto_path_index]))
+        #
+        #  Hopefully at this point we've gotten an april tag fix.  Use that
+        #  information to update our positioning pids
+        self.reset_pose_pids_to_current_position()
+
+        cmd = commands2.cmd.sequence(
+            commands.GotoXYTheta(self.swerve_drive, (13.3, 5, 0),
+                                 self._x_axis_control, self._y_axis_control, self._heading_control),
+            commands.GotoXYTheta(self.swerve_drive, (13.4, 0, 0),
+                                 self._x_axis_control, self._y_axis_control, self._heading_control))
+
+        drv_cmd = commands.drive.Drive(
+            self.swerve_drive,
+            get_x=lambda: self._x_axis_control.desired_velocity,
+            get_y=lambda: self._y_axis_control.desired_velocity,
+            get_theta=lambda: self._heading_control.desired_velocity
         )
-        self._command_scheduler.schedule(cmd)
 
+        # cmd = commands2.cmd.ParallelRaceGroup(
+        #     commands2.cmd.sequence(
+        #         commands.Shoot(self.shooter, self.indexer),
+        #         commands2.cmd.WaitCommand(
+        #             robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
+        #         commands2.cmd.ParallelCommandGroup(
+        #             commands.Load(self.intake, self.indexer),
+        #             commands2.cmd.sequence(
+        #                 commands.GotoXYTheta(self.swerve_drive, (2, 0, 0),
+        #                                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        #                 commands.GotoXYTheta(self.swerve_drive, (-2, 0, 0),
+        #                                      self._x_axis_control, self._y_axis_control, self._heading_control),
+        #                 # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
+        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
+        #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        #
+        #             ),
+        #         ),
+        #     ),
+        #     commands2.cmd.WaitCommand(15)
+        # )
+        self._command_scheduler.schedule(cmd)
+        self._command_scheduler.schedule(drv_cmd)
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()
