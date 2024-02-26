@@ -75,7 +75,7 @@ def create_profiled_pid(pid_config: ProfiledPIDConfig) -> ProfiledPIDController:
         Kp=pid_config.p,
         Ki=pid_config.i,
         Kd=pid_config.d,
-        constraints=TrapezoidProfileRadians.Constraints(pid_config.max_velocity, pid_config.max_acceleration))
+        constraints=TrapezoidProfile.Constraints(pid_config.profile.velocity, pid_config.profile.acceleration))
 
     if pid_config.wrapping is not None:
         pid.enableContinuousInput(minimumInput=pid_config.wrapping.min,

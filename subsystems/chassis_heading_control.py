@@ -20,7 +20,7 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         [], float]  # Call this function to get the current heading velocity in radians
     _target: float  # The target angle for the target tracker.  Do not set this outside of the target property accessors
     _desired_velocity: float  # How fast we want the hardware moving in radians to track the target.  The combination of PID and feedforward output.
-    _angle_pid: wpimath.controller.ProfiledPIDController  # The PID controller for the target tracker
+    _angle_pid: wpimath.controller.ProfiledPIDControllerRadians  # The PID controller for the target tracker
     _pid_config: config.ProfiledPIDConfig  # The PID configuration for the target tracker
     _ff_config: FeedForwardConfig  # The feedforward configuration for the target tracker
     _last_update_time: float  # The last time the target tracker sent updates to SmartDashboard
@@ -28,7 +28,7 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
     _pid_component: float = 0  # The PID component of the most recent output
 
     @property
-    def pid(self) -> wpimath.controller.ProfiledPIDController:
+    def pid(self) -> wpimath.controller.ProfiledPIDControllerRadians:
         return self._angle_pid
 
     def __init__(self,
