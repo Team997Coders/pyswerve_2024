@@ -11,6 +11,7 @@ from .chassis_heading_telemetry import ChassisHeadingTelemetry, AxisPositionTele
 from .shooter_telemetry import ShooterTelemetry
 from .intake_telemetry import IntakeTelemetry
 from .indexer_telemetry import IndexerTelemetry
+from .climber_telemetry import ClimberTelemetry
 import wpilib
 
 def create_selector(sd_path: str, autos : list[str]) -> wpilib.SendableChooser:

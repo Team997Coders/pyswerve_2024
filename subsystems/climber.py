@@ -14,6 +14,10 @@ class Climber(commands2.Subsystem):
     config: config.ClimberConfig
     _logger: logging.Logger
 
+    @property
+    def pid(self) -> rev.SparkMaxPIDController:
+        return self._pid
+
     def __init__(self, config: ClimberConfig, logger: logging.Logger):
         super().__init__()
         self.config = config
@@ -34,15 +38,6 @@ class Climber(commands2.Subsystem):
 
     def set_brake_mode(self):
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
-
-    @property
-    def velocity(self) -> float:
-        return self.climber_encoder.getVelocity()
-
-    @velocity.setter
-    def velocity(self, value):
-        self._pid.setReference(value, rev.CANSparkMax.ControlType.kVelocity)
-        # self.climber_motor.set(value)
 
     @property
     def position(self):
