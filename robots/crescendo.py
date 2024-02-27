@@ -19,9 +19,9 @@ default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, 
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
 default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
-                                        profile=VelocityAccelerationConfig(velocity=math.pi * 4,
-                                                                           acceleration=3 * math.pi),
-                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05)
+                                        profile=VelocityAccelerationConfig(velocity=math.pi * 8,
+                                                                           acceleration=4 * math.pi),
+                                        tolerance=PositionVelocityConfig(position=math.pi / 360, velocity=0.01)
                                         )
 default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                      profile=VelocityAccelerationConfig(velocity=5, acceleration=1),
@@ -31,8 +31,8 @@ default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kA=0.001)
 default_flywheel_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
 
-joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.5, 1),
-                                         y_deadband=math_help.Range(0.5, 1),
+joystick_controls = DriverControlsConfig(x_deadband=math_help.Range(0.2, 1),
+                                         y_deadband=math_help.Range(0.2, 1),
                                          theta_deadband=math_help.Range(0.5, 1))
 gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
                                         y_deadband=math_help.Range(0.10, 1),
@@ -45,15 +45,15 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                right_flywheel_diameter_cm=12,
                                left_flywheel_diameter_cm=12,
                                default_velocity=1,
-                               default_fire_time=.6,
-                               default_spinup_delay=.8)  # add motor configs
+                               default_fire_time=.5,
+                               default_spinup_delay=.7)  # add motor configs
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
                                intake_velocity=.5, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
                              intake_velocity=1, outtake_velocity=-1)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
-                               climber_encoder_ticks=1000)
+                               climber_max=1)
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
@@ -140,4 +140,4 @@ standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1
 
 standard_joystick_climber_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
                                                    output_range=math_help.Range(0,
-                                                                                climber_config.climber_encoder_ticks))
+                                                                                climber_config.climber_max))

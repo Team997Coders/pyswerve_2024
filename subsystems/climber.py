@@ -23,9 +23,9 @@ class Climber(commands2.Subsystem):
         self.config = config
         self._logger = logger.getChild("Climber")
         self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        hardware.init_motor(self.climber_motor, config.climber_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
-        self.climber_encoder.setPosition(0)
-        self.climber_encoder.setPositionConversionFactor(config.climber_encoder_ticks)
+        self.climber_encoder.setPosition(-1)
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)

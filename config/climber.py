@@ -7,4 +7,4 @@ from config import MotorConfig, PIDConfig, AxisConfig
 class ClimberConfig(NamedTuple):
     climber_motor: MotorConfig
     climber_pid: PIDConfig
-    climber_encoder_ticks: int  # how many ticks of the encoder is the highest point of the climber
+    climber_max: int  # how many ticks of the encoder is the highest point of the climber
