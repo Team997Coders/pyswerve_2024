@@ -46,3 +46,11 @@ class Climber(commands2.Subsystem):
     @position.setter
     def position(self, value):
         self._pid.setReference(value, rev.CANSparkMax.ControlType.kPosition)
+
+    @property
+    def speed(self) -> float:
+        return self.climber_motor.get()
+
+    @speed.setter
+    def speed(self, value: float):
+        self.climber_motor.set(value)
