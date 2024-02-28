@@ -46,7 +46,7 @@ indexer_config = IndexerConfig(MotorConfig(id=10, inverted=True), indexer_sensor
                                pid=PIDConfig(p=.5, i=0, d=0, wrapping=None),
                                intake_velocity=.5, shoot_velocity=1, outtake_velocity=-1)
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None),
-                             default_velocity=1)
+                               intake_velocity=1, outtake_velocity=-1)
 climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=PIDConfig(p=.5, i=0, d=0, wrapping=None),
                                climber_max=1)
 
