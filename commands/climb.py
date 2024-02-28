@@ -7,7 +7,7 @@ from subsystems.climber import Climber
 from typing import Callable
 
 
-class ClimberFollow(commands2.InstantCommand):
+class ClimberFollow(commands2.Command):
     _climber: Climber
 
     def __init__(self, climber, height_getter: Callable[[], float]):
@@ -17,3 +17,36 @@ class ClimberFollow(commands2.InstantCommand):
 
     def execute(self):
         self._climber.position = self._climb_input
+
+
+class ClimberUp(commands2.InstantCommand):
+    _climber: Climber
+
+    def __init__(self, climber: Climber):
+        super().__init__()
+        self._climber = climber
+
+    def execute(self):
+        self._climber.speed = -1
+
+
+class ClimberDown(commands2.InstantCommand):
+    _climber: Climber
+
+    def __init__(self, climber: Climber):
+        super().__init__()
+        self._climber = climber
+
+    def execute(self):
+        self._climber.speed = 1
+
+
+class ClimberStop(commands2.InstantCommand):
+    _climber: Climber
+
+    def __init__(self, climber: Climber):
+        super().__init__()
+        self._climber = climber
+
+    def execute(self):
+        self._climber.speed = 0

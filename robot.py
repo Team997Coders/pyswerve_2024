@@ -29,7 +29,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import swerve_bot as robot_config
+from robots import crescendo as robot_config
 
 is_test = True
 
@@ -342,6 +342,7 @@ class MyRobot(commands2.TimedCommandRobot):
                                                 self.swerve_drive)
         self._command_scheduler.schedule(heading_command)
         self._command_scheduler.schedule(driving_command)
+        self._command_scheduler.schedule(climbing_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
@@ -380,6 +381,23 @@ class MyRobot(commands2.TimedCommandRobot):
             get_y=lambda: self._y_axis_control.desired_velocity,
             get_theta=lambda: self._heading_control.desired_velocity
         )
+        cmd = commands2.cmd.ParallelRaceGroup(
+            commands2.cmd.sequence(
+                commands.Shoot(self.shooter, self.indexer),
+                commands2.cmd.WaitCommand(
+                    robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
+                commands2.cmd.ParallelCommandGroup(
+                    # commands.Load(self.intake, self.i ,indexer),
+                    commands2.cmd.sequence(
+                        commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
+                                             self._x_axis_control, self._y_axis_control, self._heading_control),
+                        commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
+                                             self._x_axis_control, self._y_axis_control, self._heading_control)
+                        # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
+                        #                      self._x_axis_control, self._y_axis_control, self._heading_control),
+                        # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+                        #                      self._x_axis_control, self._y_axis_control, self._heading_control)
+
 
         cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
         drv_cmd.requirements = {self.swerve_drive}
