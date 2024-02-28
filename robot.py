@@ -29,7 +29,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import crescendo as robot_config
+from robots import swerve_bot as robot_config
 
 is_test = True
 
@@ -233,13 +233,17 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_command = create_twinstick_heading_command(self.joystick_two,
                                                                 self._heading_control)
 
+        self.driving_command.requirements = {self.swerve_drive}
+        self.heading_command.requirements = {self._heading_control}
+
         # Unbind before competition
         self.joystick_two.button(5).toggleOnTrue(self.sysid.create_dynamic_measurement_command())
         self.joystick_one.button(5).toggleOnTrue(self.sysid.create_quasistatic_measurement_command())
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
-        self.heading_command.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+
+        sd.putData("Commands", self._command_scheduler)
 
     def try_init_mechanisms(self):
         """Initialize mechanisms if they are present in the robot config"""
@@ -329,18 +333,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
-        driving_command = create_3dof_command(self.joystick_one, self.swerve_drive)
+        driving_command = create_twinstick_tracking_command(self.joystick_one,
+                                                            self.swerve_drive,
+                                                            self._heading_control)
+        heading_command = create_twinstick_heading_command(self.joystick_two,
+                                                           self._heading_control)
+        three_dof_command = create_3dof_command(self.joystick_one,
+                                                self.swerve_drive)
+        self._command_scheduler.schedule(heading_command)
         self._command_scheduler.schedule(driving_command)
-
-        # driving_command = create_twinstick_tracking_command(self.joystick_one,
-        #                                                     self.swerve_drive,
-        #                                                     self._heading_control)
-        # heading_command = create_twinstick_heading_command(self.joystick_two,
-        #                                                    self._heading_control)
-        # three_dof_command = create_3dof_command(self.joystick_one,
-        #                                         self.swerve_drive)
-        # self._command_scheduler.schedule(heading_command)
-        # self._command_scheduler.schedule(driving_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
@@ -368,9 +369,9 @@ class MyRobot(commands2.TimedCommandRobot):
         self.reset_pose_pids_to_current_position()
 
         cmd = commands2.cmd.sequence(
-            commands.GotoXYTheta(self.swerve_drive, (13.3, 5, 0),
+            commands.GotoXYTheta(self.swerve_drive, (14.3, 0, 0),
                                  self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (13.4, 0, 0),
+            commands.GotoXYTheta(self.swerve_drive, (13.3, 0, 0),
                                  self._x_axis_control, self._y_axis_control, self._heading_control))
 
         drv_cmd = commands.drive.Drive(
@@ -379,6 +380,9 @@ class MyRobot(commands2.TimedCommandRobot):
             get_y=lambda: self._y_axis_control.desired_velocity,
             get_theta=lambda: self._heading_control.desired_velocity
         )
+
+        cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
+        drv_cmd.requirements = {self.swerve_drive}
 
         # cmd = commands2.cmd.ParallelRaceGroup(
         #     commands2.cmd.sequence(

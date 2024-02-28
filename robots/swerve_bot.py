@@ -22,8 +22,8 @@ default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, 
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
-                                         profile=VelocityAccelerationConfig(velocity=math.pi * 4, acceleration=math.pi),
-                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05))
+                                         profile=VelocityAccelerationConfig(velocity=math.pi * 8, acceleration=math.pi * 4),
+                                        tolerance=PositionVelocityConfig(position=math.pi / 80, velocity=0.05))
 default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                      profile=VelocityAccelerationConfig(velocity=1, acceleration=2.5),
                                      tolerance=PositionVelocityConfig(position=0.5, velocity=0.1))
@@ -58,7 +58,7 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,
-                                     invert_gyro=True,
+                                     invert_gyro=False,
                                      gyro_on_spi=True)
 
 swerve_modules = {ModulePosition.front_left:
@@ -122,6 +122,10 @@ swerve_modules = {ModulePosition.front_left:
 
 standard_joystick_drive_axis_config = AxisConfig(deadband=math_help.Range(0.05, 1),
                                                  output_range=math_help.Range(0, physical_properties.max_drive_speed))
+
+standard_joystick_rotation_axis_config = AxisConfig(deadband=math_help.Range(0.5, 1),
+                                                    output_range=math_help.Range(0,
+                                                                                 physical_properties.max_drive_speed))
 
 standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1),
                                                 output_range=math_help.Range(0, physical_properties.max_drive_speed))
