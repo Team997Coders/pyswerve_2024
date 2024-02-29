@@ -1,4 +1,4 @@
-import abc 
+import abc
 import math
 import threading
 from collections.abc import Iterable, Sequence, Set
@@ -40,8 +40,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     _odemetry_lock: threading.Lock = threading.Lock()
 
-    #Automatically invert the gyro if the physical properties say it is inverted without
-    #having to check the physical properties every time the gyro is accessed.\
+    # Automatically invert the gyro if the physical properties say it is inverted without
+    # having to check the physical properties every time the gyro is accessed.\
     __gyro_get_degrees_lambda: lambda: float
 
     @property
@@ -84,28 +84,28 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
         self._ordered_modules = [self.modules[position] for position in sorted(self.modules.keys())]
         self.logger.info(f"Module Order: {[m.id for m in self._ordered_modules]}")
- 
-        locations = [m.location for m  in self._ordered_modules]
-        self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
- 
-        module_positions = tuple([m.position for m in self._ordered_modules]) 
 
-        #The Pose Estimator uses the default standard deviations for model and vision estimates.
+        locations = [m.location for m in self._ordered_modules]
+        self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
+
+        module_positions = tuple([m.position for m in self._ordered_modules])
+
+        # The Pose Estimator uses the default standard deviations for model and vision estimates.
         # According to wpilib:
-        # The default standard deviations of the model states are 
-        # 0.1 meters for x, 0.1 meters for y, and 0.1 radians for heading. 
+        # The default standard deviations of the model states are
+        # 0.1 meters for x, 0.1 meters for y, and 0.1 radians for heading.
         # The default standard deviations of the vision measurements are
         # 0.9 meters for x, 0.9 meters for y, and 0.9 radians for heading.
         self._odemetry = estimator.SwerveDrive4PoseEstimator(self._kinematics,
                                                              geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                                              module_positions,  # type: ignore
-                                                             geom.Pose2d(13.3, 0,geom.Rotation2d(0)))
+                                                             geom.Pose2d(13.3, 0, geom.Rotation2d(0)))
 
         self.initialize()
 
-        #Register the subsystem at the end to ensure periodic is called
-#        commands2.CommandScheduler.getInstance().registerSubsystem(self)
+        # Register the subsystem at the end to ensure periodic is called
 
+    #        commands2.CommandScheduler.getInstance().registerSubsystem(self)
 
     def initialize(self):
         """Initialize the swerve drive.  Needs to be called repeatedly until it returns True."""
@@ -118,7 +118,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     def resetPose(self):
         return
-    
+
     def periodic(self):
         """Call periodically to update the odemetry"""
         self.update_odometry()
@@ -161,12 +161,13 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self.drive_with_chassis_speeds(desired_chasis_speeds, run_modules)
 
     def drive_with_chassis_speeds(self, desired_chasis_speeds: kinematics.ChassisSpeeds,
-              run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
+                                  run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
         module_states = self._kinematics.toSwerveModuleStates(desired_chasis_speeds)
         self.drive_with_module_states(module_states, run_modules=run_modules)
 
-    def drive_with_module_states(self, module_states: tuple[kinematics.SwerveModuleState, kinematics.SwerveModuleState, kinematics.SwerveModuleState, kinematics.SwerveModuleState],
-                                run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
+    def drive_with_module_states(self, module_states: tuple[
+        kinematics.SwerveModuleState, kinematics.SwerveModuleState, kinematics.SwerveModuleState, kinematics.SwerveModuleState],
+                                 run_modules: Sequence[ModulePosition] | Set[ModulePosition] | None = None):
         """
         Drive the robot using module states.  Module states must be passed in the same order as self._ordered_modules
         """
@@ -178,7 +179,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
             if run_modules is not None and module.id not in run_modules:
                 continue
- 
+
             state = module_states[i]
             module.desired_state = state
 
@@ -189,11 +190,14 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     def lock_wheels(self):
         quarter_pi = math.pi / 4.0
-        self._modules[ModulePosition.front_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(quarter_pi))
-        self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(-quarter_pi))
-        self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi - quarter_pi))
-        self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(math.pi + quarter_pi))
-
+        self._modules[ModulePosition.front_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
+            quarter_pi))
+        self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
+            -quarter_pi))
+        self._modules[ModulePosition.back_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
+            math.pi - quarter_pi))
+        self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
+            math.pi + quarter_pi))
 
     @property
     def pose(self) -> geom.Pose2d:
@@ -203,12 +207,14 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     @pose.setter
     def pose(self, value: geom.Pose2d):
+        self.resetPose(value)
+
+    def resetPose(self, pose: geom.Pose2d):
         with self._odemetry_lock:
             self._odemetry.resetPosition(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                          # possible cause of teleporting position on field
                                          self._measured_module_positions,
-                                         value)
-
+                                         pose)
 
     @property
     def _measured_module_states(self) -> Sequence[kinematics.SwerveModuleState]:
@@ -216,9 +222,12 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         return tuple([m.measured_state for m in self._ordered_modules])
 
     @property
-    def _measured_module_positions(self) -> Sequence[kinematics.SwerveModuleState]:
+    def _measured_module_positions(self) -> tuple[kinematics.SwerveModulePosition,
+    kinematics.SwerveModulePosition,
+    kinematics.SwerveModulePosition,
+    kinematics.SwerveModulePosition]:
         """Current state of the modules"""
-        return tuple([m.position for m in self._ordered_modules])
+        return tuple([m.position for m in self._ordered_modules])  # type: ignore
 
     @property
     def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:

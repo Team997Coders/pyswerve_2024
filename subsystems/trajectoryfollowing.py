@@ -5,6 +5,7 @@ import wpilib
 import wpimath.geometry as geom
 from commands2 import Subsystem
 
+import config
 import swerve
 from swerve import SwerveDrive
 import commands2
@@ -16,7 +17,9 @@ from config import ModulePosition
 class TrajectoryFollowing(Subsystem):
     _swerve_drive: swerve.SwerveDrive
 
-    def __init__(self, swerve_drive: swerve.SwerveDrive) -> None:
+    def __init__(self, swerve_drive: swerve.SwerveDrive,
+                       axis_config: config.ProfiledPIDConfig,
+                       heading_config: config.PIDConfig) -> None:
         self._swerve_drive = swerve_drive
         #This code assumes all modules are equidistant from the center
         front_left_module = swerve_drive.modules[ModulePosition.front_left]
@@ -30,13 +33,13 @@ class TrajectoryFollowing(Subsystem):
             self._swerve_drive.drive_with_chassis_speeds,
             # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             HolonomicPathFollowerConfig(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(robot_config.default_axis_pid.p,
-                             robot_config.default_axis_pid.i,
-                             robot_config.default_axis_pid.d),  # Translation PID constants
-                PIDConstants(robot_config.default_heading_pid.p,
-                             robot_config.default_heading_pid.i,
-                             robot_config.default_heading_pid.d),  # Rotation PID constants
-                robot_config.default_axis_pid.profile.velocity,  # Max module speed, in m/s
+                PIDConstants(axis_config.p,
+                             axis_config.i,
+                             axis_config.d),  # Translation PID constants
+                PIDConstants(heading_config.p,
+                             heading_config.i,
+                             heading_config.d),  # Rotation PID constants
+                axis_config.profile.velocity,  # Max module speed, in m/s
                 drive_base_radius,  # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig()  # Default path replanning config. See the API for the options here
             ),

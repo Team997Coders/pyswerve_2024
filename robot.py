@@ -150,6 +150,8 @@ class MyRobot(commands2.TimedCommandRobot):
 
     sysid: subsystems.swerve_system_id
 
+    trajectory_following: subsystems.TrajectoryFollowing
+
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
         self.config = robot_config
@@ -172,8 +174,6 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self):
         super().robotInit()
 
-
-
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         self.field = wpilib.Field2d()
@@ -189,7 +189,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
-
 
         self.operator_control = commands2.button.CommandJoystick(2) if robot_config.has_mechanisms else None
 
@@ -231,7 +230,6 @@ class MyRobot(commands2.TimedCommandRobot):
             (self.joystick_one, 10): 14
         }
 
-
         self.bind_apriltags(self._tag_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
@@ -245,7 +243,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
         # Unbind before competition
 
-
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
 
@@ -253,18 +250,36 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
-        self.trajectory = subsystems.TrajectoryFollowing(self.swerve_drive)
+        self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive,
+                                                                   robot_config.default_axis_pid,
+                                                                   robot_config.default_heading_pid)
 
     def define_autonomous_modes(self):
-        self.auto_options = [autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto, (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
-                             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
-                             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-                             autos.AutoFactory("taxi", pathplannerlib.auto.AutoBuilder.buildAuto, ("auto taxi",))
-                             ]
+
+
+
+        self.auto_options = [
+            autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
+                              (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
+            autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
+            autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
+            ]
 
         if robot_config.has_mechanisms:
-              self.auto_options.append(autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto, (self,)))
-              #autos.AutoFactory("Drive Test Path", pathplannerlib.auto.AutoBuilder.buildAuto, ("test_path.json",))]
+            try:
+                path_commands = [
+                    autos.AutoFactory("taxi", pathplannerlib.auto.AutoBuilder.buildAuto, ("auto taxi",)),
+                ]
+                self.auto_options.extend(path_commands)
+            except FileNotFoundError as e:
+                print(str(e))
+                pass
+
+            self.auto_options.append(
+                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
+                                  (self,)))
+
+
 
     def try_init_mechanisms(self):
         """Initialize mechanisms if they are present in the robot config"""
@@ -370,7 +385,6 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self):
         super().teleopPeriodic()
 
-
     def updateField(self):
         pass
 
@@ -395,7 +409,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         cmds = factory.create(*factory.args)
 
-        #Factories can return either a set of commands or a single command.  Call the scheduler accordingly
+        # Factories can return either a set of commands or a single command.  Call the scheduler accordingly
         if isinstance(cmds, commands2.Command):
             self._command_scheduler.schedule(cmds)
         else:
