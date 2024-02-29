@@ -1,5 +1,7 @@
 import sys
 
+import pathplannerlib.auto
+
 import autos
 import robotpy_apriltag
 import wpilib
@@ -25,7 +27,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import crescendo as robot_config
+from robots import swerve_bot as robot_config
 
 is_test = True
 ######################################################################
@@ -137,6 +139,8 @@ class MyRobot(commands2.TimedCommandRobot):
 
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
+    auto_options: list[autos.AutoFactory]
+
     robot_control_commands: list
     auto_chooser: wpilib.SendableChooser
 
@@ -144,6 +148,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
+        self.config = robot_config
 
     def update_test_mode(self):
         """Sets a global variable indicating that the robot is in test mode"""
@@ -163,7 +168,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self):
         super().robotInit()
 
-        self.auto_chooser = telemetry.create_selector("autos", autos.auto_paths)
+
 
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
@@ -180,7 +185,9 @@ class MyRobot(commands2.TimedCommandRobot):
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
-        self.operator_control = commands2.button.CommandJoystick(2)
+
+
+        self.operator_control = commands2.button.CommandJoystick(2) if robot_config.has_mechanisms else None
 
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
@@ -220,6 +227,7 @@ class MyRobot(commands2.TimedCommandRobot):
             (self.joystick_one, 10): 14
         }
 
+
         self.bind_apriltags(self._tag_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
@@ -232,16 +240,31 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_command.requirements = {self._heading_control}
 
         # Unbind before competition
-        self.joystick_two.button(5).toggleOnTrue(self.sysid.create_dynamic_measurement_command())
-        self.joystick_one.button(5).toggleOnTrue(self.sysid.create_quasistatic_measurement_command())
+
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
 
         sd.putData("Commands", self._command_scheduler)
 
+        self.define_autonomous_modes()
+        self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
+        self.trajectory = subsystems.TrajectoryFollowing(self.swerve_drive)
+
+    def define_autonomous_modes(self):
+        self.auto_options = [autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto, (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
+                             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
+                             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
+                             autos.AutoFactory("taxi", pathplannerlib.auto.AutoBuilder.buildAuto, ("auto taxi",))
+                             ]
+
+        if robot_config.has_mechanisms:
+              self.auto_options.append(autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto, (self,)))
+              #autos.AutoFactory("Drive Test Path", pathplannerlib.auto.AutoBuilder.buildAuto, ("test_path.json",))]
+
     def try_init_mechanisms(self):
         """Initialize mechanisms if they are present in the robot config"""
+        sd.putBoolean("Has Mechanisms", robot_config.has_mechanisms)
         if robot_config.has_mechanisms:
             self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid,
                                               self.logger)
@@ -310,7 +333,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.swerve_drive.periodic()
-        self.april_tag_one.periodic()
+        if self.april_tag_one is not None:
+            self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
         self.swerve_telemetry.report_to_dashboard()
         self.report_position_control_to_dashboard()
@@ -338,7 +362,6 @@ class MyRobot(commands2.TimedCommandRobot):
                                                 self.swerve_drive)
         self._command_scheduler.schedule(heading_command)
         self._command_scheduler.schedule(driving_command)
-        # self._command_scheduler.schedule(climbing_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
@@ -356,72 +379,23 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousInit(self):
         super().autonomousInit()
-
         print("Auto Init")
-        # auto_path_index = self.auto_chooser.getSelected()
-        # sd.putString("selected auto",str(autos.auto_paths[auto_path_index]))
-        #
+
         #  Hopefully at this point we've gotten an april tag fix.  Use that
         #  information to update our positioning pids
         self.reset_pose_pids_to_current_position()
 
-        cmd = commands2.cmd.sequence(
-            commands.GotoXYTheta(self.swerve_drive, (14.3, 0, 0),
-                                 self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (13.3, 0, 0),
-                                 self._x_axis_control, self._y_axis_control, self._heading_control))
+        auto_path_index = self.auto_chooser.getSelected()
+        factory = self.auto_options[auto_path_index]
+        sd.putString("Selected auto", factory.name)
 
-        drv_cmd = commands.drive.Drive(
-            self.swerve_drive,
-            get_x=lambda: self._x_axis_control.desired_velocity,
-            get_y=lambda: self._y_axis_control.desired_velocity,
-            get_theta=lambda: self._heading_control.desired_velocity
-        )
-        # cmd = commands2.cmd.ParallelRaceGroup(
-        #     commands2.cmd.sequence(
-        #         commands.Shoot(self.shooter, self.indexer),
-        #         commands2.cmd.WaitCommand(
-        #             robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
-        #         commands2.cmd.ParallelCommandGroup(
-        #             # commands.Load(self.intake, self.i ,indexer),
-        #             commands2.cmd.sequence(
-        #                 commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
-        #                                      self._x_axis_control, self._y_axis_control, self._heading_control),
-        #                 commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
-        #                                      self._x_axis_control, self._y_axis_control, self._heading_control)
-        #                 # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
-        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
-        #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
-        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        cmds = factory.create(*factory.args)
 
-
-        cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
-        drv_cmd.requirements = {self.swerve_drive}
-
-        # cmd = commands2.cmd.ParallelRaceGroup(
-        #     commands2.cmd.sequence(
-        #         commands.Shoot(self.shooter, self.indexer),
-        #         commands2.cmd.WaitCommand(
-        #             robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
-        #         commands2.cmd.ParallelCommandGroup(
-        #             commands.Load(self.intake, self.indexer),
-        #             commands2.cmd.sequence(
-        #                 commands.GotoXYTheta(self.swerve_drive, (2, 0, 0),
-        #                                      self._x_axis_control, self._y_axis_control, self._heading_control)
-        #                 commands.GotoXYTheta(self.swerve_drive, (-2, 0, 0),
-        #                                      self._x_axis_control, self._y_axis_control, self._heading_control),
-        #                 # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
-        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
-        #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
-        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
-        #
-        #             ),
-        #         ),
-        #     ),
-        #     commands2.cmd.WaitCommand(15)
-        # )
-        self._command_scheduler.schedule(cmd)
-        self._command_scheduler.schedule(drv_cmd)
+        #Factories can return either a set of commands or a single command.  Call the scheduler accordingly
+        if isinstance(cmds, commands2.Command):
+            self._command_scheduler.schedule(cmds)
+        else:
+            self._command_scheduler.schedule(*cmds)
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()

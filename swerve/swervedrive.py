@@ -99,7 +99,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self._odemetry = estimator.SwerveDrive4PoseEstimator(self._kinematics,
                                                              geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                                              module_positions,  # type: ignore
-                                                             geom.Pose2d(0,0,geom.Rotation2d(0)))
+                                                             geom.Pose2d(13.3, 0,geom.Rotation2d(0)))
 
         self.initialize()
 
@@ -115,6 +115,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
             return True
 
         return False
+
+    def resetPose(self):
+        return
     
     def periodic(self):
         """Call periodically to update the odemetry"""

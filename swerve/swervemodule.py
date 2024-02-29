@@ -85,7 +85,8 @@ class SwerveModule(ISwerveModule):
         self.drive_motor_encoder = self._drive_motor.getEncoder()
         self.angle_motor_encoder = self._angle_motor.getEncoder()
 
-        self.drive_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.drive) * ((physical_config.wheel_diameter_cm / 100) * math.pi))
+        self.drive_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.drive) *
+                                                             ((physical_config.wheel_diameter_cm / 100) * math.pi))
         # Use the line below to report number of rotations for wheel rotation tests
         # self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive) * (

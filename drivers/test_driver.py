@@ -278,8 +278,7 @@ class TestDriver:
         self.current_test_group_index = 4  # len(self.test_groups) - 1
         self._chooser = create_test_selection_widget("Test Group", self.test_groups)
 
-        if not robot.is_test:
-            self._chooser.onChange(self.on_test_change)
+        self._chooser.onChange(self.on_test_change)
 
     def testInit(self):
         return
