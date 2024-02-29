@@ -94,4 +94,8 @@ class GotoXYTheta(commands2.Command):
                                  self._theta_axis_pid.desired_velocity)
 
     def isFinished(self) -> bool:
-        return self._x_axis_pid.atTarget() and self._y_axis_pid.atTarget() and self._theta_axis_pid.atTarget()
+        finished = self._x_axis_pid.atTarget() and self._y_axis_pid.atTarget() and self._theta_axis_pid.atTarget()
+        if finished:
+            print("Finished!")
+
+        return finished

@@ -23,10 +23,10 @@ default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 8, acceleration=math.pi * 4),
-                                        tolerance=PositionVelocityConfig(position=math.pi / 80, velocity=0.05))
+                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.02))
 default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                      profile=VelocityAccelerationConfig(velocity=1, acceleration=2.5),
-                                     tolerance=PositionVelocityConfig(position=0.5, velocity=0.1))
+                                     tolerance=PositionVelocityConfig(position=0.1, velocity=0.02))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kV=0.01,
                                                 kA=0.001)
