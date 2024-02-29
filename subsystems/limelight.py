@@ -4,9 +4,11 @@ import robotpy_apriltag
 from swerve import SwerveDrive
 from wpimath import geometry as geom
 import logging
-import wpilib
 import threading
 import time
+from swerve import SwerveDrive
+import wpimath.geometry as geom
+from config import CameraConfig
 
 class LimelightAprilTagDetector:
 
@@ -19,9 +21,9 @@ class LimelightAprilTagDetector:
     limelight: limelight.Limelight | None = None
     limelight_thread: threading.Thread | None = None
 
-    def __init__(self, swerve_drive, logger: logging.Logger):
+    def __init__(self, config: CameraConfig, logger: logging.Logger):
         self.logger = logger
-        translation = geom.Translation3d(0.305, 0, 0.152)  # inches(12, 0, 6)
+        self.cam_position = CameraConfig.camera_position
         discovered_limelights = limelight.discover_limelights()
         print("discovered limelights:", self.discovered_limelights)
 
