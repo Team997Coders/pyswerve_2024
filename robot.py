@@ -253,11 +253,14 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
+        self.trajectory = subsystems.TrajectoryFollowing(self.swerve_drive)
 
     def define_autonomous_modes(self):
         self.auto_options = [autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto, (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
                              autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
-                             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),]
+                             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
+                             autos.AutoFactory("taxi", pathplannerlib.auto.AutoBuilder.buildAuto, ("auto taxi",))
+                             ]
 
         if robot_config.has_mechanisms:
               self.auto_options.append(autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto, (self,)))

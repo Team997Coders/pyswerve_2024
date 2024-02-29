@@ -13,17 +13,15 @@ from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
 from config import ModulePosition
 
-from robot import robot_config
-
-class TrajectoryFollwing(Subsystem):
+class TrajectoryFollowing(Subsystem):
     _swerve_drive: swerve.SwerveDrive
 
     def __init__(self, swerve_drive: swerve.SwerveDrive) -> None:
         self._swerve_drive = swerve_drive
         #This code assumes all modules are equidistant from the center
-        front_left_module = robot_config.swerve_modules[ModulePosition.front_left]
+        front_left_module = swerve_drive.modules[ModulePosition.front_left]
         wheel_location = front_left_module.location
-        drive_base_radius = math.sqrt(wheel_location[0] ** 2 + wheel_location[1] ** 2)
+        drive_base_radius = math.sqrt(wheel_location.x ** 2 + wheel_location.y ** 2)
 
         AutoBuilder.configureHolonomic(
             lambda: self._swerve_drive.pose,  # Robot pose supplier

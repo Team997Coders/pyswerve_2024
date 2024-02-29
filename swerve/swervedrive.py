@@ -115,6 +115,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
             return True
 
         return False
+
+    def resetPose(self):
+        return
     
     def periodic(self):
         """Call periodically to update the odemetry"""
