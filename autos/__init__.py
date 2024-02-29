@@ -1,5 +1,6 @@
 # import auto_selector
 from . import auto_calibrations
+from . import manual_autos
 from typing import NamedTuple, Callable, Sequence, Any
 import commands2
 

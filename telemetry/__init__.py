@@ -14,7 +14,7 @@ from .indexer_telemetry import IndexerTelemetry
 from .climber_telemetry import ClimberTelemetry
 import wpilib
 
-def create_selector(sd_path: str, values : list[str], default: int | None) -> wpilib.SendableChooser:
+def create_selector(sd_path: str, values : list[str], default: int | None = None) -> wpilib.SendableChooser:
     """Creates a widget in smart dashboard that can select which test group to run from a list
     :param sd_path: The path in smart dashboard to write the selected test group to
     """

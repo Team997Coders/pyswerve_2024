@@ -257,9 +257,11 @@ class MyRobot(commands2.TimedCommandRobot):
     def define_autonomous_modes(self):
         self.auto_options = [autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto, (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
                              autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
-                             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-                             autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto, (self,)),
-                             autos.AutoFactory("Drive Test Path", pathplannerlib.auto.AutoBuilder.buildAuto, "test_path.json")]
+                             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),]
+
+        if robot_config.has_mechanisms:
+              self.auto_options.append(autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto, (self,)))
+              #autos.AutoFactory("Drive Test Path", pathplannerlib.auto.AutoBuilder.buildAuto, ("test_path.json",))]
 
     def try_init_mechanisms(self):
         """Initialize mechanisms if they are present in the robot config"""
@@ -389,7 +391,12 @@ class MyRobot(commands2.TimedCommandRobot):
         sd.putString("Selected auto", factory.name)
 
         cmds = factory.create(*factory.args)
-        self._command_scheduler.schedule(*cmds)
+
+        #Factories can return either a set of commands or a single command.  Call the scheduler accordingly
+        if isinstance(cmds, commands2.Command):
+            self._command_scheduler.schedule(cmds)
+        else:
+            self._command_scheduler.schedule(*cmds)
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()
