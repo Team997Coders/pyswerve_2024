@@ -108,10 +108,13 @@ class TwinstickHeadingSetter(commands2.Command):
         self.get_y = get_y
 
     def execute(self):
-        x = self.get_x()
-        y = self.get_y()
-        if x == 0 and y == 0:
-            return
-        else:
-            heading = geom.Rotation2d(-x, y).radians()
-            self.set_heading_goal(heading)
+        try:
+            x = self.get_x()
+            y = self.get_y()
+            if x == 0 and y == 0:
+                return
+            else:
+                heading = geom.Rotation2d(-x, y).radians()
+                self.set_heading_goal(heading)
+        except:
+            pass
