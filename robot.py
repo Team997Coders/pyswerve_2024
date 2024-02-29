@@ -8,9 +8,7 @@ import wpilib
 import wpilib.event
 import commands
 import config
-import hardware
 import subsystems
-from config import AxisConfig
 import swerve
 import telemetry
 import navx
@@ -18,15 +16,13 @@ import drivers
 from drivers import TestDriver, TwinStickTeleopDrive, TeleopDrive
 from swerve import SwerveDrive
 from debug import attach_debugger
-from wpilib import SmartDashboard
 from wpilib import SmartDashboard as sd
 import commands2
 import commands2.button
-from math_help import Range
 from wpilib import DriverStation
-from wpimath.controller import ProfiledPIDControllerRadians, ProfiledPIDController
-from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
-from computervision.fieldpositioning import AprilTagDetector
+from wpimath.controller import ProfiledPIDControllerRadians
+from wpimath.trajectory import TrapezoidProfile
+from subsystems.photonvision import photonCamera
 import math
 
 ######################################################################
@@ -126,7 +122,7 @@ class MyRobot(commands2.TimedCommandRobot):
     operator_control: commands2.button.CommandJoystick | None = None
 
     field: wpilib.Field2d
-    april_tag_one: AprilTagDetector
+    april_tag_one: photonCamera
 
     trapezoid_profile: TrapezoidProfile.Constraints
     rotation_pid: ProfiledPIDControllerRadians
@@ -196,7 +192,7 @@ class MyRobot(commands2.TimedCommandRobot):
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         self.swerve_drive.initialize()
-        self.april_tag_one = AprilTagDetector(self.swerve_drive, self.logger)
+        self.april_tag_one = photonCamera(config.CameraConfig, self.logger)
 
         self.init_positioning_pids()
         self.init_position_control_telemetry()
