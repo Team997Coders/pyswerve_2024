@@ -5,7 +5,6 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
     ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, AxisConfig, CameraConfig
 import wpimath.geometry as geom
-from swerve import swervedrive
 from .shared import swerve_current_limit, swerve_ramp_rate
 
 #Set to true if the robot has mechanisms beyond navigation, vision, and swerve
@@ -54,7 +53,6 @@ climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=P
 camera_config = CameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0.305, 0, 0.152), #camera postition on the robot xyz in meters from the center inches: (12, 0, 6)
                                                               geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees
                             camera_name="NO NAME!!!", #Set name from local host window
-                            swerve_drive=swervedrive
                             )
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,

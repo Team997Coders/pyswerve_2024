@@ -22,7 +22,7 @@ import commands2.button
 from wpilib import DriverStation
 from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfile
-from subsystems.photonvision import photonCamera
+from subsystems.photonvision import PhotonVisionAprilTagDetector
 import math
 
 ######################################################################
@@ -122,7 +122,7 @@ class MyRobot(commands2.TimedCommandRobot):
     operator_control: commands2.button.CommandJoystick | None = None
 
     field: wpilib.Field2d
-    april_tag_one: photonCamera
+    april_tag_one: PhotonVisionAprilTagDetector
 
     trapezoid_profile: TrapezoidProfile.Constraints
     rotation_pid: ProfiledPIDControllerRadians
@@ -192,7 +192,9 @@ class MyRobot(commands2.TimedCommandRobot):
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         self.swerve_drive.initialize()
-        self.april_tag_one = photonCamera(config.CameraConfig, self.logger)
+        self.april_tag_one = PhotonVisionAprilTagDetector(self.swerve_drive,
+                                                          robot_config.camera_config,
+                                                          self.logger)
 
         self.init_positioning_pids()
         self.init_position_control_telemetry()

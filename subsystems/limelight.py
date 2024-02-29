@@ -23,7 +23,7 @@ class LimelightAprilTagDetector:
 
     def __init__(self, config: CameraConfig, logger: logging.Logger):
         self.logger = logger
-        self.cam_position = CameraConfig.camera_position
+        self.cam_position = config.camera_position
         discovered_limelights = limelight.discover_limelights()
         print("discovered limelights:", self.discovered_limelights)
 

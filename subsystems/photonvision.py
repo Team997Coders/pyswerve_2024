@@ -4,14 +4,15 @@ import photonlibpy
 import photonlibpy.photonCamera
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.photonPoseEstimator import *
+
+import swerve
 from config import CameraConfig
 from swerve import SwerveDrive
 import wpimath.geometry as geom
 import time
 
 
-class photonCamera:
-
+class PhotonVisionAprilTagDetector:
     photonvision: PhotonCamera
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
     swerve_drive: SwerveDrive 
@@ -21,14 +22,16 @@ class photonCamera:
     last_print: float | None # The last time we printed a log message
     apriltag_seen: bool
 
-    def __init__(self, config: CameraConfig, logger: logging.Logger):
+    def __init__(self, swerve_drive: swerve.SwerveDrive,
+                       config: CameraConfig,
+                       logger: logging.Logger):
         self.logger = logger
         self.last_print = None
-        self.cam_position = CameraConfig.camera_position
+        self.cam_position = config.camera_position
         self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(robotpy_apriltag.AprilTagField.k2024Crescendo)
         self.apriltag_seen = False
-        self.swerve_drive = CameraConfig.swerve_drive
-        self.photonvision = PhotonCamera(CameraConfig.camera_name)
+        self.swerve_drive = swerve_drive
+        self.photonvision = PhotonCamera(config.camera_name)
         self.photon_pose_estimatior = PhotonPoseEstimator(self.apriltagfieldlayout,
                                                           PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                                                           self.photonvision, self.cam_position)
