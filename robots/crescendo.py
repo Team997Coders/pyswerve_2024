@@ -4,8 +4,9 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
     ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, SwerveModuleIntProperty, \
-    AxisConfig
-
+    AxisConfig, CameraConfig
+import wpimath.geometry as geom
+from swerve import swervedrive
 from .shared import swerve_current_limit, swerve_ramp_rate
 
 # Panel is #13
@@ -54,6 +55,12 @@ intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), pid=PIDConfig(p=
                              intake_velocity=1, outtake_velocity=-1)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_max=1)
+
+camera_config = CameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
+                                                              geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
+                             camera_name="set name here", #Set name from local host window
+                             swerve_drive=swervedrive
+                             )
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
