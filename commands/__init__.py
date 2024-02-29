@@ -13,7 +13,7 @@ from . import climb
 from . import drive
 from . import apriltags
 from .shoot import Shoot, SpinupShooter, SpindownShooter
-from .climb import ClimberFollow
+from .climb import ClimberFollow, ClimberStop
 from .drive import Drive, TwinstickHeadingSetter
 from .apriltags import AprilTagPointer
 from .auto import DeadReckonX, DeadReckonY, GotoXYTheta

@@ -32,7 +32,6 @@ import math
 from robots import crescendo as robot_config
 
 is_test = True
-
 ######################################################################
 
 if __debug__ and "run" in sys.argv:
@@ -130,10 +129,10 @@ class MyRobot(commands2.TimedCommandRobot):
     trapezoid_profile: TrapezoidProfile.Constraints
     rotation_pid: ProfiledPIDControllerRadians
 
-    shooter: subsystems.Shooter = None
-    intake: subsystems.Intake = None
-    indexer: subsystems.Indexer = None
-    climber: subsystems.Climber = None
+    shooter: subsystems.Shooter | None = None
+    intake: subsystems.Intake | None = None
+    indexer: subsystems.Indexer | None = None
+    climber: subsystems.Climber | None = None
     _heading_control: subsystems.ChassisHeadingControl
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
@@ -327,7 +326,8 @@ class MyRobot(commands2.TimedCommandRobot):
             commands2.cmd.ParallelCommandGroup(
                 commands.IndexOff(self.indexer),
                 commands.SpindownShooter(self.shooter),
-                commands.IntakeOff(self.intake)
+                commands.IntakeOff(self.intake),
+                commands.ClimberStop(self.climber)
             )
         )
         self._command_scheduler.cancelAll()
@@ -342,7 +342,7 @@ class MyRobot(commands2.TimedCommandRobot):
                                                 self.swerve_drive)
         self._command_scheduler.schedule(heading_command)
         self._command_scheduler.schedule(driving_command)
-        self._command_scheduler.schedule(climbing_command)
+        # self._command_scheduler.schedule(climbing_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
@@ -381,22 +381,22 @@ class MyRobot(commands2.TimedCommandRobot):
             get_y=lambda: self._y_axis_control.desired_velocity,
             get_theta=lambda: self._heading_control.desired_velocity
         )
-        cmd = commands2.cmd.ParallelRaceGroup(
-            commands2.cmd.sequence(
-                commands.Shoot(self.shooter, self.indexer),
-                commands2.cmd.WaitCommand(
-                    robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
-                commands2.cmd.ParallelCommandGroup(
-                    # commands.Load(self.intake, self.i ,indexer),
-                    commands2.cmd.sequence(
-                        commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
-                                             self._x_axis_control, self._y_axis_control, self._heading_control),
-                        commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
-                                             self._x_axis_control, self._y_axis_control, self._heading_control)
-                        # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
-                        #                      self._x_axis_control, self._y_axis_control, self._heading_control),
-                        # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
-                        #                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        # cmd = commands2.cmd.ParallelRaceGroup(
+        #     commands2.cmd.sequence(
+        #         commands.Shoot(self.shooter, self.indexer),
+        #         commands2.cmd.WaitCommand(
+        #             robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
+        #         commands2.cmd.ParallelCommandGroup(
+        #             # commands.Load(self.intake, self.i ,indexer),
+        #             commands2.cmd.sequence(
+        #                 commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
+        #                                      self._x_axis_control, self._y_axis_control, self._heading_control),
+        #                 commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
+        #                                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        #                 # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
+        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
+        #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
 
 
         cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}

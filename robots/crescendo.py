@@ -25,7 +25,7 @@ default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                         )
 default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                      profile=VelocityAccelerationConfig(velocity=5, acceleration=1),
-                                     tolerance=PositionVelocityConfig(position=0.5, velocity=0.05))
+                                     tolerance=PositionVelocityConfig(position=0.05, velocity=0.05))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kV=0.01,
                                                 kA=0.001)
@@ -50,7 +50,7 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
                                intake_velocity=.5, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
-intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
+intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
                              intake_velocity=1, outtake_velocity=-1)
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_max=1)
@@ -139,5 +139,5 @@ standard_gamepad_drive_axis_config = AxisConfig(deadband=math_help.Range(0.10, 1
                                                                              physical_properties.max_drive_speed))
 
 standard_joystick_climber_axis_config = AxisConfig(deadband=math_help.Range(0.15, 1),
-                                                   output_range=math_help.Range(0,
+                                                   output_range=math_help.Range(-1,
                                                                                 climber_config.climber_max))

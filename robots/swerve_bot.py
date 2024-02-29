@@ -23,10 +23,10 @@ default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
 default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 8, acceleration=math.pi * 4),
-                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.02))
-default_axis_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
-                                     profile=VelocityAccelerationConfig(velocity=1, acceleration=2.5),
-                                     tolerance=PositionVelocityConfig(position=0.1, velocity=0.02))
+                                        tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05))
+default_axis_pid = ProfiledPIDConfig(p=.2, i=0, d=0.05,
+                                     profile=VelocityAccelerationConfig(velocity=4 * math.pi, acceleration=2 * math.pi),
+                                     tolerance=PositionVelocityConfig(position=0.1, velocity=0.1))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kV=0.01,
                                                 kA=0.001)
@@ -54,7 +54,7 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
                                      encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                      gear_ratio=SwerveModuleFloatProperty(angle=150.0 / 7, drive=6.75),
-                                     max_drive_speed=3,
+                                     max_drive_speed=5,
                                      max_rotation_speed=math.pi / 6,
                                      fw_set_retries=5,
                                      fw_set_retry_delay_sec=0.05,
