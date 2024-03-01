@@ -4,13 +4,18 @@ from typing import Tuple, Any, Sequence
 from wpimath.geometry import Pose3d, Transform3d, Translation3d, Rotation3d
 import wpilib
 
-class LimeLightNetTablesPositioning:
+
+class LimeLightNetTables:
     """Inspired by FROG 3160's Limelight class, this class reads pose data directly from net-tables"""
 
-    def __init__(self, limelight_name: str = "limelight"):
+    def __init__(self, limelight_name: str | None = None):
+        limelight_name = "limelight" if limelight_name is None else limelight_name
+
         self.network_table = NetworkTableInstance.getDefault().getTable(
             key=limelight_name
         )
+
+        self.network_table.List
         self.nt_botpose = self.network_table.getFloatArrayTopic("botpose").subscribe(
             [-997, -997, -997, 0, 0, 0, -1]
         )
@@ -27,17 +32,13 @@ class LimeLightNetTablesPositioning:
         # create the timer that we can use to timestamp
         self.timer = wpilib.Timer()
 
-    def getPipelineNum(self):
+    @property
+    def PipelineNum(self) -> int:
         return self.nt_pipeline.get()
 
-    def setPipeline(self, pipeline_num: int):
+    @PipelineNum.setter
+    def PipelineNum(self, pipeline_num: int):
         self.network_table.putNumber("pipeline", pipeline_num)
-
-    # def getBotPoseEstimateForAlliance(self) -> Tuple[Pose3d, Any]:
-    #     if self.fieldLayout.alliance == RED_ALLIANCE:
-    #         return *self.getBotPoseEstimateRed(),
-    #     elif self.fieldLayout.alliance == BLUE_ALLIANCE:
-    #         return *self.getBotPoseEstimateBlue(),
 
     def getBotPoseEstimate(self) -> Tuple[Pose3d | None, float | None]:
         return self.array_to_bot_pose_estimate(self.nt_botpose.getAtomic())
@@ -61,7 +62,8 @@ class LimeLightNetTablesPositioning:
 
         return None
 
-    def array_to_bot_pose_estimate(self, pose_array_timestamped: ntcore.TimestampedFloatArray) -> Tuple[Pose3d | None, float | None]:
+    def array_to_bot_pose_estimate(self, pose_array_timestamped: ntcore.TimestampedFloatArray) -> Tuple[
+        Pose3d | None, float | None]:
         """Takes limelight array data and creates a Pose3d object for
            robot position and a timestamp reprepresenting the time
            the position was observed.
@@ -74,6 +76,9 @@ class LimeLightNetTablesPositioning:
         """
         pose_array = pose_array_timestamped.value
         pose_update_us = pose_array_timestamped.time
+        if pose_update_us == 0:
+            return None, None
+
         pX, pY, pZ, pRoll, pPitch, pYaw, latency_ms = pose_array
         if latency_ms == -1:
             return None, None

@@ -6,7 +6,7 @@ from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.photonPoseEstimator import *
 
 import swerve
-from config import CameraConfig
+from config import PhotonCameraConfig
 from swerve import SwerveDrive
 import wpimath.geometry as geom
 import time
@@ -23,7 +23,7 @@ class PhotonVisionAprilTagDetector:
     apriltag_seen: bool
 
     def __init__(self, swerve_drive: swerve.SwerveDrive,
-                       config: CameraConfig,
+                       config: PhotonCameraConfig,
                        logger: logging.Logger):
         self.logger = logger
         self.last_print = None

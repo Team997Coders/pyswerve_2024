@@ -61,8 +61,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         return self._modules
 
     @property
-    def odemetry(self) -> estimator.SwerveDrive4PoseEstimator:
-        return self._odemetry
+    def estimated_position(self) -> geom.Pose2d:
+        """Get the pose estimators best guess about where the robot is"""
+        return self._odemetry.getEstimatedPosition()
 
     @property
     def ordered_modules(self) -> list[SwerveModule]:
@@ -116,15 +117,12 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
         return False
 
-    def resetPose(self):
-        return
-
     def periodic(self):
         """Call periodically to update the odemetry"""
         self.update_odometry()
-        # if __debug__:
-        for m in self._ordered_modules:
-            m.report_to_dashboard()  # type: ignore
+        if __debug__:
+            for m in self._ordered_modules:
+                m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
         with self._odemetry_lock:
@@ -207,9 +205,11 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     @pose.setter
     def pose(self, value: geom.Pose2d):
-        self.resetPose(value)
+        self.reset_pose(value)
 
-    def resetPose(self, pose: geom.Pose2d):
+    def reset_pose(self, pose: geom.Pose2d):
+        """Force the robot to a specific pose on the field.  This is good to call at startup when we get our
+        first positioning data from the camera."""
         with self._odemetry_lock:
             self._odemetry.resetPosition(geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                          # possible cause of teleporting position on field

@@ -12,6 +12,7 @@ from .shooter_telemetry import ShooterTelemetry
 from .intake_telemetry import IntakeTelemetry
 from .indexer_telemetry import IndexerTelemetry
 from .climber_telemetry import ClimberTelemetry
+from .limelight_nettables import LimeLightNetTables
 import wpilib
 
 def create_selector(sd_path: str, values : list[str], default: int | None = None) -> wpilib.SendableChooser:

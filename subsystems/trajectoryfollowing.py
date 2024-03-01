@@ -28,7 +28,7 @@ class TrajectoryFollowing(Subsystem):
 
         AutoBuilder.configureHolonomic(
             lambda: self._swerve_drive.pose,  # Robot pose supplier
-            self._swerve_drive.resetPose,  # Method to reset odometry (will be called if your auto has a starting pose)
+            self._swerve_drive.reset_pose,  # Method to reset odometry (will be called if your auto has a starting pose)
             lambda: self._swerve_drive.measured_chassis_speed,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             self._swerve_drive.drive_with_chassis_speeds,
             # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds

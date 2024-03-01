@@ -122,7 +122,8 @@ class MyRobot(commands2.TimedCommandRobot):
     operator_control: commands2.button.CommandJoystick | None = None
 
     field: wpilib.Field2d
-    april_tag_one: PhotonVisionAprilTagDetector
+    april_tag_one: PhotonVisionAprilTagDetector | None = None
+    limelight_positioning: subsystems.LimeLightPositioning | None = None
 
     trapezoid_profile: TrapezoidProfile.Constraints
     rotation_pid: ProfiledPIDControllerRadians
@@ -192,9 +193,13 @@ class MyRobot(commands2.TimedCommandRobot):
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         self.swerve_drive.initialize()
-        self.april_tag_one = PhotonVisionAprilTagDetector(self.swerve_drive,
-                                                          robot_config.camera_config,
-                                                          self.logger)
+        # self.april_tag_one = PhotonVisionAprilTagDetector(self.swerve_drive,
+        #                                                   robot_config.camera_config,
+        #                                                   self.logger)
+
+        self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,
+                                                                     robot_config.limelight_camera_config,
+                                                                     self.logger)
 
         self.init_positioning_pids()
         self.init_position_control_telemetry()
@@ -326,7 +331,7 @@ class MyRobot(commands2.TimedCommandRobot):
             get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vx,
             pid_config=robot_config.default_axis_pid,
             feedforward_config=None,
-            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().x
+            initial_position=self.swerve_drive.estimated_position.x
         )
 
         self._y_axis_control = subsystems.AxisPositionControl(
@@ -334,7 +339,7 @@ class MyRobot(commands2.TimedCommandRobot):
             get_chassis_velocity_measurement=lambda: self.swerve_drive.measured_chassis_speed.vy,
             pid_config=robot_config.default_axis_pid,
             feedforward_config=None,
-            initial_position=self.swerve_drive.odemetry.getEstimatedPosition().y
+            initial_position=self.swerve_drive.estimated_position.y
         )
 
     def init_position_control_telemetry(self):

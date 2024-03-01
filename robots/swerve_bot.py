@@ -1,9 +1,10 @@
 import math_help
 import math
-from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
+from config import (PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
-    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, AxisConfig, CameraConfig
+    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, AxisConfig,
+    PhotonCameraConfig, LimelightCameraConfig)
 import wpimath.geometry as geom
 from .shared import swerve_current_limit, swerve_ramp_rate
 
@@ -50,10 +51,15 @@ intake_config = IntakeConfig(MotorConfig(id=9, inverted=False), pid=PIDConfig(p=
 climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=PIDConfig(p=.5, i=0, d=0, wrapping=None),
                                climber_max=1)
 
-camera_config = CameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0.305, 0, 0.152), #camera postition on the robot xyz in meters from the center inches: (12, 0, 6)
+photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0.305, 0, 0.152), #camera postition on the robot xyz in meters from the center inches: (12, 0, 6)
                                                               geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees
                             camera_name="NO NAME!!!", #Set name from local host window
                             )
+
+limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0.305, 0, 0.152), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
+                                                                geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
+                                 camera_name=None, #Set name from nettable name if not default of 'limelight'
+                                 refresh_rate=5)
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,

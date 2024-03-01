@@ -43,4 +43,4 @@ from . import bar
 from .bar import BarConfig
 
 from . import camera
-from .camera import CameraConfig
+from .camera import PhotonCameraConfig, LimelightCameraConfig

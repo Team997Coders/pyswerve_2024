@@ -4,7 +4,7 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
     OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
     ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, SwerveModuleIntProperty, \
-    AxisConfig, CameraConfig
+    AxisConfig, PhotonCameraConfig, LimelightCameraConfig
 import wpimath.geometry as geom
 from .shared import swerve_current_limit, swerve_ramp_rate
 
@@ -55,10 +55,16 @@ intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), pid=PIDConfig(p=
 climber_config = ClimberConfig(MotorConfig(id=13, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_max=1)
 
-camera_config = CameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
+photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
                                                               geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
-                             camera_name="set name here" #Set name from local host window
-                             )
+                                          camera_name="set name here" #Set name from local host window
+                                          )
+
+limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
+                                                                geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
+                                 camera_name=None, #Set name from nettable name if not default of 'limelight'
+                                 refresh_rate=5
+                                 )
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
