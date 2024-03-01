@@ -27,7 +27,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import swerve_bot as robot_config
+from robots import crescendo as robot_config
 
 is_test = True
 ######################################################################
@@ -84,7 +84,8 @@ def create_twinstick_heading_command(controller: commands2.button.CommandGeneric
         get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
                                         robot_config.standard_joystick_rotation_axis_config),
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
-                                        robot_config.standard_joystick_rotation_axis_config))
+                                        robot_config.standard_joystick_rotation_axis_config),
+        is_heading_inverted=False)
 
 
 def create_climber_command(controller: commands2.button.CommandGenericHID,
@@ -135,7 +136,7 @@ class MyRobot(commands2.TimedCommandRobot):
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
 
-    _tag_mappings: dict[tuple[commands2.button.CommandGenericHID, int], int]
+    _target_heading_mappings: dict[tuple[commands2.button.CommandGenericHID, int], tuple[float, float]]
 
     apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
@@ -157,15 +158,16 @@ class MyRobot(commands2.TimedCommandRobot):
         global is_test
         is_test = self.isTest()
 
-    def bind_apriltags(self, mapping_dict: dict[tuple[commands2.button.CommandGenericHID, int], int]) -> None:
-        for (controller, button), tag_num in mapping_dict.items():
-            april_tag_pointer = commands.AprilTagPointer(set_heading_goal=self._heading_control.setTarget,
-                                                         aprilTagNumber=tag_num,
-                                                         apriltagfieldlayout=self.apriltagfieldlayout,
-                                                         get_xy=lambda: (
-                                                             self.swerve_drive.pose.x, self.swerve_drive.pose.y))
-            april_tag_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
-            controller.button(button).toggleOnTrue(april_tag_pointer)
+    def bind_heading_targets(self, mapping_dict: dict[
+        tuple[commands2.button.CommandGenericHID, int], tuple[float, float]]) -> None:
+        for (controller, button), target in mapping_dict.items():
+            self.target_pointer = commands.SetTarget(set_heading_goal=self._heading_control.setTarget,
+                                                     target_xy=target,
+                                                     get_chassis_xy=lambda: (
+                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y),
+                                                     is_heading_reversed=False)
+            self.target_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+            controller.button(button).toggleOnTrue(self.target_pointer)
 
     def robotInit(self):
         super().robotInit()
@@ -210,25 +212,25 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.try_init_mechanisms()
 
-        self._tag_mappings = {
-            #  blue tag mappings
-            (self.joystick_two, 3): 4,
-            (self.joystick_two, 4): 5,
+        self._target_heading_mappings = {
             #  red tag mappings
-            (self.joystick_two, 6): 11,
-            (self.joystick_two, 7): 12,
-            (self.joystick_two, 8): 13,
+            (self.joystick_two, 3): (0.0, 3.0),  # speaker
+            (self.joystick_two, 4): (0.0, 0.0),  # amp
+            (self.joystick_two, 5): (0.0, 0.0),  # source
+            (self.joystick_two, 6): (3.0, 3.0),  # stage left
+            (self.joystick_two, 7): (3.0, 4.0),  # stage center
+            (self.joystick_two, 8): (3.0, 5.0),  # stage right
 
             #  blue tag mappings
-            (self.joystick_one, 6): 7,
-            (self.joystick_one, 7): 6,
-            #  red tag mappings
-            (self.joystick_one, 8): 16,
-            (self.joystick_one, 9): 15,
-            (self.joystick_one, 10): 14
+            (self.joystick_one, 3): (0.0, 3.0),  # speaker
+            (self.joystick_one, 4): (0.0, 0.0),  # amp
+            (self.joystick_one, 5): (0.0, 0.0),  # source
+            (self.joystick_one, 6): (3.0, 3.0),  # stage left
+            (self.joystick_one, 7): (3.0, 4.0),  # stage center
+            (self.joystick_one, 8): (3.0, 5.0)  # stage right
         }
 
-        self.bind_apriltags(self._tag_mappings)
+        self.bind_heading_targets(self._target_heading_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -239,12 +241,14 @@ class MyRobot(commands2.TimedCommandRobot):
         self.driving_command.requirements = {self.swerve_drive}
         self.heading_command.requirements = {self._heading_control}
 
-        # Unbind before competition
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
 
-        sd.putData("Commands", self._command_scheduler)
+        commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
+            commands.FlipHeading(self.heading_command, self.target_pointer))
+
+        # sd.putData("Commands", self._command_scheduler)
 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
@@ -253,8 +257,6 @@ class MyRobot(commands2.TimedCommandRobot):
                                                                    robot_config.default_heading_pid)
 
     def define_autonomous_modes(self):
-
-
 
         self.auto_options = [
             autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
@@ -292,7 +294,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
             self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-            self.joystick_one.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
+            self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
@@ -401,17 +403,51 @@ class MyRobot(commands2.TimedCommandRobot):
         #  information to update our positioning pids
         self.reset_pose_pids_to_current_position()
 
-        auto_path_index = self.auto_chooser.getSelected()
-        factory = self.auto_options[auto_path_index]
-        sd.putString("Selected auto", factory.name)
+        cmd = commands2.cmd.sequence(
+            commands.GotoXYTheta(self.swerve_drive, (2, 0, 0),
+                                 self._x_axis_control, self._y_axis_control, self._heading_control),
+            commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
+                                 self._x_axis_control, self._y_axis_control, self._heading_control),
+            commands.GotoXYTheta(self.swerve_drive, (0, 2, 0),
+                                 self._x_axis_control, self._y_axis_control, self._heading_control),
+            commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+                                 self._x_axis_control, self._y_axis_control, self._heading_control)
+        )
 
-        cmds = factory.create(*factory.args)
+        drv_cmd = commands.drive.Drive(
+            self.swerve_drive,
+            get_x=lambda: self._x_axis_control.desired_velocity,
+            get_y=lambda: self._y_axis_control.desired_velocity,
+            get_theta=lambda: self._heading_control.desired_velocity
+        )
+
+        # cmd = commands2.cmd.ParallelRaceGroup(
+        #     commands2.cmd.sequence(
+        #         commands.Shoot(self.shooter, self.indexer),
+        #         commands2.cmd.WaitCommand(
+        #             robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
+        #         commands2.cmd.ParallelCommandGroup(
+        #             # commands.Load(self.intake, self.i ,indexer),
+        #             commands2.cmd.sequence(
+        #                 commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
+        #                                      self._x_axis_control, self._y_axis_control, self._heading_control),
+        #                 commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
+        #                                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        #                 # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
+        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
+        #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
+        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
+        cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
+        drv_cmd.requirements = {self.swerve_drive}
+        # cmds = factory.create(*factory.args)
 
         # Factories can return either a set of commands or a single command.  Call the scheduler accordingly
-        if isinstance(cmds, commands2.Command):
-            self._command_scheduler.schedule(cmds)
-        else:
-            self._command_scheduler.schedule(*cmds)
+        # if isinstance(cmds, commands2.Command):
+        #     self._command_scheduler.schedule(cmds)
+        # else:
+        #     self._command_scheduler.schedule(*cmds)
+        self._command_scheduler.schedule(cmd)
+        self._command_scheduler.schedule(drv_cmd)
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()

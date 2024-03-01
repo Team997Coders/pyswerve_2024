@@ -14,6 +14,6 @@ from . import drive
 from . import apriltags
 from .shoot import Shoot, SpinupShooter, SpindownShooter
 from .climb import ClimberFollow, ClimberStop
-from .drive import Drive, TwinstickHeadingSetter
+from .drive import Drive, TwinstickHeadingSetter, FlipHeading, SetTarget
 from .apriltags import AprilTagPointer
 from .auto import DeadReckonX, DeadReckonY, GotoXYTheta
