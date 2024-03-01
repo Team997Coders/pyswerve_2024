@@ -77,7 +77,7 @@ class SwerveModule(ISwerveModule):
         self._angle_motor = rev.CANSparkMax(module_config.angle_motor.id, rev.CANSparkMax.MotorType.kBrushless)
 
         hardware.init_motor(self._drive_motor, module_config.drive_motor)
-        hardware.init_motor(self._angle_motor, module_config.angle_motor) 
+        hardware.init_motor(self._angle_motor, module_config.angle_motor)
 
         self.drive_pid = self._drive_motor.getPIDController()
         self.angle_pid = self._angle_motor.getPIDController()
@@ -85,52 +85,39 @@ class SwerveModule(ISwerveModule):
         self.drive_motor_encoder = self._drive_motor.getEncoder()
         self.angle_motor_encoder = self._angle_motor.getEncoder()
 
-        self.drive_motor_encoder.setPositionConversionFactor((1.0 / physical_config.gear_ratio.drive) *
-                                                             ((physical_config.wheel_diameter_cm / 100) * math.pi))
+        hardware.safe_set_rev_in_thread(self.drive_motor_encoder.setPositionConversionFactor,
+                                        (1.0 / physical_config.gear_ratio.drive) *
+                                        ((physical_config.wheel_diameter_cm / 100) * math.pi))
         # Use the line below to report number of rotations for wheel rotation tests
         # self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
-        self.drive_motor_encoder.setVelocityConversionFactor((1.0 / physical_config.gear_ratio.drive) * (
-                (physical_config.wheel_diameter_cm / 100) * math.pi) / 60.0)  # convert from rpm to revolutions/sec
+        hardware.safe_set_rev_in_thread(self.drive_motor_encoder.setVelocityConversionFactor,
+                                        (1.0 / physical_config.gear_ratio.drive) * (
+                                                (physical_config.wheel_diameter_cm / 100) * math.pi) / 60.0)  # convert from rpm to revolutions/sec
 
         # Request specific angles from the PID controller 
         hardware.init_pid(self.drive_pid, module_config.drive_pid, feedback_device=self.drive_motor_encoder)
 
-        self.angle_motor_encoder.setPositionConversionFactor((2.0 * math.pi) / physical_config.gear_ratio.angle)
-        self.angle_motor_encoder.setVelocityConversionFactor(
-            (2.0 * math.pi) / (physical_config.gear_ratio.angle * 60.0))  # convert from rpm to revolutions/sec
+        hardware.safe_set_rev_in_thread(self.angle_motor_encoder.setPositionConversionFactor,
+                                        (2.0 * math.pi) / physical_config.gear_ratio.angle)
+        hardware.safe_set_rev_in_thread(self.angle_motor_encoder.setVelocityConversionFactor,
+                                        (2.0 * math.pi) / (
+                                                    physical_config.gear_ratio.angle * 60.0))  # convert from rpm to revolutions/sec
         self.angle_absolute_encoder = self._angle_motor.getAbsoluteEncoder(
             encoderType=rev.SparkAbsoluteEncoder.Type.kDutyCycle)
 
         if module_config.encoder.conversion_factor is not None:
-            self.angle_absolute_encoder.setPositionConversionFactor(module_config.encoder.conversion_factor)
+            hardware.safe_set_rev_in_thread(self.angle_absolute_encoder.setPositionConversionFactor,
+                                            module_config.encoder.conversion_factor)
 
         # self.angle_motor_encoder(module_config.encoder.inverted)
 
-        self.angle_motor_encoder.setPosition(self.angle_absolute_encoder.getPosition())
+        hardware.safe_set_rev_in_thread(self.angle_motor_encoder.setPosition,
+                                        self.angle_absolute_encoder.getPosition())
 
         hardware.init_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)
 
-        self._angle_motor.burnFlash()
-        self._drive_motor.burnFlash()
-
-    def safe_set(self, func: Callable[[Any], rev.REVLibError], *args, **kwargs):
-        """
-        Call the provided function to set hardware settings, retrying after a short delay if an error occurs.
-        This is not being used, to use it, pass the name of the function and the arguments to this function.
-
-        Example before: self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
-        Example After : self.safe_set(drive_motor_encoder.setPositionConversionFactor, 1.0 / physical_config.gear_ratio.drive)
-        """
-        nRetries = self._physical_config.fw_set_retries
-        error = None
-        for i in range(0, nRetries):
-            error = func(*args, **kwargs)
-            if error == rev.REVLibError.kOk:
-                return
-            time.sleep(self._physical_config.fw_set_retry_delay_sec)
-
-        if error:
-            self.logger.error(f"Error setting {func.__name__}: {error}")
+        hardware.safe_set_rev_in_thread(self._angle_motor.burnFlash,())
+        hardware.safe_set_rev_in_thread(self._drive_motor.burnFlash,())
 
     def stop(self):
         """Idle both motors"""
@@ -269,7 +256,7 @@ class SwerveModule(ISwerveModule):
 
     def drive_at_voltage(self, voltage: float):
         """Drive the wheel at the specified voltage"""
-        self.angle = 0 # Safety to ensure motors are all pointed in the same direction
+        self.angle = 0  # Safety to ensure motors are all pointed in the same direction
         self._drive_motor.setVoltage(voltage)
 
     def log_to_sysid(self, log: wpilib.sysid.SysIdRoutineLog.MotorLog):

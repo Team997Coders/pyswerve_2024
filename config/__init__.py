@@ -44,3 +44,6 @@ from .bar import BarConfig
 
 from . import camera
 from .camera import CameraConfig
+
+from . import rev
+from .rev import RevConfig

@@ -5,7 +5,7 @@ from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition,
     OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
     ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, AxisConfig, CameraConfig
 import wpimath.geometry as geom
-from .shared import swerve_current_limit, swerve_ramp_rate
+from .common import swerve_current_limit, swerve_ramp_rate
 
 #Set to true if the robot has mechanisms beyond navigation, vision, and swerve
 has_mechanisms = False
@@ -61,8 +61,6 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      gear_ratio=SwerveModuleFloatProperty(angle=150.0 / 7, drive=6.75),
                                      max_drive_speed=5,
                                      max_rotation_speed=math.pi / 6,
-                                     fw_set_retries=5,
-                                     fw_set_retry_delay_sec=0.05,
                                      invert_gyro=False,
                                      gyro_on_spi=True)
 

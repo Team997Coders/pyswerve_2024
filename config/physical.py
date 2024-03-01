@@ -8,10 +8,7 @@ class PhysicalConfig:
     encoder_pulses_per_revolution: SwerveModuleFloatProperty # Pulses per revolution of the encoder
     gear_ratio: SwerveModuleFloatProperty # Ratio of motor rotations to wheel rotations
     max_drive_speed: float # Meters per second
-    max_rotation_speed: float # Radians per second
-    fw_set_retry_delay_sec: float # How long to wait between retries if hardware returns an error during configuration
-    fw_set_retries: int # How many times to retry if hardware returns an error during configuration
-    invert_gyro: bool # Whether the gyro is inverted
+    max_rotation_speed: float # Radians per second   invert_gyro: bool # Whether the gyro is inverted
     gyro_on_spi: bool # If false, the gyro is on i2c
     def __init__(self,
                  wheel_diameter_cm: float,
@@ -20,8 +17,7 @@ class PhysicalConfig:
                  gear_ratio: SwerveModuleFloatProperty,
                  max_drive_speed: float = 1.0, 
                  max_rotation_speed: float = math.pi / 4, 
-                 fw_set_retry_delay_sec : float = 0.01,
-                 fw_set_retries: int = 5,
+
                  invert_gyro: bool = False,
                  gyro_on_spi: bool = True):
         self.wheel_diameter_cm = wheel_diameter_cm
@@ -30,8 +26,6 @@ class PhysicalConfig:
         self.gear_ratio = gear_ratio 
         self.max_drive_speed = max_drive_speed
         self.max_rotation_speed = max_rotation_speed
-        self.fw_set_retries = fw_set_retries
-        self.fw_set_retry_delay_sec = fw_set_retry_delay_sec
         self.invert_gyro = invert_gyro
         self.gyro_on_spi = gyro_on_spi
 
@@ -40,9 +34,3 @@ class PhysicalConfig:
 
         if self.wheel_grip_coefficient_of_friction <= 0:
             raise ValueError("In this universe the coefficient of friction must be greater than 0")
- 
-        if self.fw_set_retries < 0:
-            raise ValueError("Number of retries must be greater than or equal to 0")
-        
-        if  not 0 < self.fw_set_retry_delay_sec <= 1 :
-            raise ValueError("Retry delay must be greater than 0 and less than 1 second")
