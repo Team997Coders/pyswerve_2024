@@ -393,7 +393,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def reset_pose_pids_to_current_position(self):
         """Sets the current position of the driving pids to the estimated position of the robot"""
-        estimated_pose = self.swerve_drive.odemetry.getEstimatedPosition()
+        estimated_pose = self.swerve_drive.estimated_position
         self._x_axis_control.set_current_position(estimated_pose.x)
         self._y_axis_control.set_current_position(estimated_pose.y)
         self._heading_control.set_current_position(self.swerve_drive.gyro_angle_radians)

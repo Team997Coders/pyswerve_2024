@@ -8,17 +8,27 @@ import wpilib
 class LimeLightNetTables:
     """Inspired by FROG 3160's Limelight class, this class reads pose data directly from net-tables"""
 
+    _botpose = Pose3d | None
+    network_table: ntcore.NetworkTable
+
+    _last_botpose_update: float | None = None
+    _last_targetpose_update: float | None = None
+
     def __init__(self, limelight_name: str | None = None):
         limelight_name = "limelight" if limelight_name is None else limelight_name
+        self._last_botpose_update = None
+        self._last_targetpose_update = None
 
         self.network_table = NetworkTableInstance.getDefault().getTable(
             key=limelight_name
         )
 
-        self.network_table.List
         self.nt_botpose = self.network_table.getFloatArrayTopic("botpose").subscribe(
             [-997, -997, -997, 0, 0, 0, -1]
         )
+
+        #self.network_table.addListener("botpose",  self._on_botpose_change)
+
         self.nt_botpose_blue = self.network_table.getFloatArrayTopic(
             "botpose_wpiblue"
         ).subscribe([-997, -997, -997, 0, 0, 0, -1])
@@ -32,6 +42,12 @@ class LimeLightNetTables:
         # create the timer that we can use to timestamp
         self.timer = wpilib.Timer()
 
+    # def _on_botpose_change(self, table: ntcore.NetworkTable, key: str, event: ntcore.Event):
+    #     if isinstance(event.data, ntcore.ValueEventData):
+    #         event.data.value.getFloatArray()
+    #         event.data.value.time()
+    #     self._botpose = self.array_to_bot_pose_estimate(value)
+
     @property
     def PipelineNum(self) -> int:
         return self.nt_pipeline.get()
@@ -41,7 +57,12 @@ class LimeLightNetTables:
         self.network_table.putNumber("pipeline", pipeline_num)
 
     def getBotPoseEstimate(self) -> Tuple[Pose3d | None, float | None]:
-        return self.array_to_bot_pose_estimate(self.nt_botpose.getAtomic())
+        value = self.nt_botpose.getAtomic()
+        if value.time == 0 or value.time == self._last_botpose_update:
+            return None, None
+
+        self._last_botpose_update = value.time
+        return self.array_to_bot_pose_estimate(value)
 
     def getBotPoseEstimateBlue(self) -> Tuple[Pose3d | None, float | None]:
         return self.array_to_bot_pose_estimate(self.nt_botpose_blue.getAtomic())
@@ -49,8 +70,13 @@ class LimeLightNetTables:
     def getBotPoseEstimateRed(self) -> Tuple[Pose3d | None, float | None]:
         return self.array_to_bot_pose_estimate(self.nt_botpose_red.getAtomic())
 
-    def getTargetTransform(self) -> Tuple[Transform3d, float] | None:
+    def getTargetTransform(self) -> Tuple[Transform3d, float] | Tuple[None, None]:
         transform_array = self.nt_targetpose_robotspace.getAtomic()
+        if transform_array.time == 0 or transform_array.time == self._Last_targetpose_update:
+            return None, None
+
+        self._Last_targetpose_update = transform_array.time
+
         timestamp_us = transform_array.time
         latency_ms = transform_array.value[6]
         transform = Transform3d(
@@ -60,7 +86,7 @@ class LimeLightNetTables:
         if timestamp_us > 0:
             return transform, timestamp_us - (latency_ms / 1000)
 
-        return None
+        return None, None
 
     def array_to_bot_pose_estimate(self, pose_array_timestamped: ntcore.TimestampedFloatArray) -> Tuple[
         Pose3d | None, float | None]:
