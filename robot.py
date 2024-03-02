@@ -27,7 +27,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import crescendo as robot_config
+from robots import swerve_bot as robot_config
 
 is_test = True
 ######################################################################
@@ -169,6 +169,18 @@ class MyRobot(commands2.TimedCommandRobot):
             self.target_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
             controller.button(button).toggleOnTrue(self.target_pointer)
 
+    def bind_position_targets(self, mapping_dict: dict[
+        tuple[commands2.button.CommandGenericHID, int], tuple[float, float, float]]) -> None:
+        for (controller, button), target in mapping_dict.items():
+            self.goto_target = commands.GotoXYTheta(swerve_drive=self.swerve_drive,
+                                                    destination_xy_theta=target,
+                                                    x_axis_pid=self._x_axis_control,
+                                                    y_axis_pid=self._y_axis_control,
+                                                    theta_axis_pid=self._heading_control)
+            self.goto_target.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl,
+                                             subsystems.AxisPositionControl}
+            controller.button(button).toggleOnTrue(self.goto_target)
+
     def robotInit(self):
         super().robotInit()
 
@@ -188,7 +200,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
 
-        self.operator_control = commands2.button.CommandJoystick(2) if robot_config.has_mechanisms else None
+        self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
 
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
@@ -230,7 +242,26 @@ class MyRobot(commands2.TimedCommandRobot):
             (self.joystick_one, 8): (3.0, 5.0)  # stage right
         }
 
+        self._target_position_mappings = {
+            #  red tag mappings
+            (self.operator_control, 3): (0.0, 2.0, 0),  # speaker
+            (self.operator_control, 4): (0.0, 0.0, 0),  # amp
+            (self.operator_control, 5): (0.0, 0.0, math.pi / 2),  # source
+            (self.operator_control, 6): (3.0, 3.0, 0),  # stage left
+            (self.operator_control, 7): (3.0, 4.0, 0),  # stage center
+            (self.operator_control, 8): (5.0, 5.0, 0),  # stage right
+
+            #  blue tag mappings
+            # (self.operator_control,  9): (0.0, 3.0, 0),  # speaker
+            # (self.operator_control, 10): (0.0, 0.0, 0),  # amp
+            # (self.operator_control, 11): (0.0, 0.0, 0),  # source
+            # (self.operator_control, 12): (3.0, 3.0, 0),  # stage left
+            # (self.operator_control, 13): (3.0, 4.0, 0),  # stage center
+            # (self.operator_control, 14): (3.0, 5.0, 0)   # stage right
+        }
+
         self.bind_heading_targets(self._target_heading_mappings)
+        self.bind_position_targets(self._target_position_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -244,9 +275,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
-
-        commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-            commands.FlipHeading(self.heading_command, self.target_pointer))
+        # if self.config.has_mechanisms:
+        #     commands2.button.Trigger(condition=lambda: self.indexer.ready).toggleOnTrue(
+        #         commands.FlipHeading(self.heading_command, self.target_pointer))
+        # self.joystick_two.button(2).toggleOnTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
 
         # sd.putData("Commands", self._command_scheduler)
 
@@ -372,15 +404,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
-        driving_command = create_twinstick_tracking_command(self.joystick_one,
-                                                            self.swerve_drive,
-                                                            self._heading_control)
-        heading_command = create_twinstick_heading_command(self.joystick_two,
-                                                           self._heading_control)
-        three_dof_command = create_3dof_command(self.joystick_one,
-                                                self.swerve_drive)
-        self._command_scheduler.schedule(heading_command)
-        self._command_scheduler.schedule(driving_command)
+        # driving_command = create_twinstick_tracking_command(self.joystick_one,
+        #                                                     self.swerve_drive,
+        #                                                     self._heading_control)
+        # heading_command = create_twinstick_heading_command(self.joystick_two,
+        #                                                    self._heading_control)
+        # three_dof_command = create_3dof_command(self.joystick_one,
+        #                                         self.swerve_drive)
+        self._command_scheduler.schedule(self.heading_command)
+        self._command_scheduler.schedule(self.driving_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
@@ -403,12 +435,12 @@ class MyRobot(commands2.TimedCommandRobot):
         #  information to update our positioning pids
         self.reset_pose_pids_to_current_position()
 
-        cmd = commands2.cmd.sequence(
-            commands.GotoXYTheta(self.swerve_drive, (2, 0, 0),
+        self.cmd = commands2.cmd.sequence(
+            commands.GotoXYTheta(self.swerve_drive, (1, 0, 0),
                                  self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
+            commands.GotoXYTheta(self.swerve_drive, (1, 1, 0),
                                  self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (0, 2, 0),
+            commands.GotoXYTheta(self.swerve_drive, (0, 1, 0),
                                  self._x_axis_control, self._y_axis_control, self._heading_control),
             commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
                                  self._x_axis_control, self._y_axis_control, self._heading_control)
@@ -437,7 +469,7 @@ class MyRobot(commands2.TimedCommandRobot):
         #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
         #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
         #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
-        cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
+        self.cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
         drv_cmd.requirements = {self.swerve_drive}
         # cmds = factory.create(*factory.args)
 
@@ -446,11 +478,11 @@ class MyRobot(commands2.TimedCommandRobot):
         #     self._command_scheduler.schedule(cmds)
         # else:
         #     self._command_scheduler.schedule(*cmds)
-        self._command_scheduler.schedule(cmd)
         self._command_scheduler.schedule(drv_cmd)
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()
+        self._command_scheduler.schedule(self.cmd)
 
     def testInit(self) -> None:
         super().testInit()

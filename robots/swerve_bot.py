@@ -20,13 +20,13 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None)
-default_heading_pid = ProfiledPIDConfig(p=.18, i=0.12, d=0.001,
+default_heading_pid = ProfiledPIDConfig(p=.2, i=0.0, d=0.0,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 8, acceleration=math.pi * 4),
                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05))
-default_axis_pid = ProfiledPIDConfig(p=5, i=0.012, d=0.0,
+default_axis_pid = ProfiledPIDConfig(p=5, i=0.0, d=0.0,
                                      profile=VelocityAccelerationConfig(velocity=8 * math.pi, acceleration=4 * math.pi),
-                                     tolerance=PositionVelocityConfig(position=0.15, velocity=0.5))
+                                     tolerance=PositionVelocityConfig(position=0.15, velocity=0.05))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
                                                 kV=0.01,
                                                 kA=0.001)
