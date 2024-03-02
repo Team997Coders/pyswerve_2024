@@ -12,17 +12,17 @@ from wpimath.trajectory import TrapezoidProfile, TrapezoidProfileRadians
 from typing import NamedTuple
 from robots.common import rev_config
 
-
 rev_hardware_set_queue = queue.Queue()
 rev_thread = None
 
+
 class rev_hardware_call(NamedTuple):
-    func: Callable[[Any], rev.REVLibError]
+    func: Callable[..., rev.REVLibError]
     args: Any
     kwargs: Any
 
 
-def safe_set_rev(func: Callable[[Any], rev.REVLibError], *args, **kwargs):
+def safe_set_rev(func: Callable[..., rev.REVLibError], *args, **kwargs):
     """
      Call the provided function to set hardware settings, retrying after a short delay if an error occurs.
      To use it, pass the name of the function and the arguments to this function.  Note, this can kill the
@@ -44,9 +44,10 @@ def safe_set_rev(func: Callable[[Any], rev.REVLibError], *args, **kwargs):
     if error:
         logging.error(f"Error setting {func.__name__}: {error}")
 
+
 def __safe_set_rev_run(worklist: queue.Queue):
     """Function to run in a daemon thread to set hardware settings.  It will run until the queue is empty."""
-    time_to_wait = 1 # Time to wait before giving up and ending this thread
+    time_to_wait = 1  # Time to wait before giving up and ending this thread
     last_work_item_time = time.monotonic()
 
     while True:
@@ -61,10 +62,11 @@ def __safe_set_rev_run(worklist: queue.Queue):
                 rev_thread = None
                 return
 
-            #Wait a bit before checking the queue again
+            # Wait a bit before checking the queue again
             time.sleep(0.01)
 
-def safe_set_rev_in_thread(func: Callable[[Any], rev.REVLibError] | Callable[[], rev.REVLibError], *args, **kwargs):
+
+def safe_set_rev_in_thread(func: Callable[..., rev.REVLibError], *args, **kwargs):
     """
         Call the provided function to set hardware settings, retrying after a short delay if an error occurs.
         To use it, pass the name of the function and the arguments to this function.  It creates a daemon
@@ -78,12 +80,13 @@ def safe_set_rev_in_thread(func: Callable[[Any], rev.REVLibError] | Callable[[],
 
     global rev_thread, rev_hardware_set_queue
 
-    rev_hardware_set_queue.put(rev_hardware_call(func, args, kwargs)) # Add the call to the queue of work to be done
+    rev_hardware_set_queue.put(rev_hardware_call(func, args, kwargs))  # Add the call to the queue of work to be done
 
-    #Start a thread to work through the queue if one is not already running
+    # Start a thread to work through the queue if one is not already running
     if rev_thread is None:
         rev_thread = threading.Thread(target=__safe_set_rev_run, args=(rev_hardware_set_queue,), daemon=True)
         rev_thread.start()
+
 
 def init_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig, feedback_device: rev.CANSensor | None = None):
     """Configures a SparkMax PID controller with the provided PIDConfig"""
@@ -116,11 +119,13 @@ def read_pid(pid: rev.SparkMaxPIDController) -> PIDConfig:
     return PIDConfig(p=pid.getP(), i=pid.getI(), d=pid.getD(),
                      wrapping=config.OptionalRange(min_wrap, max_wrap) if wrapping else None)
 
+
 def adjust_pid(pid: rev.SparkMaxPIDController, pid_config: PIDConfig):
     """Configures a SparkMax PID controller with the provided PIDConfig"""
     safe_set_rev_in_thread(pid.setP, pid_config.p)
     safe_set_rev_in_thread(pid.setI, pid_config.i)
     safe_set_rev_in_thread(pid.setD, pid_config.d)
+
 
 def init_motor(motor: rev.CANSparkMax, config: MotorConfig):
     motor.restoreFactoryDefaults()

@@ -92,7 +92,8 @@ class SwerveModule(ISwerveModule):
         # self.drive_motor_encoder.setPositionConversionFactor(1.0 / physical_config.gear_ratio.drive)
         hardware.safe_set_rev_in_thread(self.drive_motor_encoder.setVelocityConversionFactor,
                                         (1.0 / physical_config.gear_ratio.drive) * (
-                                                (physical_config.wheel_diameter_cm / 100) * math.pi) / 60.0)  # convert from rpm to revolutions/sec
+                                                (
+                                                            physical_config.wheel_diameter_cm / 100) * math.pi) / 60.0)  # convert from rpm to revolutions/sec
 
         # Request specific angles from the PID controller 
         hardware.init_pid(self.drive_pid, module_config.drive_pid, feedback_device=self.drive_motor_encoder)
@@ -101,7 +102,7 @@ class SwerveModule(ISwerveModule):
                                         (2.0 * math.pi) / physical_config.gear_ratio.angle)
         hardware.safe_set_rev_in_thread(self.angle_motor_encoder.setVelocityConversionFactor,
                                         (2.0 * math.pi) / (
-                                                    physical_config.gear_ratio.angle * 60.0))  # convert from rpm to revolutions/sec
+                                                physical_config.gear_ratio.angle * 60.0))  # convert from rpm to revolutions/sec
         self.angle_absolute_encoder = self._angle_motor.getAbsoluteEncoder(
             encoderType=rev.SparkAbsoluteEncoder.Type.kDutyCycle)
 
@@ -116,8 +117,8 @@ class SwerveModule(ISwerveModule):
 
         hardware.init_pid(self.angle_pid, module_config.angle_pid, feedback_device=self.angle_absolute_encoder)
 
-        hardware.safe_set_rev_in_thread(self._angle_motor.burnFlash,())
-        hardware.safe_set_rev_in_thread(self._drive_motor.burnFlash,())
+        hardware.safe_set_rev_in_thread(self._angle_motor.burnFlash)
+        hardware.safe_set_rev_in_thread(self._drive_motor.burnFlash)
 
     def stop(self):
         """Idle both motors"""
