@@ -1,5 +1,4 @@
 import wpimath.geometry as geom
-from swerve import swervedrive
 from typing import NamedTuple
 
 
