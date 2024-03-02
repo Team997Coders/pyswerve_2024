@@ -388,10 +388,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
-        self.swerve_drive.periodic()
         if self.april_tag_one is not None:
             self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
+        #print(f"Estimated position: {self.swerve_drive.estimated_position}")
         self.swerve_telemetry.report_to_dashboard()
         self.report_position_control_to_dashboard()
         self.mechanism_telemetry_periodic()
