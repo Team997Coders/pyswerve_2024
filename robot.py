@@ -167,8 +167,20 @@ class MyRobot(commands2.TimedCommandRobot):
                                                      get_chassis_xy=lambda: (
                                                          self.swerve_drive.pose.x, self.swerve_drive.pose.y),
                                                      is_heading_reversed=False)
-            self.target_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+            self.target_pointer.requirements = {self._heading_control}
             controller.button(button).toggleOnTrue(self.target_pointer)
+
+    def bind_position_targets(self, mapping_dict: dict[
+        tuple[commands2.button.CommandGenericHID, int], tuple[float, float, float]]) -> None:
+        for (controller, button), target in mapping_dict.items():
+            self.goto_target = commands.GotoXYTheta(swerve_drive=self.swerve_drive,
+                                                    destination_xy_theta=target,
+                                                    x_axis_pid=self._x_axis_control,
+                                                    y_axis_pid=self._y_axis_control,
+                                                    theta_axis_pid=self._heading_control)
+            self.goto_target.requirements = {self._heading_control,
+                                             self._x_axis_control, self._y_axis_control, self.swerve_drive}
+            controller.button(button).toggleOnTrue(self.goto_target)
 
     def robotInit(self):
         super().robotInit()
@@ -189,7 +201,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
 
-        self.operator_control = commands2.button.CommandJoystick(2) if robot_config.has_mechanisms else None
+        self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
 
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
@@ -235,7 +247,26 @@ class MyRobot(commands2.TimedCommandRobot):
             (self.joystick_one, 8): (3.0, 5.0)  # stage right
         }
 
+        self._target_position_mappings = {
+            #  red tag mappings
+            (self.operator_control, 3): (0.0, 2.0, 0),  # speaker
+            (self.operator_control, 4): (0.0, 0.0, 0),  # amp
+            (self.operator_control, 5): (0.0, 0.0, math.pi / 2),  # source
+            (self.operator_control, 6): (3.0, 3.0, 0),  # stage left
+            (self.operator_control, 7): (3.0, 4.0, 0),  # stage center
+            (self.operator_control, 8): (5.0, 5.0, 0),  # stage right
+
+            #  blue tag mappings
+            # (self.operator_control,  9): (0.0, 3.0, 0),  # speaker
+            # (self.operator_control, 10): (0.0, 0.0, 0),  # amp
+            # (self.operator_control, 11): (0.0, 0.0, 0),  # source
+            # (self.operator_control, 12): (3.0, 3.0, 0),  # stage left
+            # (self.operator_control, 13): (3.0, 4.0, 0),  # stage center
+            # (self.operator_control, 14): (3.0, 5.0, 0)   # stage right
+        }
+
         self.bind_heading_targets(self._target_heading_mappings)
+        self.bind_position_targets(self._target_position_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -249,8 +280,11 @@ class MyRobot(commands2.TimedCommandRobot):
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
-
+ 
         sd.putData("Commands", self._command_scheduler)
+
+        self.joystick_two.button(2).toggleOnTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
+ 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
         self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive,
@@ -279,7 +313,6 @@ class MyRobot(commands2.TimedCommandRobot):
             self.auto_options.append(
                 autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
                                   (self,)))
-
 
 
     def try_init_mechanisms(self):
@@ -376,15 +409,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
-        driving_command = create_twinstick_tracking_command(self.joystick_one,
-                                                            self.swerve_drive,
-                                                            self._heading_control)
-        heading_command = create_twinstick_heading_command(self.joystick_two,
-                                                           self._heading_control)
-        three_dof_command = create_3dof_command(self.joystick_one,
-                                                self.swerve_drive)
-        self._command_scheduler.schedule(heading_command)
-        self._command_scheduler.schedule(driving_command)
+        self._command_scheduler.schedule(self.heading_command)
+        self._command_scheduler.schedule(self.driving_command)
 
     def teleopPeriodic(self):
         super().teleopPeriodic()
