@@ -25,7 +25,7 @@ default_heading_pid = ProfiledPIDConfig(p=.2, i=0.0, d=0.0,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 8, acceleration=math.pi * 4),
                                         tolerance=PositionVelocityConfig(position=math.pi / 180, velocity=0.05))
-default_axis_pid = ProfiledPIDConfig(p=5, i=0.0, d=0.0,
+default_axis_pid = ProfiledPIDConfig(p=5, i=0.1, d=0.001,
                                      profile=VelocityAccelerationConfig(velocity=8 * math.pi, acceleration=4 * math.pi),
                                      tolerance=PositionVelocityConfig(position=0.15, velocity=0.05))
 default_heading_feedforward = FeedForwardConfig(kS=0.0,
@@ -61,7 +61,7 @@ limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d
                                  camera_name=None, #Set name from nettable name if not default of 'limelight'
                                  refresh_rate=5)
 
-physical_properties = PhysicalConfig(wheel_diameter_cm=12,
+physical_properties = PhysicalConfig(wheel_diameter_cm=10.16,
                                      wheel_grip_coefficient_of_friction=1,
                                      encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                      gear_ratio=SwerveModuleFloatProperty(angle=150.0 / 7, drive=6.75),
