@@ -166,7 +166,7 @@ class MyRobot(commands2.TimedCommandRobot):
                                                      get_chassis_xy=lambda: (
                                                          self.swerve_drive.pose.x, self.swerve_drive.pose.y),
                                                      is_heading_reversed=False)
-            self.target_pointer.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl}
+            self.target_pointer.requirements = {self._heading_control}
             controller.button(button).toggleOnTrue(self.target_pointer)
 
     def bind_position_targets(self, mapping_dict: dict[
@@ -177,8 +177,8 @@ class MyRobot(commands2.TimedCommandRobot):
                                                     x_axis_pid=self._x_axis_control,
                                                     y_axis_pid=self._y_axis_control,
                                                     theta_axis_pid=self._heading_control)
-            self.goto_target.requirements = {subsystems.chassis_heading_control.ChassisHeadingControl,
-                                             subsystems.AxisPositionControl}
+            self.goto_target.requirements = {self._heading_control,
+                                             self._x_axis_control, self._y_axis_control, self.swerve_drive}
             controller.button(button).toggleOnTrue(self.goto_target)
 
     def robotInit(self):
@@ -275,12 +275,13 @@ class MyRobot(commands2.TimedCommandRobot):
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
-        # if self.config.has_mechanisms:
-        #     commands2.button.Trigger(condition=lambda: self.indexer.ready).toggleOnTrue(
-        #         commands.FlipHeading(self.heading_command, self.target_pointer))
-        # self.joystick_two.button(2).toggleOnTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
 
-        # sd.putData("Commands", self._command_scheduler)
+        if self.config.has_mechanisms:
+            commands2.button.Trigger(condition=lambda: self.indexer.ready).toggleOnTrue(
+                commands.FlipHeading(self.heading_command, self.target_pointer))
+        self.joystick_two.button(2).toggleOnTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
+
+        sd.putData("Commands", self._command_scheduler)
 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
@@ -310,7 +311,6 @@ class MyRobot(commands2.TimedCommandRobot):
             self.auto_options.append(
                 autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
                                   (self,)))
-
 
 
     def try_init_mechanisms(self):
