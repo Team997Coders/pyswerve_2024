@@ -28,7 +28,8 @@ class LimeLightPositioning(commands2.Subsystem):
 
     def __init__(self, swerve_drive: swerve.SwerveDrive,
                        config: LimelightCameraConfig,
-                       logger: logging.Logger):
+                       logger: logging.Logger,
+                       use_thread: bool = True):
         self._logger = logger
         self._last_print = None
         self._apriltag_seen = False
@@ -37,6 +38,7 @@ class LimeLightPositioning(commands2.Subsystem):
         self._config = config
         self._update_delay = 1.0 / config.refresh_rate
         self._thread = None
+        self._use_thread = use_thread
 
     def start_thread(self):
         self._logger.info("Starting Limelight Pose Update Thread")
@@ -45,9 +47,10 @@ class LimeLightPositioning(commands2.Subsystem):
         self._thread.start()
 
     def periodic(self):
-        self.update_pose()
-        # if self._thread is None or not self._thread.is_alive():
-        #     self.start_thread()
+        if not self._use_thread:
+            self.update_pose()
+        elif self._thread is None or not self._thread.is_alive():
+             self.start_thread()
 
     def run_thread(self):
         while True:

@@ -58,7 +58,7 @@ class LimeLightNetTables:
 
     def getBotPoseEstimate(self) -> Tuple[Pose3d | None, float | None]:
         value = self.nt_botpose.getAtomic()
-        if value.time == 0 or value.time == self._last_botpose_update:
+        if value.time == self._last_botpose_update:
             return None, None
 
         self._last_botpose_update = value.time
