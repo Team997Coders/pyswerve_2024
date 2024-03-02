@@ -63,7 +63,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     @property
     def estimated_position(self) -> geom.Pose2d:
         """Get the pose estimators best guess about where the robot is"""
-        return self._odemetry.getEstimatedPosition()
+        with self._odemetry_lock:
+            return self._odemetry.getEstimatedPosition()
 
     @property
     def ordered_modules(self) -> list[SwerveModule]:

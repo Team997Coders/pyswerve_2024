@@ -29,7 +29,7 @@ class LimeLightPositioning(commands2.Subsystem):
     def __init__(self, swerve_drive: swerve.SwerveDrive,
                        config: LimelightCameraConfig,
                        logger: logging.Logger,
-                       use_thread: bool = True):
+                       use_thread: bool = False):
         self._logger = logger
         self._last_print = None
         self._apriltag_seen = False
@@ -65,12 +65,16 @@ class LimeLightPositioning(commands2.Subsystem):
         #Camera should be measured relative to the center of the robot
         #So if the camera is centered on the ground directly front of the robot center by 10cm,
         # that is recorded as +10cm on the X axis.  We need to adjust the pose back by 10cm
-        camera_adjusted_pose = pose.transformBy(-self.cam_position)
+        camera_adjusted_pose = pose.transformBy(self.cam_position.inverse())
+        #camera_adjusted_pose = pose
         if not self._apriltag_seen:
             self._apriltag_seen = True
             self._swerve_drive.reset_pose(camera_adjusted_pose.toPose2d())
+            #print(f"reset pose: {camera_adjusted_pose.toPose2d()}")
         else:
             self._swerve_drive.add_vision_measurement(camera_adjusted_pose.toPose2d(), timestamp)
+            #print(f"add vision measurement: {camera_adjusted_pose.toPose2d()} @ {timestamp} estimated: {self._swerve_drive.estimated_position}")
+
 
 
 
