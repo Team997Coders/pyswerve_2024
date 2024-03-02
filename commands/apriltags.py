@@ -13,18 +13,21 @@ class AprilTagPointer(commands2.Command):
     _aprilTagNumber: int
     _apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
     _get_xy: Callable[[], Tuple[float, float]]
+    is_heading_reversed: bool
 
     def __init__(self,
                  set_heading_goal: Callable[[float], None],
                  aprilTagNumber: int,
                  apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout,
-                 get_xy: Callable[[], Tuple[float, float]]):
+                 get_xy: Callable[[], Tuple[float, float]],
+                 is_heading_reversed: bool):
 
         super().__init__()
         self._set_heading_goal = set_heading_goal
         self._aprilTagNumber = aprilTagNumber
         self._apriltagfieldlayout = apriltagfieldlayout
         self._get_xy = get_xy
+        self.is_heading_reversed = is_heading_reversed
 
 
     def execute(self):
@@ -34,7 +37,7 @@ class AprilTagPointer(commands2.Command):
         px = pose.x
         py = pose.y
         heading_goal = math.atan2(ty - py, tx - px)
-        # TODO: the math to get the heading and set it on the HeadingTracker
-        self._set_heading_goal(heading_goal)
-
-
+        if self.is_heading_reversed:
+            self._set_heading_goal(heading_goal + math.pi)
+        else:
+            self._set_heading_goal(heading_goal)

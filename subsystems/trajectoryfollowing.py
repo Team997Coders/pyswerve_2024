@@ -25,7 +25,7 @@ class TrajectoryFollowing(Subsystem):
         front_left_module = swerve_drive.modules[ModulePosition.front_left]
         wheel_location = front_left_module.location
         drive_base_radius = math.sqrt(wheel_location.x ** 2 + wheel_location.y ** 2)
-
+        super().__init__()
         AutoBuilder.configureHolonomic(
             lambda: self._swerve_drive.pose,  # Robot pose supplier
             self._swerve_drive.resetPose,  # Method to reset odometry (will be called if your auto has a starting pose)
