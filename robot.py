@@ -27,7 +27,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import crescendo as robot_config
+from robots import swerve_bot as robot_config
 
 is_test = True
 ######################################################################
@@ -250,11 +250,7 @@ class MyRobot(commands2.TimedCommandRobot):
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
 
-        commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-            commands.FlipHeading(self.heading_command, self.target_pointer))
-
-        # sd.putData("Commands", self._command_scheduler)
-
+        sd.putData("Commands", self._command_scheduler)
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
         self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive,
@@ -300,6 +296,9 @@ class MyRobot(commands2.TimedCommandRobot):
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
             self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
             self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
+
+            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
+                commands.FlipHeading(self.heading_command, self.target_pointer))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
@@ -408,51 +407,17 @@ class MyRobot(commands2.TimedCommandRobot):
         #  information to update our positioning pids
         self.reset_pose_pids_to_current_position()
 
-        cmd = commands2.cmd.sequence(
-            commands.GotoXYTheta(self.swerve_drive, (2, 0, 0),
-                                 self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
-                                 self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (0, 2, 0),
-                                 self._x_axis_control, self._y_axis_control, self._heading_control),
-            commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
-                                 self._x_axis_control, self._y_axis_control, self._heading_control)
-        )
+        auto_path_index = self.auto_chooser.getSelected()
+        factory = self.auto_options[auto_path_index]
+        sd.putString("Selected auto", factory.name)
 
-        drv_cmd = commands.drive.Drive(
-            self.swerve_drive,
-            get_x=lambda: self._x_axis_control.desired_velocity,
-            get_y=lambda: self._y_axis_control.desired_velocity,
-            get_theta=lambda: self._heading_control.desired_velocity
-        )
-
-        # cmd = commands2.cmd.ParallelRaceGroup(
-        #     commands2.cmd.sequence(
-        #         commands.Shoot(self.shooter, self.indexer),
-        #         commands2.cmd.WaitCommand(
-        #             robot_config.shooter_config.default_spinup_delay + robot_config.shooter_config.default_fire_time),
-        #         commands2.cmd.ParallelCommandGroup(
-        #             # commands.Load(self.intake, self.i ,indexer),
-        #             commands2.cmd.sequence(
-        #                 commands.GotoXYTheta(self.swerve_drive, (2, 2, 0),
-        #                                      self._x_axis_control, self._y_axis_control, self._heading_control),
-        #                 commands.GotoXYTheta(self.swerve_drive, (.5, .5, 0),
-        #                                      self._x_axis_control, self._y_axis_control, self._heading_control)
-        #                 # commands.GotoXYTheta(self.swerve_drive, (0, .5, 0),
-        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control),
-        #                 # commands.GotoXYTheta(self.swerve_drive, (0, 0, 0),
-        #                 #                      self._x_axis_control, self._y_axis_control, self._heading_control)
-        cmd.requirements = {self._x_axis_control, self._y_axis_control, self._heading_control}
-        drv_cmd.requirements = {self.swerve_drive}
-        # cmds = factory.create(*factory.args)
+        cmds = factory.create(*factory.args)
 
         # Factories can return either a set of commands or a single command.  Call the scheduler accordingly
-        # if isinstance(cmds, commands2.Command):
-        #     self._command_scheduler.schedule(cmds)
-        # else:
-        #     self._command_scheduler.schedule(*cmds)
-        self._command_scheduler.schedule(cmd)
-        self._command_scheduler.schedule(drv_cmd)
+        if isinstance(cmds, commands2.Command):
+            self._command_scheduler.schedule(cmds)
+        else:
+            self._command_scheduler.schedule(*cmds)
 
     def autonomousPeriodic(self):
         super().autonomousPeriodic()
