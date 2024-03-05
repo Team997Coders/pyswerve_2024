@@ -62,6 +62,7 @@ class Drive(commands2.Command):
         theta = self.get_theta()
         self.send_drive_command(x, y, theta)
 
+
     def send_drive_command(self, vx: float, vy: float, vtheta: float):
         chassis_speeds = self._swerve_drive.measured_chassis_speed
         velocity = math.sqrt(chassis_speeds.vx ** 2 + chassis_speeds.vy ** 2)
@@ -125,7 +126,7 @@ class TwinstickHeadingSetter(commands2.Command):
             else:
                 heading = geom.Rotation2d(-x, y).radians()
                 if self.is_heading_inverted:
-                    self.set_heading_goal(-heading)
+                    self.set_heading_goal(heading + math.pi)
                 else:
                     self.set_heading_goal(heading)
         except:
@@ -135,9 +136,9 @@ class TwinstickHeadingSetter(commands2.Command):
 class FlipHeading(commands2.InstantCommand):
     def __init__(self, twinstick_heading_setter: TwinstickHeadingSetter, set_target: SetTarget):
         super().__init__()
-        self._twinstick_heading_setter = twinstick_heading_setter
-        self._set_target = set_target
+        self.twinstick_heading_setter = twinstick_heading_setter
+        self.set_target = set_target
 
     def execute(self):
-        self._twinstick_heading_setter.is_heading_inverted = not self._twinstick_heading_setter.is_heading_inverted
-        self._set_target.is_heading_reversed = not self._set_target.is_heading_reversed
+        self.twinstick_heading_setter.is_heading_inverted = not self.twinstick_heading_setter.is_heading_inverted
+        self.set_target.is_heading_reversed = not self.set_target.is_heading_reversed
