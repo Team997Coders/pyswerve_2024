@@ -33,7 +33,7 @@ class Indexer(commands2.Subsystem):
         try:
             self._feederSensor = wpilib.DigitalInput(config.indexer_sensor_id)
             self._read_indexer_state = lambda: not self._feederSensor.get() if config.indexer_sensor_inverted \
-                else self._feederSensor
+                else lambda: self._feederSensor
             self._logger.info("Initialized indexer sensor")
             print("Initialized indexer sensor")
         except:
@@ -51,9 +51,9 @@ class Indexer(commands2.Subsystem):
         self._indexer_pid = self._indexer_motor.getPIDController()
         hardware.init_pid(self._indexer_pid, self.config.pid)
 
-    def periodic(self) -> None:
-        super().periodic()
-        self._last_sensor_state = self._read_indexer_state()
+    # def periodic(self) -> None:
+    #     super().periodic()
+    #     self._last_sensor_state = self._read_indexer_state()
 
     @property
     def ready(self) -> bool:
