@@ -109,6 +109,8 @@ class LimeLightNetTables:
         if latency_ms == -1:
             return None, None
         else:
+            timestamp_us =  pose_update_us - (latency_ms / 1000)
+            timestamp_sec = timestamp_us / 1000000
             return Pose3d(
                 Translation3d(pX, pY, pZ), Rotation3d.fromDegrees(pRoll, pPitch, pYaw)
-            ), pose_update_us - (latency_ms / 1000)
+            ), timestamp_sec
