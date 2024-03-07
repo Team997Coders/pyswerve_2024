@@ -27,7 +27,7 @@ class ClimberUp(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
-        self._climber.speed = -1
+        self._climber.speed = -0.5
 
 
 class ClimberDown(commands2.InstantCommand):
@@ -38,7 +38,7 @@ class ClimberDown(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
-        self._climber.speed = 1
+        self._climber.speed = 0.5
 
 
 class ClimberStop(commands2.InstantCommand):

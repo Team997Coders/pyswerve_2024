@@ -68,11 +68,9 @@ class IndexSensorCommand(commands2.WaitUntilCommand):
     _indexer: Indexer
 
     def __init__(self, indexer):
-        super().__init__(lambda: indexer.ready)
         self._indexer = indexer
+        super().__init__(lambda: self._indexer.ready)
 
-    def isFinished(self) -> bool:
-        return self._indexer.ready
 
 class Load(commands2.InstantCommand):
     """Loads a note (ring) into the robot and prepares it to be fired"""
@@ -81,13 +79,14 @@ class Load(commands2.InstantCommand):
     def __init__(self, intake: Intake, indexer: Indexer):
         super().__init__()
         self.intake_scheduled = True
-        self._command = commands2.cmd.sequence(
+        self._command = commands2.SequentialCommandGroup(
             commands2.cmd.ParallelCommandGroup(IntakeOn(intake),
                                                IndexOnIntake(indexer)),
-            commands2.cmd.ParallelRaceGroup(IndexSensorCommand(indexer), commands2.cmd.WaitCommand(5)),
+            commands2.cmd.ParallelRaceGroup(commands2.WaitUntilCommand(lambda: indexer.ready),
+                                            commands2.cmd.WaitCommand(5)),
             IntakeOff(intake),
             IndexOff(indexer)
-        ) 
+        )
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)

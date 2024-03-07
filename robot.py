@@ -27,7 +27,7 @@ import math
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
-from robots import swerve_bot as robot_config
+from robots import crescendo as robot_config
 
 is_test = True
 ######################################################################
@@ -117,7 +117,7 @@ class MyRobot(commands2.TimedCommandRobot):
     twinstick_teleop_drive: TwinStickTeleopDrive
     _navx: navx.AHRS  # Attitude Heading Reference System
 
-    controller: commands2.button.CommandXboxController
+    controller: commands2.button.CommandGenericHID
     joystick_one: commands2.button.CommandJoystick
     joystick_two: commands2.button.CommandJoystick
     operator_control: commands2.button.CommandJoystick | None = None
@@ -207,13 +207,9 @@ class MyRobot(commands2.TimedCommandRobot):
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         self.swerve_drive.initialize()
-        # self.april_tag_one = PhotonVisionAprilTagDetector(self.swerve_drive,
-        #                                                   robot_config.camera_config,
-        #                                                   self.logger)
-
-        self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,
-                                                                     robot_config.limelight_camera_config,
-                                                                     self.logger)
+        # self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,
+        #                                                              robot_config.limelight_camera_config,
+        #                                                              self.logger)
 
         self.init_positioning_pids()
         self.init_position_control_telemetry()
@@ -227,46 +223,45 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
 
-        self.try_init_mechanisms()
 
         self._target_heading_mappings = {
             #  red tag mappings
-            (self.joystick_two, 3): (0.0, 3.0),  # speaker
-            (self.joystick_two, 4): (0.0, 0.0),  # amp
-            (self.joystick_two, 5): (0.0, 0.0),  # source
-            (self.joystick_two, 6): (3.0, 3.0),  # stage left
-            (self.joystick_two, 7): (3.0, 4.0),  # stage center
-            (self.joystick_two, 8): (3.0, 5.0),  # stage right
+            (self.joystick_two, 3): (1.3 + 8.28, 5.6),  # speaker
+            (self.joystick_two, 4): (1.8 + 8.28, 7.6),  # amp
+            (self.joystick_two, 5): (1.5 + 8.28, 1.5),  # source
+            (self.joystick_two, 6): (4.3 + 8.28, 5.0),  # stage left
+            (self.joystick_two, 7): (5.8 + 8.28, 4.0),  # stage center
+            (self.joystick_two, 8): (4.4 + 8.28, 3.4),  # stage right
 
             #  blue tag mappings
-            (self.joystick_one, 3): (0.0, 3.0),  # speaker
-            (self.joystick_one, 4): (0.0, 0.0),  # amp
-            (self.joystick_one, 5): (0.0, 0.0),  # source
-            (self.joystick_one, 6): (3.0, 3.0),  # stage left
-            (self.joystick_one, 7): (3.0, 4.0),  # stage center
-            (self.joystick_one, 8): (3.0, 5.0)  # stage right
+            (self.joystick_one, 3): (1.3, 5.6),  # speaker
+            (self.joystick_one, 4): (1.8, 7.6),  # amp
+            (self.joystick_one, 5): (1.5, 1.5),  # source
+            (self.joystick_one, 6): (4.3, 5.0),  # stage left
+            (self.joystick_one, 7): (5.8, 4.0),  # stage center
+            (self.joystick_one, 8): (4.4, 3.4)  # stage right
         }
 
         self._target_position_mappings = {
-            #  red tag mappings
-            (self.operator_control, 3): (0.0, 2.0, 0),  # speaker
-            (self.operator_control, 4): (0.0, 0.0, 0),  # amp
-            (self.operator_control, 5): (0.0, 0.0, math.pi / 2),  # source
-            (self.operator_control, 6): (3.0, 3.0, 0),  # stage left
-            (self.operator_control, 7): (3.0, 4.0, 0),  # stage center
-            (self.operator_control, 8): (5.0, 5.0, 0),  # stage right
-
             #  blue tag mappings
-            # (self.operator_control,  9): (0.0, 3.0, 0),  # speaker
-            # (self.operator_control, 10): (0.0, 0.0, 0),  # amp
-            # (self.operator_control, 11): (0.0, 0.0, 0),  # source
-            # (self.operator_control, 12): (3.0, 3.0, 0),  # stage left
-            # (self.operator_control, 13): (3.0, 4.0, 0),  # stage center
-            # (self.operator_control, 14): (3.0, 5.0, 0)   # stage right
+            (self.operator_control, 3): (1.3, 5.6, 0),  # speaker
+            (self.operator_control, 4): (1.8, 7.6, 0),  # amp
+            (self.operator_control, 5): (1.5, 1.5, math.pi / 2),  # source
+            (self.operator_control, 6): (4.3, 5.0, 0),  # stage left
+            (self.operator_control, 7): (5.8, 4.0, 0),  # stage center
+            (self.operator_control, 8): (4.4, 3.4, 0),  # stage right
+
+            #  red tag mappings
+            # (self.operator_control,  9): (1.3 + 8.28, 0),  # speaker
+            # (self.operator_control, 10): (1.8 + 8.28, 0),  # amp
+            # (self.operator_control, 11): (1.5 + 8.28, 0),  # source
+            # (self.operator_control, 12): (4.3 + 8.28, 0),  # stage left
+            # (self.operator_control, 13): (5.8 + 8.28, 0),  # stage center
+            # (self.operator_control, 14): (4.4 + 8.28, 0)   # stage right
         }
 
         self.bind_heading_targets(self._target_heading_mappings)
-        self.bind_position_targets(self._target_position_mappings)
+        # self.bind_position_targets(self._target_position_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -277,14 +272,20 @@ class MyRobot(commands2.TimedCommandRobot):
         self.driving_command.requirements = {self.swerve_drive}
         self.heading_command.requirements = {self._heading_control}
 
+        self.try_init_mechanisms()
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
- 
+
+        if self.config.has_mechanisms:
+            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
+                commands.FlipHeading(self.heading_command, self.target_pointer))
+            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
+                commands.FlipHeading(self.heading_command, self.target_pointer))
+        self.joystick_two.button(2).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
+
         sd.putData("Commands", self._command_scheduler)
 
-        self.joystick_two.button(2).toggleOnTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
- 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
         self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive,
@@ -296,8 +297,11 @@ class MyRobot(commands2.TimedCommandRobot):
         self.auto_options = [
             autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
+            autos.AutoFactory("Drive a square", autos.auto_calibrations.drive_a_square,
+                              (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
+            autos.AutoFactory("Manual Auto>", autos.manual_autos.shoot_drive_load_backup_auto, (self)),
             ]
 
         if robot_config.has_mechanisms:
@@ -327,11 +331,9 @@ class MyRobot(commands2.TimedCommandRobot):
             self.init_mechanism_telemetry()
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-            self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-            self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
-
-            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-                commands.FlipHeading(self.heading_command, self.target_pointer))
+            self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer).andThen(
+                commands.FlipHeading(self.heading_command, self.target_pointer)))
+            # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
@@ -409,11 +411,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
+        # driving_command = create_twinstick_tracking_command(self.joystick_one,
+        #                                                     self.swerve_drive,
+        #                                                     self._heading_control)
+        # heading_command = create_twinstick_heading_command(self.joystick_two,
+        #                                                    self._heading_control)
+        # three_dof_command = create_3dof_command(self.joystick_one,
+        #                                         self.swerve_drive)
         self._command_scheduler.schedule(self.heading_command)
         self._command_scheduler.schedule(self.driving_command)
-
-    def teleopPeriodic(self):
-        super().teleopPeriodic()
 
     def updateField(self):
         pass
@@ -433,8 +439,11 @@ class MyRobot(commands2.TimedCommandRobot):
         #  information to update our positioning pids
         self.reset_pose_pids_to_current_position()
 
+
         auto_path_index = self.auto_chooser.getSelected()
+
         factory = self.auto_options[auto_path_index]
+
         sd.putString("Selected auto", factory.name)
 
         cmds = factory.create(*factory.args)
@@ -450,8 +459,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def testInit(self) -> None:
         super().testInit()
-        self.test_driver.testInit()
+        # self.test_driver.testInit()
+        self._command_scheduler.schedule(commands.TestMechanisms(
+            indexer=self.indexer, intake=self.intake, shooter=self.shooter, climber=self.climber))
 
     def testPeriodic(self) -> None:
         super().testPeriodic()
-        self.test_driver.testPeriodic()
+        # self.test_driver.testPeriodic()
