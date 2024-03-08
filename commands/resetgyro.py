@@ -3,7 +3,7 @@ import navx
 import commands2
 
 
-class ResetGyro(commands2.InstantCommand):
+class ResetNavx(commands2.InstantCommand):
 
     def __init__(self):
         # Calls the constructor of our parent class if it exists.  Do this first when inheriting from a parent class.

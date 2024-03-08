@@ -29,6 +29,7 @@ class ClimberUp(commands2.InstantCommand):
 
     def execute(self):
         self._climber.speed = -0.5
+        self._climber.set_brake_mode(True)
 
 
 class ClimberDown(commands2.InstantCommand):
@@ -41,6 +42,7 @@ class ClimberDown(commands2.InstantCommand):
 
     def execute(self):
         self._climber.speed = 0.5
+        self._climber.set_brake_mode(True)
 
 
 
@@ -54,4 +56,5 @@ class ClimberStop(commands2.InstantCommand):
 
     def execute(self):
         self._climber.speed = 0
+        self._climber.set_brake_mode(True)
 

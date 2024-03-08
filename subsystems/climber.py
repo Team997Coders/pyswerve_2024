@@ -13,6 +13,8 @@ class Climber(commands2.Subsystem):
     climber_encoder: rev.RelativeEncoder.EncoderType.kHallSensor
     config: config.ClimberConfig
     _logger: logging.Logger
+    _climber_sensor: wpilib.DigitalInput | None
+    _last_sensor_state: bool = False
 
     @property
     def pid(self) -> rev.SparkMaxPIDController:
@@ -22,15 +24,20 @@ class Climber(commands2.Subsystem):
         super().__init__()
         self.config = config
         self._logger = logger.getChild("Climber")
-        self.climber_motor = rev.CANSparkMax(15, rev.CANSparkMax.MotorType.kBrushless)
-        self.climber_motor2 = rev.CANSparkMax(14, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber_motor = rev.CANSparkMax(config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber_motor2 = rev.CANSparkMax(15, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self.climber_motor, config.climber_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(-1)
-        self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
-        self.climber_motor2.setIdleMode(self.climber_motor2.getIdleMode().kBrake)
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
+        self.set_brake_mode(True)
+
+        self.climber_motor2.follow(self.climber_motor, True)
+        try:
+            self._climber_sensor = wpilib.DigitalInput(config.climber_sensor_id)
+        except:
+            print("Climber sensor not found")
 
     def set_climber_motor_voltage(self, voltage: float):
         self.climber_motor.setVoltage(voltage)
@@ -38,8 +45,13 @@ class Climber(commands2.Subsystem):
     def get_climber_encoder_rotation(self):
         return self.climber_encoder.getPosition()
 
-    def set_brake_mode(self):
-        self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
+    def set_brake_mode(self, brakeMode: bool):
+        if brakeMode:
+            self.climber_motor.setIdleMode(self.climber_motor.IdleMode.kBrake)
+            self.climber_motor2.setIdleMode(self.climber_motor2.IdleMode.kBrake)
+        else:
+            self.climber_motor.setIdleMode(self.climber_motor.IdleMode.kCoast)
+            self.climber_motor2.setIdleMode(self.climber_motor2.IdleMode.kCoast)
 
     @property
     def position(self):
@@ -55,5 +67,7 @@ class Climber(commands2.Subsystem):
 
     @speed.setter
     def speed(self, value: float):
+        #if self._climber_sensor:
+        #    self.climber_motor.set(0)
+        #else:
         self.climber_motor.set(value)
-        self.climber_motor2.set(value)

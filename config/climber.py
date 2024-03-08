@@ -8,3 +8,5 @@ class ClimberConfig(NamedTuple):
     climber_motor: MotorConfig
     climber_pid: PIDConfig
     climber_max: int  # how many ticks of the encoder is the highest point of the climber
+    climber_sensor_id: int
+    climber_sensor_inverted: bool

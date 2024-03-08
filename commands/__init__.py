@@ -19,3 +19,4 @@ from .climb import ClimberFollow, ClimberStop, ClimberUp, ClimberDown
 from .drive import Drive, TwinstickHeadingSetter, FlipHeading, SetTarget
 from .apriltags import AprilTagPointer
 from .auto import DeadReckonX, DeadReckonY, GotoXYTheta
+from .resetgyro import ResetNavx

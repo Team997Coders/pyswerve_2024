@@ -90,3 +90,4 @@ class Load(commands2.InstantCommand):
 
     def execute(self):
         commands2.CommandScheduler.getInstance().schedule(self._command)
+

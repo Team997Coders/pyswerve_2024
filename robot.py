@@ -261,14 +261,15 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.try_init_mechanisms()
 
-        # RETURN COMMAND TO JOYSTICK BUTTON 2
-
-
         self.joystick_two.button(2).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
 
         self.joystick_one.button(4).onTrue(commands.ClimberUp(self.climber))
         self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
         self.joystick_one.button(5).onTrue(commands.ClimberDown(self.climber))
+
+
+        self.joystick_two.button(3).onTrue(commands.Outtake(self.intake, self.indexer))
+
 
         sd.putData("Commands", self._command_scheduler)
 

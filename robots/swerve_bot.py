@@ -49,7 +49,7 @@ indexer_config = IndexerConfig(MotorConfig(id=10, inverted=True), indexer_sensor
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=False), pid=PIDConfig(p=1, i=0, d=0, wrapping=None),
                                intake_velocity=1, outtake_velocity=-1)
 climber_config = ClimberConfig(MotorConfig(id=11, inverted=False), climber_pid=PIDConfig(p=.5, i=0, d=0, wrapping=None),
-                               climber_max=1)
+                               climber_max=1, climber_sensor_id=2, climber_sensor_inverted=False)
 
 photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0.305, 0, 0.152), #camera postition on the robot xyz in meters from the center inches: (12, 0, 6)
                                                               geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees
