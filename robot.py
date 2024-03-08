@@ -226,20 +226,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self._target_heading_mappings = {
             #  red tag mappings
-            (self.joystick_two, 3): (1.3 + 8.28, 5.6),  # speaker
-            (self.joystick_two, 4): (1.8 + 8.28, 7.6),  # amp
-            (self.joystick_two, 5): (1.5 + 8.28, 1.5),  # source
-            (self.joystick_two, 6): (4.3 + 8.28, 5.0),  # stage left
-            (self.joystick_two, 7): (5.8 + 8.28, 4.0),  # stage center
-            (self.joystick_two, 8): (4.4 + 8.28, 3.4),  # stage right
-
-            #  blue tag mappings
-            (self.joystick_one, 3): (1.3, 5.6),  # speaker
-            (self.joystick_one, 4): (1.8, 7.6),  # amp
-            (self.joystick_one, 5): (1.5, 1.5),  # source
-            (self.joystick_one, 6): (4.3, 5.0),  # stage left
-            (self.joystick_one, 7): (5.8, 4.0),  # stage center
-            (self.joystick_one, 8): (4.4, 3.4)  # stage right
+            (self.joystick_one, 11): (4.4, 3.4)  # stage right
         }
 
         self._target_position_mappings = {
@@ -275,14 +262,13 @@ class MyRobot(commands2.TimedCommandRobot):
         self.try_init_mechanisms()
 
         # RETURN COMMAND TO JOYSTICK BUTTON 2
-        self.joystick_one.button(2).toggleOnTrue(self.heading_command)
 
-        if self.config.has_mechanisms:
-            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-                commands.FlipHeading(self.heading_command, self.target_pointer))
-            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-                commands.FlipHeading(self.heading_command, self.target_pointer))
+
         self.joystick_two.button(2).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
+
+        self.joystick_one.button(4).onTrue(commands.ClimberUp(self.climber))
+        self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
+        self.joystick_one.button(5).onTrue(commands.ClimberDown(self.climber))
 
         sd.putData("Commands", self._command_scheduler)
 
@@ -331,8 +317,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self.init_mechanism_telemetry()
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-            self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer).andThen(
-                commands.FlipHeading(self.heading_command, self.target_pointer)))
+            self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
             # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
 
     def init_mechanism_telemetry(self):

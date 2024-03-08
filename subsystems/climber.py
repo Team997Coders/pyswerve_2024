@@ -22,11 +22,13 @@ class Climber(commands2.Subsystem):
         super().__init__()
         self.config = config
         self._logger = logger.getChild("Climber")
-        self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber_motor = rev.CANSparkMax(15, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber_motor2 = rev.CANSparkMax(14, rev.CANSparkMax.MotorType.kBrushless)
         hardware.init_motor(self.climber_motor, config.climber_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(-1)
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
+        self.climber_motor2.setIdleMode(self.climber_motor2.getIdleMode().kBrake)
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
 
@@ -54,3 +56,4 @@ class Climber(commands2.Subsystem):
     @speed.setter
     def speed(self, value: float):
         self.climber_motor.set(value)
+        self.climber_motor2.set(value)
