@@ -17,8 +17,8 @@ has_mechanisms = True
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
-fast_drive_pid = PIDConfig(p=0.4, i=0.0,d=0.05,wrapping=None,tolerance=None)
-default_heading_pid = ProfiledPIDConfig(p=.1, i=0.1, d=0.002,
+fast_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
+default_heading_pid = ProfiledPIDConfig(p=.25, i=0.1, d=0.002,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                         profile=VelocityAccelerationConfig(velocity=math.pi * 5,
                                                                            acceleration=4 * math.pi),
@@ -52,7 +52,7 @@ indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_senso
                                pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None, tolerance=None),
                                intake_velocity=.4, shoot_velocity=1, outtake_velocity=-0.5)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=9, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
-                             intake_velocity=.2, outtake_velocity=-0.5)
+                             intake_velocity=.3, outtake_velocity=-0.5)
 climber_config = ClimberConfig(MotorConfig(id=14, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_max=1, climber_sensor_id=2, climber_sensor_inverted=False)
 photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED

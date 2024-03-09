@@ -171,7 +171,7 @@ class MyRobot(commands2.TimedCommandRobot):
             controller.button(button).toggleOnTrue(self.target_pointer)
 
     def bind_position_targets(self, mapping_dict: dict[
-        tuple[commands2.button.CommandGenericHID, int], tuple[float, float, float]]) -> None:
+        tuple[commands2.button.CommandGenericHID, int], tuple[float, float, float]])    -> None:
         for (controller, button), target in mapping_dict.items():
             self.goto_target = commands.GotoXYTheta(swerve_drive=self.swerve_drive,
                                                     destination_xy_theta=target,
@@ -261,7 +261,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.try_init_mechanisms()
 
-        self.joystick_two.button(2).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
+        self.joystick_two.button(4).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
 
         self.joystick_one.button(4).onTrue(commands.ClimberUp(self.climber))
         self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
