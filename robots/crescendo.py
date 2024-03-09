@@ -18,7 +18,7 @@ default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, 
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
 fast_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
-default_heading_pid = ProfiledPIDConfig(p=.25, i=0.1, d=0.002,
+default_heading_pid = ProfiledPIDConfig(p=.2, i=0.1, d=0.001, #p=.2, i=0.1, d=0.001,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                         profile=VelocityAccelerationConfig(velocity=math.pi * 5,
                                                                            acceleration=4 * math.pi),

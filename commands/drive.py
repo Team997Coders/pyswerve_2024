@@ -127,8 +127,11 @@ class TwinstickHeadingSetter(commands2.Command):
                 heading = geom.Rotation2d(-x, y).radians()
                 if self.is_heading_inverted:
                     self.set_heading_goal(heading + math.pi)
+
+                    print("Goal Heading", heading + math.pi )
                 else:
                     self.set_heading_goal(heading)
+                    print("Goal Heading", heading)
         except:
             pass
 

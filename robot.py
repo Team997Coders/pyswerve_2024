@@ -267,7 +267,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
         self.joystick_one.button(5).onTrue(commands.ClimberDown(self.climber))
 
-
         self.joystick_two.button(3).onTrue(commands.Outtake(self.intake, self.indexer))
 
 
@@ -382,6 +381,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve_telemetry.report_to_dashboard()
         self.report_position_control_to_dashboard()
         self.mechanism_telemetry_periodic()
+        print("Current Headingzz: ", self._heading_control.getMeasurement())
 
     def disabledInit(self):
         super().disabledInit()
