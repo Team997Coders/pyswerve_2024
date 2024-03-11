@@ -2,6 +2,7 @@ from telemetry import FloatEntry
 import config
 import ntcore
 
+
 class ShooterTelemetry:
 
     _config: config.ShooterConfig

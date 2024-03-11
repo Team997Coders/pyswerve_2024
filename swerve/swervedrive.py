@@ -224,9 +224,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     @property
     def _measured_module_positions(self) -> tuple[kinematics.SwerveModulePosition,
-    kinematics.SwerveModulePosition,
-    kinematics.SwerveModulePosition,
-    kinematics.SwerveModulePosition]:
+                                                  kinematics.SwerveModulePosition,
+                                                  kinematics.SwerveModulePosition,
+                                                  kinematics.SwerveModulePosition]:
         """Current state of the modules"""
         return tuple([m.position for m in self._ordered_modules])  # type: ignore
 

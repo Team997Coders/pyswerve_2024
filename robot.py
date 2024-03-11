@@ -45,7 +45,7 @@ def get_alliance_adjusted_axis(controller: commands2.button.CommandGenericHID, i
     else:
         return controller.getRawAxis(i_axis)
 
-
+############### maybe that's the error
 def create_twinstick_tracking_command(controller: commands2.button.CommandGenericHID,
                                       swerve_drive: swerve.SwerveDrive,
                                       heading_control: subsystems.ChassisHeadingControl):
@@ -63,7 +63,7 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
                                         robot_config.standard_joystick_drive_axis_config),
         get_theta=lambda: heading_control.desired_velocity)
 
-
+###############
 def create_3dof_command(controller: commands2.button.CommandGenericHID,
                         swerve_drive: swerve.SwerveDrive):
     return commands.drive.Drive(
@@ -76,7 +76,7 @@ def create_3dof_command(controller: commands2.button.CommandGenericHID,
                                             robot_config.standard_joystick_drive_axis_config)
     )
 
-
+######### this one also
 def create_twinstick_heading_command(controller: commands2.button.CommandGenericHID,
                                      heading_control: subsystems.ChassisHeadingControl):
     return commands.drive.TwinstickHeadingSetter(
@@ -87,7 +87,7 @@ def create_twinstick_heading_command(controller: commands2.button.CommandGeneric
                                         robot_config.standard_joystick_rotation_axis_config),
         is_heading_inverted=False)
 
-
+#############
 def create_climber_command(controller: commands2.button.CommandGenericHID,
                            climber: subsystems.Climber):
     return commands.ClimberFollow(
@@ -197,7 +197,7 @@ class MyRobot(commands2.TimedCommandRobot):
         else:
             self._navx = navx.AHRS.create_i2c()
 
-        self.controller = commands2.button.CommandXboxController(0)
+        #self.controller = commands2.button.CommandXboxController(0) we don't need this
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
 
@@ -223,29 +223,30 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
 
-
         self._target_heading_mappings = {
             #  red tag mappings
             (self.joystick_one, 11): (4.4, 3.4)  # stage right
         }
-
-        self._target_position_mappings = {
-            #  blue tag mappings
-            (self.operator_control, 3): (1.3, 5.6, 0),  # speaker
-            (self.operator_control, 4): (1.8, 7.6, 0),  # amp
-            (self.operator_control, 5): (1.5, 1.5, math.pi / 2),  # source
-            (self.operator_control, 6): (4.3, 5.0, 0),  # stage left
-            (self.operator_control, 7): (5.8, 4.0, 0),  # stage center
-            (self.operator_control, 8): (4.4, 3.4, 0),  # stage right
-
-            #  red tag mappings
-            # (self.operator_control,  9): (1.3 + 8.28, 0),  # speaker
-            # (self.operator_control, 10): (1.8 + 8.28, 0),  # amp
-            # (self.operator_control, 11): (1.5 + 8.28, 0),  # source
-            # (self.operator_control, 12): (4.3 + 8.28, 0),  # stage left
-            # (self.operator_control, 13): (5.8 + 8.28, 0),  # stage center
-            # (self.operator_control, 14): (4.4 + 8.28, 0)   # stage right
-        }
+        if DriverStation.getAlliance().kBlue:
+            self.blue_target_position_mappings = {
+                #  blue tag mappings
+                (self.operator_control, 3): (1.3, 5.6, 0),  # speaker
+                (self.operator_control, 4): (1.8, 7.6, 0),  # amp
+                (self.operator_control, 5): (1.5, 1.5, math.pi / 2),  # source
+                (self.operator_control, 6): (4.3, 5.0, 0),  # stage left
+                (self.operator_control, 7): (5.8, 4.0, 0),  # stage center
+                (self.operator_control, 8): (4.4, 3.4, 0),  # stage right
+            }
+        if DriverStation.getAlliance().kRed:
+            self.red_target_position_mappings = {
+                #  red tag mappings
+                (self.operator_control,  9): (1.3 + 8.28, 0),  # speaker
+                (self.operator_control, 10): (1.8 + 8.28, 0),  # amp
+                (self.operator_control, 11): (1.5 + 8.28, 0),  # source
+                (self.operator_control, 12): (4.3 + 8.28, 0),  # stage left
+                (self.operator_control, 13): (5.8 + 8.28, 0),  # stage center
+                (self.operator_control, 14): (4.4 + 8.28, 0)   # stage right
+            }
 
         self.bind_heading_targets(self._target_heading_mappings)
         # self.bind_position_targets(self._target_position_mappings)
