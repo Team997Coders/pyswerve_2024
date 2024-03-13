@@ -74,20 +74,27 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig],
                  physical_config: PhysicalConfig, logger: logging.Logger):
         super().__init__()
-        self.logger = logger.getChild("swerve")
-        if physical_config.invert_gyro:
+        self.logger = logger.getChild("swerve") #Logger makes a child
+        if physical_config.invert_gyro: #The gyro_get_lambda variable is set to a function which is the angle of the robot from the Navx librays
             self.__gyro_get_lambda = lambda: -(gyro.getAngle())
         else:
             self.__gyro_get_lambda = gyro.getAngle
-        self._modules = {}
-        self._physical_config = physical_config
-        for position, module_config in swerve_config.items():
-            self._modules[position] = SwerveModule(position, module_config, physical_config, self.logger)
+        self._modules = {} #Creates a dict of all modules of the swerve drive
+        self._physical_config = physical_config #makes a copy of the physical config for the swerve drive use
+        for position, module_config in swerve_config.items(): #loops through all(4) swerve modules
+            self._modules[position] = SwerveModule( #adds swerve module to _modules dict
+                                                   position, #number of the swerve module(0 - 3)
+                                                   module_config, #All the data about the swerve module -> in Crescendo
+                                                   physical_config, #Constants about the robot, ex: wheel diameter, drive speed -> in Crescendo
+                                                   self.logger) #logger is the access to the printing stuff
 
-        self._ordered_modules = [self.modules[position] for position in sorted(self.modules.keys())]
-        self.logger.info(f"Module Order: {[m.id for m in self._ordered_modules]}")
+        self._ordered_modules = [self.modules[position] #basically copying over all the information in the modules dict into the list _ordered_modules
+                                 for position in #repeats through all(4) swerve modules
+                                 sorted(self.modules.keys())] #Returns a sorted list of all the swerve modules
 
-        locations = [m.location for m in self._ordered_modules]
+        #self.logger.info(f"Module Order: {[m.id for m in self._ordered_modules]}") #information about all the swerve modules
+
+        locations = [module.location for module in self._ordered_modules] #creates a list of the positions(4) of the modules (x, y) translation -> in Crescendo
         self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
 
         module_positions = tuple([m.position for m in self._ordered_modules])

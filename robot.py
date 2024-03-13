@@ -203,8 +203,13 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
 
-        self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
-                                               robot_config.physical_properties, self.logger)
+        #Creates the swerve drive in robotpy
+        self.swerve_drive = swerve.SwerveDrive(self._navx, #Built in Navx stuff that we should not touch
+                                               robot_config.swerve_modules, #This is a Dictionaty with [Module Position, Swerve Module Config]
+                                                                                #Module Position = 0, 1, 2, 3 -> each with front_left, etc.
+                                                                                #Swerve Module Config = All the configurations for each motor, SEE MORE IN CRESCENDO
+                                               robot_config.physical_properties, #Constants about the robot: ex: wheel diameter, drive speed, SEE MORE IN CRESCENDO
+                                               self.logger) #logger is the access to the command line, use it to print stuff and send messages from code
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         self.swerve_drive.initialize()
         # self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,

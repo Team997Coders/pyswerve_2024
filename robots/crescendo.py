@@ -17,8 +17,7 @@ has_mechanisms = True
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
-fast_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
-default_heading_pid = ProfiledPIDConfig(p=.2, i=0.1, d=0.001, #p=.2, i=0.1, d=0.001,
+default_heading_pid = ProfiledPIDConfig(p=.2, i=0.1, d=0.001,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                         profile=VelocityAccelerationConfig(velocity=math.pi * 5,
                                                                            acceleration=4 * math.pi),
@@ -66,30 +65,38 @@ limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d
                                  refresh_rate=5
                                  )
 
+#Dont touch this stuff unless you change things on the robot
 physical_properties = PhysicalConfig(wheel_diameter_cm=12,
                                      wheel_grip_coefficient_of_friction=1,
                                      encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                      gear_ratio=SwerveModuleFloatProperty(angle=150.0 / 7, drive=6.75),
-                                     max_drive_speed=5,
+                                     max_drive_speed=5, #The drive speed of the Swerve
                                      max_rotation_speed=math.pi / 6,
                                      invert_gyro=False,
                                      gyro_on_spi=True,
                                      )
 
 swerve_modules = {ModulePosition.front_left:
-                      SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False,
-                                                                 open_ramp_rate=swerve_ramp_rate.drive,
-                                                                 closed_ramp_rate=swerve_ramp_rate.drive,
-                                                                 current_limit=swerve_current_limit.drive),
-                                         angle_motor=MotorConfig(id=1, inverted=True,
-                                                                 open_ramp_rate=swerve_ramp_rate.angle,
-                                                                 closed_ramp_rate=swerve_ramp_rate.angle,
-                                                                 current_limit=swerve_current_limit.angle),
-                                         encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
-                                                               inverted=False),
-                                         location=(10.375, 10.375),
-                                         angle_pid=default_angle_pid,
-                                         drive_pid=fast_drive_pid),
+                      SwerveModuleConfig(drive_motor= #All the information about the drive motor
+                                         MotorConfig(id=8, #motor ID on the RoboRIO
+                                                     inverted=False, #motor inversion
+                                                                 open_ramp_rate=swerve_ramp_rate.drive, #How long to get to full speed in seconds
+                                                                 closed_ramp_rate=swerve_ramp_rate.drive, #How long to get to no speed in seconds
+                                                                 current_limit=swerve_current_limit.drive), # Current limit in amps of the motor
+                                         angle_motor= #All the information about the angle motor
+                                         MotorConfig(id=1, #motor ID on the RoboRIO
+                                                     inverted=True, #motor inversion
+                                                                 open_ramp_rate=swerve_ramp_rate.angle, #How long to get to full speed in seconds
+                                                                 closed_ramp_rate=swerve_ramp_rate.angle, #How long to get to no speed in seconds
+                                                                 current_limit=swerve_current_limit.angle),  # Current limit in amps of the motor
+                                         encoder=EncoderConfig(id_val=None,  # Encoder ID on the RoboRIO, if there is one
+                                                               offset=None,  # Offset in radians.  Subtract this number from the absolute encoder value to get 0 degrees relative to robot chassis.
+                                                                                # Set to None if offset is configured in Rev Hardware Client
+                                                               conversion_factor=math.pi * 2, # Conversion factor from encoder ticks to radians
+                                                               inverted=False), #encoder inversion
+                                         location=(10.375, 10.375), #location of swerve module on robot in inches
+                                         angle_pid=default_angle_pid, #pids for angle
+                                         drive_pid=default_drive_pid), #pids for drive
                   ModulePosition.front_right:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False,
                                                                  open_ramp_rate=swerve_ramp_rate.drive,
@@ -103,7 +110,7 @@ swerve_modules = {ModulePosition.front_left:
                                                                inverted=False),
                                          location=(10.375, -10.375),
                                          angle_pid=default_angle_pid,
-                                         drive_pid=fast_drive_pid),
+                                         drive_pid=default_drive_pid),
                   ModulePosition.back_right:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=4, inverted=False,
                                                                  open_ramp_rate=swerve_ramp_rate.drive,
@@ -117,7 +124,7 @@ swerve_modules = {ModulePosition.front_left:
                                                                inverted=False),
                                          location=(-10.375, -10.375),
                                          angle_pid=default_angle_pid,
-                                         drive_pid=fast_drive_pid),
+                                         drive_pid=default_drive_pid),
                   ModulePosition.back_left:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=2, inverted=False,
                                                                  open_ramp_rate=swerve_ramp_rate.drive,
@@ -131,7 +138,7 @@ swerve_modules = {ModulePosition.front_left:
                                                                inverted=False),
                                          location=(-10.375, 10.375),
                                          angle_pid=default_angle_pid,
-                                         drive_pid=fast_drive_pid)
+                                         drive_pid=default_drive_pid)
 
                   }  # type: dict[ModulePosition, SwerveModuleConfig]
 
