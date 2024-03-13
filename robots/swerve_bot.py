@@ -61,7 +61,7 @@ limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d
                                  camera_name=None, #Set name from nettable name if not default of 'limelight'
                                  refresh_rate=5)
 
-physical_properties = PhysicalConfig(wheel_diameter_cm=12,
+physical_properties = PhysicalConfig(wheel_diameter_cm=10.16,
                                      wheel_grip_coefficient_of_friction=1,
                                      encoder_pulses_per_revolution=SwerveModuleFloatProperty(drive=1, angle=1),
                                      gear_ratio=SwerveModuleFloatProperty(angle=150.0 / 7, drive=6.75),
