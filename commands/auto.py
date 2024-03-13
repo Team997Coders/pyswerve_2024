@@ -68,11 +68,10 @@ class GotoXYTheta(commands2.Command):
 
     @target.setter
     def target(self, value: tuple[float, float, float]):
-        if self._destination_xyt != value:
-            self._destination_xyt = value
-            self._x_axis_pid.setGoal(value[0])
-            self._y_axis_pid.setGoal(value[1])
-            self._theta_axis_pid.setGoal(value[2])
+        self._destination_xyt = value
+        self._x_axis_pid.setGoal(value[0])
+        self._y_axis_pid.setGoal(value[1])
+        self._theta_axis_pid.setGoal(value[2])
 
     def __init__(self,
                  swerve_drive: SwerveDrive,
@@ -88,10 +87,17 @@ class GotoXYTheta(commands2.Command):
         self._y_axis_pid = y_axis_pid
         self._theta_axis_pid = theta_axis_pid
 
+    def initialize(self):
+        self.target = self._destination_xyt
+
     def execute(self):
         self._swerve_drive.drive(self._x_axis_pid.desired_velocity,
                                  self._y_axis_pid.desired_velocity,
                                  self._theta_axis_pid.desired_velocity)
 
     def isFinished(self) -> bool:
-        return self._x_axis_pid.atTarget() and self._y_axis_pid.atTarget() and self._theta_axis_pid.atTarget()
+        finished = self._x_axis_pid.atTarget() and self._y_axis_pid.atTarget() and self._theta_axis_pid.atTarget()
+        if finished:
+            print("Finished!")
+
+        return finished

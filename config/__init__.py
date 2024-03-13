@@ -41,3 +41,9 @@ from .climber import ClimberConfig
 
 from . import bar
 from .bar import BarConfig
+
+from . import camera
+from .camera import PhotonCameraConfig, LimelightCameraConfig
+
+from . import rev
+from .rev import RevConfig

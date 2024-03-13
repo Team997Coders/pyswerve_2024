@@ -12,7 +12,7 @@ class swerve_system_id(commands2.subsystem.Subsystem):
     drive_forward_routine: commands2.sysid.SysIdRoutine
     drive_reverse_routine: commands2.sysid.SysIdRoutine
 
-    def create_quasistatic_measurement_command(self):
+    def create_quasistatic_measurement_command(self) -> commands2.Command:
         """Creates a command that aligns the wheels and performs a series of kinetic measurements."""
         return commands2.SequentialCommandGroup(
             SetSwerveModuleAngles(self._swerve_drive, angle=0),
@@ -23,7 +23,7 @@ class swerve_system_id(commands2.subsystem.Subsystem):
             self.drive_forward_routine.quasistatic(direction=commands2.sysid.SysIdRoutine.Direction.kForward),
         )
 
-    def create_dynamic_measurement_command(self):
+    def create_dynamic_measurement_command(self) -> commands2.Command:
         """Creates a command that aligns the wheels and performs a series of kinetic measurements."""
         return commands2.SequentialCommandGroup(
             SetSwerveModuleAngles(self._swerve_drive, angle=0),
@@ -44,7 +44,7 @@ class swerve_system_id(commands2.subsystem.Subsystem):
                                                                               "swerve")
         # Config is where to set voltage ramps and voltage steps and other sanity parameters for the motors.
         # starting with the defaults since we don't know what they are yet.
-        self._config = commands2.sysid.sysidroutine.SysIdRoutine.Config()
+        self._config = commands2.sysid.sysidroutine.SysIdRoutine.Config(stepVoltage=3)
 
         self.drive_forward_routine = commands2.sysid.SysIdRoutine(self._config, self._mechanism)
 

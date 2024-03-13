@@ -41,6 +41,5 @@ class IndexOff(commands2.InstantCommand):
         self._indexer = indexer
 
     def execute(self):
-        self._indexer.speed = 0
-
+        self._indexer._indexer_motor.stopMotor()
         print("IndexOff")

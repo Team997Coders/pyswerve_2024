@@ -45,7 +45,7 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         :param feedforward_config: The feedforward configuration for the target tracker
         :param initial_angle: The initial target angle of the chassis in radians
         """
-        self._angle_pid = hardware.create_profiled_pid_radians(angle_pid_config)
+        self._angle_pid = hardware.create_profiled_pid(angle_pid_config)
         super().__init__(self._angle_pid,
                          initial_angle)  # Sending a duplicate of angle_pid, but simpler to understand where pid is
         self._ff_config = feedforward_config

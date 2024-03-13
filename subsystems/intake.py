@@ -41,6 +41,11 @@ class Intake(commands2.Subsystem):
         if value == 0:  #If we are stopping, reset the encoder
             self.intake_encoder.setPosition(0)
 
+    @property
+    def speed(self):
+        return self.intake_motor.get()
+
+    @speed.setter
     def speed(self, value: float):
         self.intake_motor.set(value)
 
@@ -49,6 +54,5 @@ class Intake(commands2.Subsystem):
         return self.intake_motor.getBusVoltage()
 
     @voltage.setter
-    def voltage(self, value: float) -> float: 
-        return self.intake_motor.setVoltage(value)
-
+    def voltage(self, value: float):
+        self.intake_motor.setVoltage(value)

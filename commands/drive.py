@@ -62,6 +62,7 @@ class Drive(commands2.Command):
         theta = self.get_theta()
         self.send_drive_command(x, y, theta)
 
+
     def send_drive_command(self, vx: float, vy: float, vtheta: float):
         chassis_speeds = self._swerve_drive.measured_chassis_speed
         velocity = math.sqrt(chassis_speeds.vx ** 2 + chassis_speeds.vy ** 2)
@@ -74,22 +75,28 @@ class Drive(commands2.Command):
 
 class SetTarget(commands2.Command):
     _set_heading_goal: Callable[[float], None]
-    _get_target_xy: Callable[[], tuple[float, float]]
+    _target_xy: [float, float]
     _get_chassis_xy: Callable[[], tuple[float, float]]
+    is_heading_reversed: bool
 
     def __init__(self, set_heading_goal: Callable[[float], None],
                  get_chassis_xy: Callable[[], tuple[float, float]],
-                 get_target_xy: Callable[[], tuple[float, float]]):
+                 target_xy: tuple[float, float],
+                 is_heading_reversed: bool):
         super().__init__()
         self._set_heading_goal = set_heading_goal
         self._get_chassis_xy = get_chassis_xy
-        self._get_target_xy = get_target_xy
+        self._target_xy = target_xy
+        self.is_heading_reversed = is_heading_reversed
 
     def execute(self):
-        tx, ty = self._get_target_xy()
+        tx, ty = self._target_xy
         px, py = self._get_chassis_xy()
         heading_goal = math.atan2(ty - py, tx - px)
-        self._set_heading_goal(heading_goal)
+        if self.is_heading_reversed:
+            self._set_heading_goal(heading_goal + math.pi)
+        else:
+            self._set_heading_goal(heading_goal)
 
 
 class TwinstickHeadingSetter(commands2.Command):
@@ -97,21 +104,41 @@ class TwinstickHeadingSetter(commands2.Command):
     set_heading_goal: Callable[[float], None]
     get_x: Callable[[], float]
     get_y: Callable[[], float]
+    is_heading_inverted: bool
 
     def __init__(self,
                  set_heading_goal: Callable[[float], None],
                  get_x: Callable[[], float],
-                 get_y: Callable[[], float]):
+                 get_y: Callable[[], float],
+                 is_heading_inverted: bool):
         super().__init__()
         self.set_heading_goal = set_heading_goal
         self.get_x = get_x
         self.get_y = get_y
+        self.is_heading_inverted = is_heading_inverted
 
     def execute(self):
-        x = self.get_x()
-        y = self.get_y()
-        if x == 0 and y == 0:
-            return
-        else:
-            heading = geom.Rotation2d(-x, y).radians()
-            self.set_heading_goal(heading)
+        try:
+            x = self.get_x()
+            y = self.get_y()
+            if x == 0 and y == 0:
+                return
+            else:
+                heading = geom.Rotation2d(-x, y).radians()
+                if self.is_heading_inverted:
+                    self.set_heading_goal(heading + math.pi)
+                else:
+                    self.set_heading_goal(heading)
+        except:
+            pass
+
+
+class FlipHeading(commands2.InstantCommand):
+    def __init__(self, twinstick_heading_setter: TwinstickHeadingSetter, set_target: SetTarget):
+        super().__init__()
+        self.twinstick_heading_setter = twinstick_heading_setter
+        self.set_target = set_target
+
+    def execute(self):
+        self.twinstick_heading_setter.is_heading_inverted = not self.twinstick_heading_setter.is_heading_inverted
+        self.set_target.is_heading_reversed = not self.set_target.is_heading_reversed

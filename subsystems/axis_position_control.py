@@ -43,7 +43,7 @@ class AxisPositionControl(commands2.ProfiledPIDSubsystem):
         :param feedforward_config: The feedforward configuration for the target tracker
         :param initial_angle: The initial target angle of the chassis in radians
         """
-        self._position_pid = hardware.create_profiled_pid_radians(pid_config)
+        self._position_pid = hardware.create_profiled_pid(pid_config)
         super().__init__(self._position_pid,
                          initial_position)  # Sending a duplicate of angle_pid, but simpler to understand where pid is
         self._ff_config = feedforward_config
