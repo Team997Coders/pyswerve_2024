@@ -149,7 +149,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     trajectory_following: subsystems.TrajectoryFollowing
 
-    def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
+    def __init__(self, period: float = commands2.TimedCommandRobot(30/1000)):
         super().__init__(period)
         self.config = robot_config
 
