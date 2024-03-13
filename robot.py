@@ -1,13 +1,10 @@
 import sys
 
-import pathplannerlib.auto
-
 import autos
 import robotpy_apriltag
 import wpilib
 import wpilib.event
 import commands
-import config
 import subsystems
 import swerve
 import telemetry
@@ -148,8 +145,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     sysid: subsystems.swerve_system_id
 
-    trajectory_following: subsystems.TrajectoryFollowing
-
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
         self.config = robot_config
@@ -159,29 +154,6 @@ class MyRobot(commands2.TimedCommandRobot):
         global is_test
         is_test = self.isTest()
 
-    def bind_heading_targets(self, mapping_dict: dict[
-        tuple[commands2.button.CommandGenericHID, int], tuple[float, float]]) -> None:
-        for (controller, button), target in mapping_dict.items():
-            self.target_pointer = commands.SetTarget(set_heading_goal=self._heading_control.setTarget,
-                                                     target_xy=target,
-                                                     get_chassis_xy=lambda: (
-                                                         self.swerve_drive.pose.x, self.swerve_drive.pose.y),
-                                                     is_heading_reversed=False)
-            self.target_pointer.requirements = {self._heading_control}
-            controller.button(button).toggleOnTrue(self.target_pointer)
-
-    def bind_position_targets(self, mapping_dict: dict[
-        tuple[commands2.button.CommandGenericHID, int], tuple[float, float, float]]) -> None:
-        for (controller, button), target in mapping_dict.items():
-            self.goto_target = commands.GotoXYTheta(swerve_drive=self.swerve_drive,
-                                                    destination_xy_theta=target,
-                                                    x_axis_pid=self._x_axis_control,
-                                                    y_axis_pid=self._y_axis_control,
-                                                    theta_axis_pid=self._heading_control)
-            self.goto_target.requirements = {self._heading_control,
-                                             self._x_axis_control, self._y_axis_control, self.swerve_drive}
-            controller.button(button).toggleOnTrue(self.goto_target)
-
     def robotInit(self):
         super().robotInit()
 
@@ -190,12 +162,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self.field = wpilib.Field2d()
         sd.putData("Field", self.field)  # TODO: Does this only need to be called once?
 
+
         self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
             robotpy_apriltag.AprilTagField.k2024Crescendo)
         if robot_config.physical_properties.gyro_on_spi:
             self._navx = navx.AHRS.create_spi()
         else:
             self._navx = navx.AHRS.create_i2c()
+
+        sd.putBoolean("NavX Calibrating?", self._navx.isConnected())
 
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
@@ -223,46 +198,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
 
-
-        self._target_heading_mappings = {
-            #  red tag mappings
-            (self.joystick_two, 3): (1.3 + 8.28, 5.6),  # speaker
-            (self.joystick_two, 4): (1.8 + 8.28, 7.6),  # amp
-            (self.joystick_two, 5): (1.5 + 8.28, 1.5),  # source
-            (self.joystick_two, 6): (4.3 + 8.28, 5.0),  # stage left
-            (self.joystick_two, 7): (5.8 + 8.28, 4.0),  # stage center
-            (self.joystick_two, 8): (4.4 + 8.28, 3.4),  # stage right
-
-            #  blue tag mappings
-            (self.joystick_one, 3): (1.3, 5.6),  # speaker
-            (self.joystick_one, 4): (1.8, 7.6),  # amp
-            (self.joystick_one, 5): (1.5, 1.5),  # source
-            (self.joystick_one, 6): (4.3, 5.0),  # stage left
-            (self.joystick_one, 7): (5.8, 4.0),  # stage center
-            (self.joystick_one, 8): (4.4, 3.4)  # stage right
-        }
-
-        self._target_position_mappings = {
-            #  blue tag mappings
-            (self.operator_control, 3): (1.3, 5.6, 0),  # speaker
-            (self.operator_control, 4): (1.8, 7.6, 0),  # amp
-            (self.operator_control, 5): (1.5, 1.5, math.pi / 2),  # source
-            (self.operator_control, 6): (4.3, 5.0, 0),  # stage left
-            (self.operator_control, 7): (5.8, 4.0, 0),  # stage center
-            (self.operator_control, 8): (4.4, 3.4, 0),  # stage right
-
-            #  red tag mappings
-            # (self.operator_control,  9): (1.3 + 8.28, 0),  # speaker
-            # (self.operator_control, 10): (1.8 + 8.28, 0),  # amp
-            # (self.operator_control, 11): (1.5 + 8.28, 0),  # source
-            # (self.operator_control, 12): (4.3 + 8.28, 0),  # stage left
-            # (self.operator_control, 13): (5.8 + 8.28, 0),  # stage center
-            # (self.operator_control, 14): (4.4 + 8.28, 0)   # stage right
-        }
-
-        self.bind_heading_targets(self._target_heading_mappings)
-        # self.bind_position_targets(self._target_position_mappings)
-
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
                                                                  self._heading_control)
@@ -277,20 +212,9 @@ class MyRobot(commands2.TimedCommandRobot):
         # RETURN COMMAND TO JOYSTICK BUTTON 2
         self.joystick_one.button(2).toggleOnTrue(self.heading_command)
 
-        if self.config.has_mechanisms:
-            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-                commands.FlipHeading(self.heading_command, self.target_pointer))
-            commands2.button.Trigger(condition=lambda: self.indexer.ready).onTrue(
-                commands.FlipHeading(self.heading_command, self.target_pointer))
-        self.joystick_two.button(2).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
-
-        sd.putData("Commands", self._command_scheduler)
 
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
-        self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive,
-                                                                   robot_config.default_axis_pid,
-                                                                   robot_config.default_heading_pid)
 
     def define_autonomous_modes(self):
 
@@ -305,15 +229,6 @@ class MyRobot(commands2.TimedCommandRobot):
             ]
 
         if robot_config.has_mechanisms:
-            try:
-                path_commands = [
-                    autos.AutoFactory("taxi", pathplannerlib.auto.AutoBuilder.buildAuto, ("auto taxi",)),
-                ]
-                self.auto_options.extend(path_commands)
-            except FileNotFoundError as e:
-                print(str(e))
-                pass
-
             self.auto_options.append(
                 autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
                                   (self,)))
@@ -331,8 +246,6 @@ class MyRobot(commands2.TimedCommandRobot):
             self.init_mechanism_telemetry()
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-            self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer).andThen(
-                commands.FlipHeading(self.heading_command, self.target_pointer)))
             # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
 
     def init_mechanism_telemetry(self):
@@ -394,9 +307,12 @@ class MyRobot(commands2.TimedCommandRobot):
             self.april_tag_one.periodic()
         self.field.setRobotPose(self.swerve_drive.pose)
         #print(f"Estimated position: {self.swerve_drive.estimated_position}")
-        self.swerve_telemetry.report_to_dashboard()
+        #self.swerve_telemetry.report_to_dashboard()
         self.report_position_control_to_dashboard()
         self.mechanism_telemetry_periodic()
+        sd.putBoolean("NavX Conected?", self._navx.isConnected())
+        sd.putNumber("Angle", self._navx.getAngle())
+
 
     def disabledInit(self):
         super().disabledInit()

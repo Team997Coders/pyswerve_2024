@@ -9,9 +9,6 @@ import config
 import swerve
 from swerve import SwerveDrive
 import commands2
-import pathplannerlib
-from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
 from config import ModulePosition
 
 class TrajectoryFollowing(Subsystem):

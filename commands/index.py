@@ -42,4 +42,5 @@ class IndexOff(commands2.InstantCommand):
 
     def execute(self):
         self._indexer._indexer_motor.stopMotor()
+        self._indexer.clearNoteState()
         print("IndexOff")
