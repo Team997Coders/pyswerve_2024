@@ -174,7 +174,7 @@ class SwerveModule(ISwerveModule):
 
             # There is almost certainly a bug in this code where the drive motor will move 
             # the wrong direction if the offset is more than 90 degrees.  That would cause
-            # the shortest_angle_difference to go to 180 degrees of the exepected angle 
+            # the shortest_angle_difference to go to 180 degrees of the expected angle
             # but not reverse the drive motor.  The fix is probably to check the offsets 
             # in the desired_state setter and reverse drive motors for all offsets more 
             # than +/- 90 degrees.  We do not run this configuration so haven't needed to 

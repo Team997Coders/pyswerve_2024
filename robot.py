@@ -45,7 +45,6 @@ def get_alliance_adjusted_axis(controller: commands2.button.CommandGenericHID, i
     else:
         return controller.getRawAxis(i_axis)
 
-############### maybe that's the error
 def create_twinstick_tracking_command(controller: commands2.button.CommandGenericHID,
                                       swerve_drive: swerve.SwerveDrive,
                                       heading_control: subsystems.ChassisHeadingControl):
@@ -197,19 +196,19 @@ class MyRobot(commands2.TimedCommandRobot):
         else:
             self._navx = navx.AHRS.create_i2c()
 
-        #self.controller = commands2.button.CommandXboxController(0) we don't need this
+        #self.controller = commands2.button.CommandXboxController(0) #we don't need this
+
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
-
-        self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
+        self.operator_control = commands2.button.CommandJoystick(2)
 
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
         self.swerve_drive.initialize()
-        # self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,
-        #                                                              robot_config.limelight_camera_config,
-        #                                                              self.logger)
+        self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,
+                                                                     robot_config.limelight_camera_config,
+                                                                     self.logger)
 
         self.init_positioning_pids()
         self.init_position_control_telemetry()
@@ -221,6 +220,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.sysid = subsystems.swerve_system_id(self.swerve_drive, "swerve")
 
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
+
         self.test_driver = TestDriver(self.swerve_drive, self.logger)
 
         self._target_heading_mappings = {
@@ -228,7 +228,7 @@ class MyRobot(commands2.TimedCommandRobot):
             (self.joystick_one, 11): (4.4, 3.4)  # stage right
         }
         if DriverStation.getAlliance().kBlue:
-            self.blue_target_position_mappings = {
+            self._target_position_mappings = {
                 #  blue tag mappings
                 (self.operator_control, 3): (1.3, 5.6, 0),  # speaker
                 (self.operator_control, 4): (1.8, 7.6, 0),  # amp
@@ -238,7 +238,7 @@ class MyRobot(commands2.TimedCommandRobot):
                 (self.operator_control, 8): (4.4, 3.4, 0),  # stage right
             }
         if DriverStation.getAlliance().kRed:
-            self.red_target_position_mappings = {
+            self._target_position_mappings = {
                 #  red tag mappings
                 (self.operator_control,  9): (1.3 + 8.28, 0),  # speaker
                 (self.operator_control, 10): (1.8 + 8.28, 0),  # amp
@@ -249,7 +249,7 @@ class MyRobot(commands2.TimedCommandRobot):
             }
 
         self.bind_heading_targets(self._target_heading_mappings)
-        # self.bind_position_targets(self._target_position_mappings)
+        self.bind_position_targets(self._target_position_mappings)
 
         self.driving_command = create_twinstick_tracking_command(self.joystick_one,
                                                                  self.swerve_drive,
@@ -266,6 +266,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
 
         self.joystick_two.button(2).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
+
 
         self.joystick_one.button(4).onTrue(commands.ClimberUp(self.climber))
         self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
@@ -289,7 +290,7 @@ class MyRobot(commands2.TimedCommandRobot):
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
             autos.AutoFactory("Manual Auto>", autos.manual_autos.shoot_drive_load_backup_auto, (self)),
-            ]
+        ]
 
         if robot_config.has_mechanisms:
             try:
@@ -328,6 +329,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self.indexer_telemetry = telemetry.IndexerTelemetry(self.indexer)
             self.shooter_telemetry = telemetry.ShooterTelemetry(self.shooter.config)
             self.climber_telemetry = telemetry.ClimberTelemetry(self.climber.config)
+
 
     def mechanism_telemetry_periodic(self):
         if robot_config.has_mechanisms:

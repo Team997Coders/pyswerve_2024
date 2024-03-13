@@ -189,6 +189,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
 
     def lock_wheels(self):
         quarter_pi = math.pi / 4.0
+
         self._modules[ModulePosition.front_left].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
             quarter_pi))
         self._modules[ModulePosition.front_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
@@ -216,6 +217,12 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                                          # possible cause of teleporting position on field
                                          self._measured_module_positions,
                                          pose)
+
+    def get_to_desired_pose(self):
+        if self.pose == self.estimated_position:
+            pass
+        else:
+            self.reset_pose(self.estimated_position)
 
     @property
     def _measured_module_states(self) -> Sequence[kinematics.SwerveModuleState]:
