@@ -1,7 +1,7 @@
 import sys
 
 import autos
-import robotpy_apriltag
+# import robotpy_apriltag
 import wpilib
 import wpilib.event
 import commands
@@ -117,10 +117,10 @@ class MyRobot(commands2.TimedCommandRobot):
     controller: commands2.button.CommandGenericHID
     joystick_one: commands2.button.CommandJoystick
     joystick_two: commands2.button.CommandJoystick
-    operator_control: commands2.button.CommandJoystick | None = None
+    #operator_control: commands2.button.CommandJoystick | None = None
 
-    field: wpilib.Field2d
-    april_tag_one: PhotonVisionAprilTagDetector | None = None
+    #field: wpilib.Field2d
+    #april_tag_one: PhotonVisionAprilTagDetector | None = None
     limelight_positioning: subsystems.LimeLightPositioning | None = None
 
     trapezoid_profile: TrapezoidProfile.Constraints
@@ -136,7 +136,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     _target_heading_mappings: dict[tuple[commands2.button.CommandGenericHID, int], tuple[float, float]]
 
-    apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
+    #apriltagfieldlayout: robotpy_apriltag.AprilTagFieldLayout
 
     auto_options: list[autos.AutoFactory]
 
@@ -159,12 +159,12 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
-        self.field = wpilib.Field2d()
-        sd.putData("Field", self.field)  # TODO: Does this only need to be called once?
+        #self.field = wpilib.Field2d()
+        #sd.putData("Field", self.field)  # TODO: Does this only need to be called once?
 
 
-        self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
-            robotpy_apriltag.AprilTagField.k2024Crescendo)
+        #self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
+        #    robotpy_apriltag.AprilTagField.k2024Crescendo)
         if robot_config.physical_properties.gyro_on_spi:
             self._navx = navx.AHRS.create_spi()
         else:
@@ -176,7 +176,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
 
-        self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
+        #self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
 
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
@@ -303,15 +303,15 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
-        if self.april_tag_one is not None:
-            self.april_tag_one.periodic()
-        self.field.setRobotPose(self.swerve_drive.pose)
+        #if self.april_tag_one is not None:
+        #    self.april_tag_one.periodic()
+        #self.field.setRobotPose(self.swerve_drive.pose)
         #print(f"Estimated position: {self.swerve_drive.estimated_position}")
         #self.swerve_telemetry.report_to_dashboard()
-        self.report_position_control_to_dashboard()
+        #self.report_position_control_to_dashboard()
         self.mechanism_telemetry_periodic()
         sd.putBoolean("NavX Conected?", self._navx.isConnected())
-        sd.putNumber("Angle", self._navx.getAngle())
+        sd.putNumber("NavXAngle", self._navx.getAngle())
 
 
     def disabledInit(self):
@@ -337,8 +337,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.schedule(self.heading_command)
         self._command_scheduler.schedule(self.driving_command)
 
-    def updateField(self):
-        pass
+    #def updateField(self):
+    #    pass
 
     def reset_pose_pids_to_current_position(self):
         """Sets the current position of the driving pids to the estimated position of the robot"""
