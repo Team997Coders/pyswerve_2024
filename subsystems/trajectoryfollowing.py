@@ -4,21 +4,25 @@ import rev
 import wpilib
 import wpimath.geometry as geom
 from commands2 import Subsystem
-
+# wpilib import DriverStation
 import config
 import swerve
 from swerve import SwerveDrive
 import commands2
+import pathplannerlib
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.config import HolonomicPathFollowerConfig, ReplanningConfig, PIDConstants
 from config import ModulePosition
+
 
 class TrajectoryFollowing(Subsystem):
     _swerve_drive: swerve.SwerveDrive
 
     def __init__(self, swerve_drive: swerve.SwerveDrive,
-                       axis_config: config.ProfiledPIDConfig,
-                       heading_config: config.PIDConfig) -> None:
+                 axis_config: config.ProfiledPIDConfig,
+                 heading_config: config.PIDConfig) -> None:
         self._swerve_drive = swerve_drive
-        #This code assumes all modules are equidistant from the center
+        # This code assumes all modules are equidistant from the center
         front_left_module = swerve_drive.modules[ModulePosition.front_left]
         wheel_location = front_left_module.location
         drive_base_radius = math.sqrt(wheel_location.x ** 2 + wheel_location.y ** 2)
@@ -30,12 +34,12 @@ class TrajectoryFollowing(Subsystem):
             self._swerve_drive.drive_with_chassis_speeds,
             # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             HolonomicPathFollowerConfig(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(axis_config.p,
-                             axis_config.i,
-                             axis_config.d),  # Translation PID constants
-                PIDConstants(heading_config.p,
-                             heading_config.i,
-                             heading_config.d),  # Rotation PID constants
+                PIDConstants(0.2,
+                             0.0,
+                             0.05),  # Translation PID constants
+                PIDConstants(0.18,
+                             0.12,
+                             0.001),  # Rotation PID constants
                 axis_config.profile.velocity,  # Max module speed, in m/s
                 drive_base_radius,  # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig()  # Default path replanning config. See the API for the options here
