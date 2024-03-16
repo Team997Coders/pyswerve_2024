@@ -246,7 +246,9 @@ class MyRobot(commands2.TimedCommandRobot):
             self.init_mechanism_telemetry()
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
+            self.joystick_two.button(3).whileTrue(commands.TestMechanisms(self.intake, self.shooter, self.indexer, self.climber))
             # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
+            self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
@@ -336,7 +338,6 @@ class MyRobot(commands2.TimedCommandRobot):
         #                                         self.swerve_drive)
         self._command_scheduler.schedule(self.heading_command)
         self._command_scheduler.schedule(self.driving_command)
-
     #def updateField(self):
     #    pass
 
