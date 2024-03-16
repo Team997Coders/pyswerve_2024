@@ -37,12 +37,12 @@ class TestMechanisms(commands2.Command):
             commands2.WaitCommand(test_time),
             commands.IntakeOff(self._intake),
             commands2.WaitCommand(test_time),
-            commands.ClimberUp(self._climber),
-            commands2.WaitCommand(test_time / 2.0),
-            commands.ClimberStop(self._climber),
-            commands2.WaitCommand(test_time / 2.0),
-            commands.ClimberDown(self._climber),
-            commands2.WaitCommand(test_time / 2.0),
+            #commands.ClimberUp(self._climber),
+            #commands2.WaitCommand(test_time / 2.0),
+            #commands.ClimberStop(self._climber),
+            #commands2.WaitCommand(test_time / 2.0),
+            #commands.ClimberDown(self._climber),
+            #commands2.WaitCommand(test_time / 2.0),
             commands.ClimberStop(self._climber)
 
         )
