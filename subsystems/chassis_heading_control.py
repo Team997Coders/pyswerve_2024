@@ -32,8 +32,8 @@ class ChassisHeadingControl(commands2.ProfiledPIDSubsystem):
         return self._angle_pid
 
     def __init__(self,
-                 get_chassis_angle_measurement: Callable[[], float],
                  get_chassis_angle_velocity_measurement: Callable[[], float],
+                 get_chassis_angle_measurement: Callable[[], float],
                  angle_pid_config: config.ProfiledPIDConfig,
                  feedforward_config: FeedForwardConfig | None,
                  initial_angle: float = 0):

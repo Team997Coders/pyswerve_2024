@@ -9,7 +9,7 @@ class SwerveTelemetry:
     swerve_drive: SwerveDrive
     physical_config: PhysicalConfig
 
-    def __init__(self, swerve_drive: SwerveDrive, physical_config: PhysicalConfig,) -> None:
+    def __init__(self, swerve_drive: SwerveDrive, physical_config: PhysicalConfig) -> None:
         self.swerve_drive = swerve_drive
         self.physical_config = physical_config
         self.report_static_to_dashboard()

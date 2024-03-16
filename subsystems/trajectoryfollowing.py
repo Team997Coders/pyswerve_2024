@@ -28,9 +28,9 @@ class TrajectoryFollowing(Subsystem):
         super().__init__()
         AutoBuilder.configureHolonomic(
             lambda: self._swerve_drive.pose,  # Robot pose supplier
-            self._swerve_drive.reset_pose,  # Method to reset odometry (will be called if your auto has a starting pose)
+            lambda: self._swerve_drive.reset_pose,  # Method to reset odometry (will be called if your auto has a starting pose)
             lambda: self._swerve_drive.measured_chassis_speed,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            self._swerve_drive.drive_with_chassis_speeds,
+            lambda: self._swerve_drive.drive_with_chassis_speeds,
             # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             HolonomicPathFollowerConfig(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
                 PIDConstants(axis_config.p,
@@ -43,8 +43,8 @@ class TrajectoryFollowing(Subsystem):
                 drive_base_radius,  # Drive base radius in meters. Distance from robot center to furthest module.
                 ReplanningConfig()  # Default path replanning config. See the API for the options here
             ),
-            self.shouldFlipPath,  # Supplier to control path flipping based on alliance color
-            self  # Reference to this subsystem to set requirements
+            lambda: self.shouldFlipPath,  # Supplier to control path flipping based on alliance color
+            self #TODO: NEEDS TO BE PASSED -> DRIVE_SUBSYTEM: SUBSYSTEM (the subsystem for the robot's drive)
         )
 
     def shouldFlipPath(self):

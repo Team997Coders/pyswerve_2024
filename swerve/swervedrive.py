@@ -26,8 +26,6 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     """Abstract base class for a sweve drive."""
     _modules: dict[ModulePosition, ISwerveModule]
 
-    initialized: bool = False  # True if the swerve drive has been initialized at least once
-
     _kinematics: kinematics.SwerveDrive4Kinematics  # Kinematics object for the swerve drive
 
     logger: logging.Logger
@@ -95,9 +93,11 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         #self.logger.info(f"Module Order: {[m.id for m in self._ordered_modules]}") #information about all the swerve modules
 
         locations = [module.location for module in self._ordered_modules] #creates a list of the positions(4) of the modules (x, y) translation -> in Crescendo
-        self._kinematics = kinematics.SwerveDrive4Kinematics(*locations)
+        self._kinematics = kinematics.SwerveDrive4Kinematics(*locations) #kinematics of the swerve drive
 
-        module_positions = tuple([m.position for m in self._ordered_modules])
+        module_positions = tuple([ #makes a tuple with each module position in it
+                                module.position #Module position is a custom class with drive and angle
+                                  for module in self._ordered_modules]) #repeats through each module to get its position
 
         # The Pose Estimator uses the default standard deviations for model and vision estimates.
         # According to wpilib:
@@ -105,25 +105,21 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         # 0.1 meters for x, 0.1 meters for y, and 0.1 radians for heading.
         # The default standard deviations of the vision measurements are
         # 0.9 meters for x, 0.9 meters for y, and 0.9 radians for heading.
-        self._odemetry = estimator.SwerveDrive4PoseEstimator(self._kinematics,
-                                                             geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
-                                                             module_positions,  # type: ignore
-                                                             geom.Pose2d(0, 0, geom.Rotation2d(0)))
-
-        self.initialize()
+        self._odemetry = estimator.SwerveDrive4PoseEstimator(self._kinematics, #This is the swervedrive4kinematics
+                                                             geom.Rotation2d.fromDegrees(self.gyro_angle_degrees), #This uses the get gyro angle lambda and the navx get angle function
+                                                             module_positions,  # type: ignore #This is the swerveModulePositions of all the swerve modules
+                                                             geom.Pose2d(0, 0, geom.Rotation2d(0))) #initial pose of the robot
 
         # Register the subsystem at the end to ensure periodic is called
-
-    #        commands2.CommandScheduler.getInstance().registerSubsystem(self)
+        # commands2.CommandScheduler.getInstance().registerSubsystem(self)
 
     def initialize(self):
         """Initialize the swerve drive.  Needs to be called repeatedly until it returns True."""
-        results = [module.initialize() for module in self._modules.values()]
-        if all(results):
-            self.initialized = True
-            return True
+        results = [module.initialize() #makes a list of bools chekcing initialization
+                   for module in self._modules.values()] #Initializes all 4 modules of the swerve drive
+        if not all(results): #Checks if all the modules have not been initialized
+            self.initialize() #recall the function untill they are all initialized
 
-        return False
 
     def periodic(self):
         """Call periodically to update the odemetry"""

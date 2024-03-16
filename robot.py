@@ -183,20 +183,20 @@ class MyRobot(commands2.TimedCommandRobot):
             controller.button(button).toggleOnTrue(self.goto_target)
 
     def robotInit(self):
-        super().robotInit()
+        super().robotInit() #wpilib initiates the robot
 
-        self.update_test_mode()
-        self._command_scheduler = commands2.CommandScheduler()
-        self.field = wpilib.Field2d()
-        sd.putData("Field", self.field)  # TODO: Does this only need to be called once?
+        self.update_test_mode() #makes a global variable to check if test mode is active
+        self._command_scheduler = commands2.CommandScheduler() #makes the command scheduler to be used to use commands
+        self.field = wpilib.Field2d() #gets the field
 
         self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
-            robotpy_apriltag.AprilTagField.k2024Crescendo)
+            robotpy_apriltag.AprilTagField.k2024Crescendo) #gets the positions of all the april tags on the field
         if robot_config.physical_properties.gyro_on_spi:
-            self._navx = navx.AHRS.create_spi()
+            self._navx = navx.AHRS.create_spi() #makes the navx (currently using spi) -> set in Crescendo
         else:
             self._navx = navx.AHRS.create_i2c()
 
+        #Makes all the controllers
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
@@ -204,34 +204,30 @@ class MyRobot(commands2.TimedCommandRobot):
         self.operator_control = commands2.button.CommandJoystick(2)  # if robot_config.has_mechanisms else None
 
         #Creates the swerve drive in robotpy
-        self.swerve_drive = swerve.SwerveDrive(self._navx, #Built in Navx stuff that we should not touch
+        self.swerve_drive = swerve.SwerveDrive(self._navx, #The robots navx
                                                robot_config.swerve_modules, #This is a Dictionaty with [Module Position, Swerve Module Config]
                                                                                 #Module Position = 0, 1, 2, 3 -> each with front_left, etc.
                                                                                 #Swerve Module Config = All the configurations for each motor, SEE MORE IN CRESCENDO
                                                robot_config.physical_properties, #Constants about the robot: ex: wheel diameter, drive speed, SEE MORE IN CRESCENDO
                                                self.logger) #logger is the access to the command line, use it to print stuff and send messages from code
-        self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
+        self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties) #just initiates the telemetry for the robot
         self.swerve_drive.initialize()
         # self.limelight_positioning = subsystems.LimeLightPositioning(self.swerve_drive,
         #                                                              robot_config.limelight_camera_config,
         #                                                              self.logger)
 
-        self.init_positioning_pids()
-        self.init_position_control_telemetry()
+        self.init_positioning_pids() #makes the heading control, x axis control, and y axis control
+        self.init_position_control_telemetry() #adds the x, y, heading to the dashboard
 
-        self._heading_control.enable()
-        self._x_axis_control.enable()
-        self._y_axis_control.enable()
+        self.sysid = subsystems.swerve_system_id(self.swerve_drive, "swerve") #makes all the stuff for the system identification tests
 
-        self.sysid = subsystems.swerve_system_id(self.swerve_drive, "swerve")
-
-        self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
-        self.test_driver = TestDriver(self.swerve_drive, self.logger)
+        self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control) #makes a class which can be used for heading telemety output
+        self.test_driver = TestDriver(self.swerve_drive, self.logger) #makes all the tests which can be used to test the hardware configuration
 
 
         self._target_heading_mappings = {
             #  red tag mappings
-            (self.joystick_one, 11): (4.4, 3.4)  # stage right
+            (self.operator_control, 11): (4.4, 3.4)  # stage right
         }
 
         self._target_position_mappings = {
@@ -255,31 +251,24 @@ class MyRobot(commands2.TimedCommandRobot):
         self.bind_heading_targets(self._target_heading_mappings)
         # self.bind_position_targets(self._target_position_mappings)
 
-        self.driving_command = create_twinstick_tracking_command(self.joystick_one,
+        self.driving_command = create_twinstick_tracking_command(self.joystick_one, #Returns the drive command for the swerve
                                                                  self.swerve_drive,
                                                                  self._heading_control)
-        self.heading_command = create_twinstick_heading_command(self.joystick_two,
+        self.heading_command = create_twinstick_heading_command(self.joystick_two, #Returns the heading command for the swerve
                                                                 self._heading_control)
 
+        #Makes it so that while the command is active: Nothing else can talk to it
         self.driving_command.requirements = {self.swerve_drive}
         self.heading_command.requirements = {self._heading_control}
 
-        self.try_init_mechanisms()
+        self.try_init_mechanisms() #makes all of the subsystems and button controlls for those subsystems on the robot
 
+        #For driver convinience -> when click button the robot to make the robot think the front is on the opposite side, flipping the heading
         self.joystick_two.button(4).onTrue(commands.FlipHeading(self.heading_command, self.target_pointer))
 
-        self.joystick_one.button(4).onTrue(commands.ClimberUp(self.climber))
-        self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
-        self.joystick_one.button(5).onTrue(commands.ClimberDown(self.climber))
-
-        self.joystick_two.button(3).onTrue(commands.Outtake(self.intake, self.indexer))
-
-
-        sd.putData("Commands", self._command_scheduler)
-
-        self.define_autonomous_modes()
-        self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
-        self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive,
+        self.define_autonomous_modes() #makes auto options which has all the autos, if you make a new one add it there
+        self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options]) #Autonomous selector in smart dashboard
+        self.trajectory_following = subsystems.TrajectoryFollowing(self.swerve_drive, #Configures the holonomic drive for trajectory following
                                                                    robot_config.default_axis_pid,
                                                                    robot_config.default_heading_pid)
 
@@ -312,7 +301,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def try_init_mechanisms(self):
         """Initialize mechanisms if they are present in the robot config"""
-        sd.putBoolean("Has Mechanisms", robot_config.has_mechanisms)
         if robot_config.has_mechanisms:
             self.shooter = subsystems.Shooter(robot_config.shooter_config, robot_config.default_flywheel_pid,
                                               self.logger)
@@ -323,7 +311,12 @@ class MyRobot(commands2.TimedCommandRobot):
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
             self.joystick_two.button(1).toggleOnTrue(commands.Shoot(self.shooter, self.indexer))
-            # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
+
+            self.joystick_one.button(4).onTrue(commands.ClimberUp(self.climber))
+            self.joystick_one.button(3).onTrue(commands.ClimberStop(self.climber))
+            self.joystick_one.button(5).onTrue(commands.ClimberDown(self.climber))
+
+            self.joystick_two.button(3).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
@@ -401,13 +394,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self._command_scheduler.cancelAll()
 
     def teleopInit(self):
-        # driving_command = create_twinstick_tracking_command(self.joystick_one,
-        #                                                     self.swerve_drive,
-        #                                                     self._heading_control)
-        # heading_command = create_twinstick_heading_command(self.joystick_two,
-        #                                                    self._heading_control)
-        # three_dof_command = create_3dof_command(self.joystick_one,
-        #                                         self.swerve_drive)
         self._command_scheduler.schedule(self.heading_command)
         self._command_scheduler.schedule(self.driving_command)
 
