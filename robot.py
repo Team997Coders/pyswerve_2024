@@ -250,6 +250,9 @@ class MyRobot(commands2.TimedCommandRobot):
             # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
             self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))
 
+            self.joystick_two.button(5).whileTrue(commands.ClimberUp(self.climber))
+            self.joystick_two.button(6).whileTrue(commands.ClimberDown(self.climber))
+
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
             telemetry.mechanisms_telemetry.ShowMechansimPIDs(self)
