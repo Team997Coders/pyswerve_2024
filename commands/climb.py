@@ -1,22 +1,5 @@
 import commands2
-from math_help import Range
-from config import AxisConfig
-from math_help import shared
-import wpimath.controller
 from subsystems.climber import Climber
-from typing import Callable
-
-
-class ClimberFollow(commands2.Command):
-    _climber: Climber
-
-    def __init__(self, climber, height_getter: Callable[[], float]):
-        super().__init__()
-        self._climber = climber
-        self._climb_input = height_getter()
-
-    def execute(self):
-        self._climber.position = self._climb_input
 
 
 class ClimberUp(commands2.InstantCommand):
@@ -27,7 +10,8 @@ class ClimberUp(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
-        self._climber.speed = -0.5
+        self._climber.set_coast_mode()  # coast mode always
+        self._climber.speed = -0.5  # goes up
 
 
 class ClimberDown(commands2.InstantCommand):
@@ -38,7 +22,12 @@ class ClimberDown(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
-        self._climber.speed = 0.5
+        self._climber.speed = 0.5   # climb down
+        if self._climber.read_climber_state:  # if the sensor is hit
+            self._climber.speed = 0  # climber stop
+            self._climber.set_brake_mode()  # set brake mode
+        else:  # if the sensor is not hit
+            self._climber.set_coast_mode()  # set coast mode
 
 
 class ClimberStop(commands2.InstantCommand):

@@ -1,10 +1,10 @@
 import rev
-import wpilib
-import subsystems
+from wpilib import DigitalInput
 import logging
 import commands2
 import config
 from config import ClimberConfig
+
 import hardware
 
 
@@ -23,12 +23,21 @@ class Climber(commands2.Subsystem):
         self.config = config
         self._logger = logger.getChild("Climber")
         self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber2_motor = rev.CANSparkMax(self.config.climber2_motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber2_motor.follow(self.climber_motor)
+        self.climber_sensor = DigitalInput(config.climber_sensor_id)
+        self.read_climber_state = lambda: not self.climber_sensor.get() if config.climber_sensor_inverted else lambda: self.climber_sensor
         hardware.init_motor(self.climber_motor, config.climber_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(-1)
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
+        self.climber2_motor.setIdleMode(self.climber2_motor.getIdleMode().kBrake)
+
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
+
+    def get_climber_sensor_status(self):
+        self.climber_sensor.get()
 
     def set_climber_motor_voltage(self, voltage: float):
         self.climber_motor.setVoltage(voltage)
@@ -38,7 +47,11 @@ class Climber(commands2.Subsystem):
 
     def set_brake_mode(self):
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
+        self.climber2_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
 
+    def set_coast_mode(self):
+        self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kCoast)
+        self.climber2_motor.setIdleMode(self.climber_motor.getIdleMode().kCoast)
     @property
     def position(self):
         return self.climber_encoder.getPosition()

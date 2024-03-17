@@ -153,8 +153,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def __init__(self, period: float = commands2.TimedCommandRobot.kDefaultPeriod / 1000):
         super().__init__(period)
         self.config = robot_config
-        self.auto_chooser = AutoBuilder.buildAutoChooser('Example Path')
-        sd.putData("Auto Chooser", self.auto_chooser)
+
     def update_test_mode(self):
         """Sets a global variable indicating that the robot is in test mode"""
         global is_test
@@ -357,9 +356,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self._y_axis_control.set_current_position(estimated_pose.y)
         self._heading_control.set_current_position(self.swerve_drive.gyro_angle_radians)
 
-    def getAutonomousCommand(self):
-        path = PathPlannerPath.fromPathFile('Example Path')
-        return AutoBuilder.followPath(path)
+
     def autonomousInit(self):
         super().autonomousInit()
         print("Auto Init")

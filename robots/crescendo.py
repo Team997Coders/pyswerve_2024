@@ -46,7 +46,8 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                intake_velocity=.4, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), intake_velocity=.5, outtake_velocity=-1)
-climber_config = ClimberConfig(MotorConfig(id=16, inverted=False), climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
+climber_config = ClimberConfig(climber_motor=MotorConfig(id=16, inverted=False), climber2_motor=MotorConfig(id=14, inverted=False),
+                               climber_sensor_id=2, climber_sensor_inverted=False, climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_max=1)
 
 photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0.305, 0, 0.152), #camera postition on the robot xyz in meters from the center inches: (12, 0, 6)
