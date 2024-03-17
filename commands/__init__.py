@@ -15,7 +15,7 @@ from . import apriltags
 from . import test_mechanisms
 from .test_mechanisms import TestMechanisms
 from .shoot import Shoot, SpinupShooter, SpindownShooter
-from .climb import ClimberFollow, ClimberStop, ClimberUp, ClimberDown
+from .climb import ClimberStop, ClimberUp, ClimberDown
 from .drive import Drive, TwinstickHeadingSetter, FlipHeading, SetTarget
 from .apriltags import AprilTagPointer
 from .auto import DeadReckonX, DeadReckonY, GotoXYTheta

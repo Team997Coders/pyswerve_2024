@@ -13,6 +13,7 @@ class ResetGyro(commands2.InstantCommand):
     @property
     def navx(self) -> navx.AHRS:
         return self.navx
+
     def execute(self):
         self.navx.reset()
 
