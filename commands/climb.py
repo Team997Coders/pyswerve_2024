@@ -38,4 +38,5 @@ class ClimberStop(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
+        self._climber.set_brake_mode()
         self._climber.speed = 0

@@ -4,7 +4,7 @@ import logging
 import commands2
 import config
 from config import ClimberConfig
-
+from wpilib import SmartDashboard
 import hardware
 
 
@@ -22,12 +22,12 @@ class Climber(commands2.Subsystem):
         super().__init__()
         self.config = config
         self._logger = logger.getChild("Climber")
-        self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
+        self.climber_motor = rev.CANSparkMax(self.config.climber1_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self.climber2_motor = rev.CANSparkMax(self.config.climber2_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self.climber2_motor.follow(self.climber_motor)
         self.climber_sensor = DigitalInput(config.climber_sensor_id)
         self.read_climber_state = lambda: not self.climber_sensor.get() if config.climber_sensor_inverted else lambda: self.climber_sensor
-        hardware.init_motor(self.climber_motor, config.climber_motor)
+        hardware.init_motor(self.climber_motor, config.climber1_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(-1)
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
@@ -35,9 +35,9 @@ class Climber(commands2.Subsystem):
 
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
-
+        SmartDashboard.putBoolean("All the way down?", self.get_climber_sensor_status())
     def get_climber_sensor_status(self):
-        self.climber_sensor.get()
+        return self.climber_sensor.get()
 
     def set_climber_motor_voltage(self, voltage: float):
         self.climber_motor.setVoltage(voltage)
