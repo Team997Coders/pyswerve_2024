@@ -19,10 +19,6 @@ class Indexer(commands2.Subsystem):
     _last_sensor_state: bool = False
     _latched_sensor_state: bool = False
 
-    @property
-    def last_sensor_state(self) -> bool:
-        return self._last_sensor_state
-
     def __init__(self, config: IndexerConfig, logger: logging.Logger):
         super().__init__()
         self._logger = logger.getChild("Indexer")
@@ -40,6 +36,9 @@ class Indexer(commands2.Subsystem):
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
         self._indexer_encoder.setVelocityConversionFactor(3 / 10)
 
+    @property
+    def last_sensor_state(self) -> bool:
+        return self._last_sensor_state
     def periodic(self) -> None:
         super().periodic()
         self._last_sensor_state = self._read_indexer_state()

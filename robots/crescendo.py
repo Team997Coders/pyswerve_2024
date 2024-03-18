@@ -14,10 +14,10 @@ from .common import swerve_current_limit, swerve_ramp_rate
 has_mechanisms = True
 
 
-default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
+default_angle_pid = PIDConfig(p=0.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
-default_heading_pid = ProfiledPIDConfig(p=.25, i=0.1, d=0.001,
+default_heading_pid = ProfiledPIDConfig(p=0.25, i=0.1, d=0.001,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                         profile=VelocityAccelerationConfig(velocity=math.pi * 5,
                                                                            acceleration=4 * math.pi),
@@ -45,18 +45,17 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
                                right_flywheel_diameter_cm=12,
                                left_flywheel_diameter_cm=12,
                                default_velocity=1,
-                               default_fire_time=.5,
+                               default_fire_time=0.5,
                                default_spinup_delay=1)  # add motor configs
 
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
-                               intake_velocity=.4, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
+                               intake_velocity=0.4, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 
 climber_config = ClimberConfig(climber1_motor=MotorConfig(id=14, inverted=False), climber2_motor=MotorConfig(id=15, inverted=False),
                                 climber_sensor_id=2, climber_sensor_inverted=True,
                                 climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None), climber_max=1)
 
-intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), pid=PIDConfig(p=.000001, i=0, d=0, wrapping=None),
-                                intake_velocity=.5, outtake_velocity=-1)
+intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), intake_velocity=0.5, outtake_velocity=-1)
 
 photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
                                                               geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
