@@ -22,7 +22,7 @@ class IndexerTelemetry:
         self._config.outtake_velocity = value
 
     def __init__(self, indexer: subsystems.Indexer):
-        self._indexer= indexer
+        self._indexer = indexer
         self._config = indexer.config
 
         self._velocity_entry = FloatEntry("Indexer", "Intake Velocity",

@@ -21,11 +21,6 @@ from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfile
 from subsystems.photonvision import PhotonVisionAprilTagDetector
 import math
-from pathplannerlib.auto import PathPlannerAuto
-from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.auto import NamedCommands
-from pathplannerlib.path import PathPlannerPath
-import pathplannerlib.auto
 
 ######################################################################
 # Change the name of the robot here to choose between different robots
@@ -88,15 +83,6 @@ def create_twinstick_heading_command(controller: commands2.button.CommandGeneric
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
                                         robot_config.standard_joystick_rotation_axis_config),
         is_heading_inverted=False)
-
-
-def create_climber_command(controller: commands2.button.CommandGenericHID,
-                           climber: subsystems.Climber):
-    return commands.ClimberFollow(
-        climber=climber,
-        height_getter=lambda: drivers.map_input(lambda: controller.getRawAxis(3),
-                                                robot_config.standard_joystick_climber_axis_config)
-    )
 
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -165,7 +151,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.update_test_mode()
         self._command_scheduler = commands2.CommandScheduler()
         #self.field = wpilib.Field2d()
-        #sd.putData("Field", self.field)  # TODO: Does this only need to be called once?
+        #sd.putData("Field", self.field)
 
 
         #self.apriltagfieldlayout = robotpy_apriltag.loadAprilTagLayoutField(
@@ -251,10 +237,9 @@ class MyRobot(commands2.TimedCommandRobot):
             self.init_mechanism_telemetry()
 
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))
-            self.joystick_two.button(3).whileTrue(commands.TestMechanisms(self.intake, self.shooter, self.indexer, self.climber))
+            # self.joystick_two.button(3).whileTrue(commands.TestMechanisms(self.intake, self.shooter, self.indexer, self.climber))
             # self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))
             self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))
-
             self.joystick_two.button(5).onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))
             self.joystick_two.button(6).onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))
 
@@ -264,7 +249,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self.intake_telemetry = telemetry.IntakeTelemetry(self.intake.config)
             self.indexer_telemetry = telemetry.IndexerTelemetry(self.indexer)
             self.shooter_telemetry = telemetry.ShooterTelemetry(self.shooter.config)
-            self.climber_telemetry = telemetry.ClimberTelemetry(self.climber.config)
+            self.climber_telemetry = telemetry.ClimberTelemetry(self.climber)
 
     def mechanism_telemetry_periodic(self):
         if robot_config.has_mechanisms:

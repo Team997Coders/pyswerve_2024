@@ -24,6 +24,8 @@ def shoot_drive_load_backup_auto(robot) -> Sequence[commands2.Command]:
     #         ),
     #         commands2.cmd.WaitCommand(15)
     #     )
+
+    #red 2 3 note auto
     cmd = commands2.cmd.sequence(
             commands2.cmd.sequence(
                 commands.Shoot(robot.shooter, robot.indexer),
