@@ -212,7 +212,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.auto_options = [
             autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
-            autos.AutoFactory("Drive a square", autos.auto_calibrations.drive_a_square,
+            autos.AutoFactory("Drive a square", autos.auto_calibrations.drive_a_square_1,
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),

@@ -1,8 +1,7 @@
 import subsystems
 from telemetry import FloatEntry
 import config
-import ntcore
-from wpilib import SmartDashboard as sd
+from wpilib import SmartDashboard
 
 
 class ClimberTelemetry:
@@ -21,8 +20,6 @@ class ClimberTelemetry:
                                           get_value=lambda: self._climber.position,
                                           set_value=self.set_climber_position)
 
-        sd.putBoolean("Intake Sensor", climber.get_climber_sensor_status())
-
     def periodic(self):
         self._position_entry.periodic()
-        sd.putBoolean("Climber Sensor", self._climber.get_climber_sensor_status())
+        SmartDashboard.putBoolean("Climber Sensor", self._climber.get_climber_sensor_status())

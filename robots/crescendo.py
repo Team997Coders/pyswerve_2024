@@ -1,21 +1,20 @@
 import math_help
 import math
 from config import PIDConfig, DriverControlsConfig, MotorConfig, ModulePosition, SwerveModuleConfig, EncoderConfig, \
-    OptionalRange, PhysicalConfig, OptionalSwerveModuleIntProperty, SwerveModuleFloatProperty, \
-    OptionalSwerveModuleFloatProperty, ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
-    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, SwerveModuleIntProperty, \
+    OptionalRange, PhysicalConfig, SwerveModuleFloatProperty, \
+    ShooterConfig, IndexerConfig, IntakeConfig, ClimberConfig, \
+    ProfiledPIDConfig, VelocityAccelerationConfig, PositionVelocityConfig, FeedForwardConfig, \
     AxisConfig, PhotonCameraConfig, LimelightCameraConfig
 import wpimath.geometry as geom
 from .common import swerve_current_limit, swerve_ramp_rate
 
-# Panel is #13
 
-#Set to true if the robot has mechanisms beyond navigation, vision, and swerve
+# Set to true if the robot has mechanisms beyond navigation, vision, and swerve
 has_mechanisms = True
 
 
 default_angle_pid = PIDConfig(p=0.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2), tolerance=None)
-# Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
+# Be Careful when adding a Ki value to the drive pid, it can cause the robot to drive very fast
 default_drive_pid = PIDConfig(p=0.2, i=0.0, d=0.05, wrapping=None, tolerance=None)
 default_heading_pid = ProfiledPIDConfig(p=0.25, i=0.1, d=0.001,
                                         wrapping=OptionalRange(min=-math.pi, max=math.pi),
@@ -51,22 +50,27 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                intake_velocity=0.4, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 
-climber_config = ClimberConfig(climber1_motor=MotorConfig(id=14, inverted=False), climber2_motor=MotorConfig(id=16, inverted=False),
-                                climber_sensor_id=2, climber_sensor_inverted=True,
-                                climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None), climber_max=1)
+climber_config = ClimberConfig(climber1_motor=MotorConfig(id=14, inverted=False),
+                               climber2_motor=MotorConfig(id=16, inverted=False),
+                               climber_sensor_id=2, climber_sensor_inverted=True,
+                               climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None), climber_max=1)
 
 intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), intake_velocity=0.5, outtake_velocity=-1)
 
-photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
-                                                              geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
-                                          camera_name="set name here" #Set name from local host window
+# camera position on the robot xyz in meters from the center, CURRENTLY UNMEASURED
+# and camera rotation on the robot in degrees
+photon_camera_config = PhotonCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0),
+                                                                           geom.Rotation3d(0, 0, 0)),
+                                          camera_name="set name here"  # Set name from local host window
                                           )
 
-limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0), #camera postition on the robot xyz in meters from the center, CURRENTLY UNMEASURED
-                                                                geom.Rotation3d(0, 0, 0)), #camera rotation on the robot in degrees, CURRENTLY UNMEASURED
-                                 camera_name=None, #Set name from nettable name if not default of 'limelight'
-                                 refresh_rate=5
-                                 )
+# camera position on the robot xyz in meters from the center, CURRENTLY UNMEASURED
+# and camera rotation on the robot in degrees, CURRENTLY UNMEASURED
+limelight_camera_config = LimelightCameraConfig(camera_position=geom.Transform3d(geom.Translation3d(0, 0, 0),
+                                                                                 geom.Rotation3d(0, 0, 0)),
+                                                camera_name=None,
+                                                refresh_rate=5
+                                                )
 
 physical_properties = PhysicalConfig(wheel_diameter_cm=10.16,
                                      wheel_grip_coefficient_of_friction=1,
@@ -79,19 +83,19 @@ physical_properties = PhysicalConfig(wheel_diameter_cm=10.16,
                                      )
 
 swerve_modules = {ModulePosition.front_left:
-                      SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False,
-                                                                 open_ramp_rate=swerve_ramp_rate.drive,
-                                                                 closed_ramp_rate=swerve_ramp_rate.drive,
-                                                                 current_limit=swerve_current_limit.drive),
-                                         angle_motor=MotorConfig(id=1, inverted=True,
-                                                                 open_ramp_rate=swerve_ramp_rate.angle,
-                                                                 closed_ramp_rate=swerve_ramp_rate.angle,
-                                                                 current_limit=swerve_current_limit.angle),
-                                         encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
-                                                               inverted=False),
-                                         location=(10.375, 10.375),
-                                         angle_pid=default_angle_pid,
-                                         drive_pid=default_drive_pid),
+                  SwerveModuleConfig(drive_motor=MotorConfig(id=8, inverted=False,
+                                     open_ramp_rate=swerve_ramp_rate.drive,
+                                     closed_ramp_rate=swerve_ramp_rate.drive,
+                                     current_limit=swerve_current_limit.drive),
+                                     angle_motor=MotorConfig(id=1, inverted=True,
+                                     open_ramp_rate=swerve_ramp_rate.angle,
+                                     closed_ramp_rate=swerve_ramp_rate.angle,
+                                     current_limit=swerve_current_limit.angle),
+                                     encoder=EncoderConfig(id_val=None, offset=None, conversion_factor=math.pi * 2,
+                                                           inverted=False),
+                                     location=(10.375, 10.375),
+                                     angle_pid=default_angle_pid,
+                                     drive_pid=default_drive_pid),
                   ModulePosition.front_right:
                       SwerveModuleConfig(drive_motor=MotorConfig(id=6, inverted=False,
                                                                  open_ramp_rate=swerve_ramp_rate.drive,
