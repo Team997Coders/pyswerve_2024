@@ -32,11 +32,11 @@ def shoot_drive_load_backup_auto(robot) -> Sequence[commands2.Command]:
                 commands2.cmd.WaitCommand(1)
             ),
             commands2.cmd.sequence(
-                commands.GotoXYTheta(robot.swerve_drive, (3, 0, 0)),
+                commands.DeadReckonX(robot.swerve_drive, 2),
                 commands2.cmd.ParallelCommandGroup(
                     commands2.cmd.sequence(
                         commands.Load(robot.intake, robot.indexer),
-                        commands.GotoXYTheta(robot.swerve_drive, (-3, 0, 0))
+                        commands.DeadReckonX(robot.swerve_drive, -2)
                     )
                 )
             ),
@@ -45,11 +45,15 @@ def shoot_drive_load_backup_auto(robot) -> Sequence[commands2.Command]:
                 commands2.cmd.WaitCommand(1)
             ),
             commands2.cmd.sequence(
-                commands.GotoXYTheta(robot.swerve_drive, (3, 2, 0)),
+                commands2.cmd.ParallelCommandGroup(
+                    commands.DeadReckonX(robot.swerve_drive, 2),
+                    commands.DeadReckonY(robot.swerve_drive, 3)
+                ),
                 commands2.cmd.ParallelCommandGroup(
                     commands2.cmd.sequence(
                         commands.Load(robot.intake, robot.indexer),
-                        commands.GotoXYTheta(robot.swerve_drive, (-3, -2, 0))
+                        commands.DeadReckonX(robot.swerve_drive, -2),
+                        commands.DeadReckonY(robot.swerve_drive, -3)
                     )
                 ),
                 commands.Shoot(robot.shooter, robot.indexer)
