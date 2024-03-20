@@ -10,8 +10,14 @@ class ClimberUp(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
-        self._climber.set_coast_mode()  # coast mode always
-        self._climber.speed = -0.5  # goes up
+        if not self._climber.read_climber_state:
+            self._climber.set_coast_mode()  # coast mode always
+            self._climber.speed = -0.5  # goes up
+        else:
+            self._climber.set_coast_mode()  # coast mode always
+            self._climber.speed = -0.5  # goes up
+
+
 
 
 class ClimberDown(commands2.InstantCommand):
@@ -22,12 +28,14 @@ class ClimberDown(commands2.InstantCommand):
         self._climber = climber
 
     def execute(self):
-        self._climber.speed = 0.5   # climb down
+
         if self._climber.read_climber_state:  # if the sensor is hit
             self._climber.speed = 0  # climber stop
             self._climber.set_brake_mode()  # set brake mode
         else:  # if the sensor is not hit
             self._climber.set_coast_mode()  # set coast mode
+            self._climber.speed = 0.5  # climb down
+        self._climber.set_coast_mode()
 
 
 class ClimberStop(commands2.InstantCommand):

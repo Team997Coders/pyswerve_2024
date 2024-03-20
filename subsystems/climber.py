@@ -68,3 +68,6 @@ class Climber(commands2.Subsystem):
     def speed(self, value: float):
         self.climber_motor.set(value)
 
+    def periodic(self):
+        SmartDashboard.putBoolean("Climber Sensor", self.get_climber_sensor_status())
+
