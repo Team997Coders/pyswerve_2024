@@ -11,7 +11,8 @@ class FloatEntry:
 
     _value_entry: ntcore.DoubleEntry
 
-    def __init__(self, subtable: str, name: str, get_value: Callable[[], float] | None, set_value: Callable[[float], None], default_value: float | None = 0.0):
+    def __init__(self, subtable: str, name: str, get_value: Callable[[], float] | None,
+                 set_value: Callable[[float], None], default_value: float | None = 0.0):
         self._value = get_value() if get_value is not None else default_value
         self._get_value = get_value
         self._set_value = set_value
@@ -23,7 +24,7 @@ class FloatEntry:
         value_topic.publish(ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
 
         self._value_entry = value_topic.getEntry(self._value,
-                                             ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
+                                                 ntcore.PubSubOptions(keepDuplicates=False, pollStorage=1))
 
         self._value_entry.set(self._value, 0)
 

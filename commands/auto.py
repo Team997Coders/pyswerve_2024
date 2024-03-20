@@ -1,25 +1,8 @@
-import sys
-import wpilib
-import wpimath
-
 import swerve
-import config
-from config.driver_controls import AxisConfig
-from robots import crescendo
-import math
-import math_help
 from swerve import SwerveDrive
-from debug import attach_debugger
-from wpilib import SmartDashboard
-from math_help import map_input_to_output_range
-import wpimath.controller
-import wpimath.geometry as geom
-from typing import Callable, Tuple
-import commands2
+from typing import Tuple
 import commands2.button
 import subsystems
-import hardware
-from subsystems import axis_position_control
 
 
 class DeadReckonX(commands2.Command):

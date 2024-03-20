@@ -36,11 +36,6 @@ class Climber(commands2.Subsystem):
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
 
-
-    def periodic(self) -> None:
-        super().periodic()
-        SmartDashboard.putBoolean("All the way down?", self.get_climber_sensor_status())
-
     def get_climber_sensor_status(self):
         return self.climber_sensor.get()
 
@@ -72,5 +67,4 @@ class Climber(commands2.Subsystem):
     @speed.setter
     def speed(self, value: float):
         self.climber_motor.set(value)
-
 
