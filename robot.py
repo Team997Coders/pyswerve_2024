@@ -216,12 +216,11 @@ class MyRobot(commands2.TimedCommandRobot):
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-            autos.AutoFactory("Manual Auto>", autos.manual_autos.shoot_drive_load_backup_auto, (self)),
             ]
 
         if robot_config.has_mechanisms:
             self.auto_options.append(
-                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
+                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.single_shot_auto,
                                   (self,)))
 
 
