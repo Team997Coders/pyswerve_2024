@@ -121,9 +121,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     def periodic(self):
         """Call periodically to update the odemetry"""
         self.update_odometry()
-        if __debug__:
-            for m in self._ordered_modules:
-                m.report_to_dashboard()  # type: ignore
+        # if __debug__:
+        #    for m in self._ordered_modules:
+        #       m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
         with self._odemetry_lock:

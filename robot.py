@@ -226,17 +226,13 @@ class MyRobot(commands2.TimedCommandRobot):
         self.auto_options = [
             autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
-            autos.AutoFactory("Drive a square", autos.auto_calibrations.drive_a_square,
-                              (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
-            autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
-            autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-            autos.AutoFactory("Manual Auto>", autos.manual_autos.shoot_drive_load_backup_auto, (self)),
+            autos.AutoFactory("Single Shot", autos.manual_autos.single_shot_auto, (self,)),
             ]
 
-        if robot_config.has_mechanisms:
-            self.auto_options.append(
-                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
-                                  (self,)))
+        # if robot_config.has_mechanisms:
+        #     self.auto_options.append(
+        #         autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
+        #                           (self,)))
 
 
     def try_init_mechanisms(self):
@@ -306,10 +302,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.y_axis_telemetry = telemetry.AxisPositionTelemetry("Y", self._y_axis_control)
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
 
-    def report_position_control_to_dashboard(self):
-        self.x_axis_telemetry.report_to_dashboard()
-        self.y_axis_telemetry.report_to_dashboard()
-        self.heading_controller_telemetry.report_to_dashboard()
+    # def report_position_control_to_dashboard(self):
+    #     self.x_axis_telemetry.report_to_dashboard()
+    #     self.y_axis_telemetry.report_to_dashboard()
+    #     self.heading_controller_telemetry.report_to_dashboard()
 
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
