@@ -89,15 +89,15 @@ class TwinStickTeleopDrive:
         ff_value = 0
         self.send_drive_command(x_output_value, y_output_value, theta_change + ff_value)
 
-        SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, self._desired_robot_heading])
-        SmartDashboard.putNumber("theta_change", theta_change)
-        SmartDashboard.putNumber("Feedforward", ff_value)
-        SmartDashboard.putNumber("desired heading", self._desired_robot_heading)
-        SmartDashboard.putData("PID controller", self._angle_pid)
-        SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
-        SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
-        SmartDashboard.putNumber("gyro", self._swerve_drive.gyro_angle_degrees)
-        SmartDashboard.putNumber("gyro_radians", gyro_radians)
+        # SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, self._desired_robot_heading])
+        # SmartDashboard.putNumber("theta_change", theta_change)
+        # SmartDashboard.putNumber("Feedforward", ff_value)
+        # SmartDashboard.putNumber("desired heading", self._desired_robot_heading)
+        # SmartDashboard.putData("PID controller", self._angle_pid)
+        # SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
+        # SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
+        # SmartDashboard.putNumber("gyro", self._swerve_drive.gyro_angle_degrees)
+        # SmartDashboard.putNumber("gyro_radians", gyro_radians)
 
         #pid_value = SmartDashboard.getData("PID controller")  # type: ProfiledPIDController
         #self._angle_pid.setP(pid_value.)

@@ -230,16 +230,16 @@ class SwerveModule(ISwerveModule):
     def radians_to_degrees(radians: float) -> float:
         return radians * 180 / math.pi
 
-    def report_to_dashboard(self):
-        sd.putNumber(f"Drive {int(self.id)} Position", self.raw_position)
-        sd.putNumber(f"Drive {int(self.id)} Velocity", self.velocity)
-        sd.putNumber(f"Drive {int(self.id)} Tgt Vel", self._desired_state.speed)
-        sd.putNumber(f"Angle {int(self.id)} Position", math.degrees(self.angle_motor_encoder.getPosition()))
-        sd.putNumber(f"Angle {int(self.id)} Absolute", math.degrees(self.angle_absolute_encoder.getPosition()))
-        sd.putNumber(f"Angle {int(self.id)} Velocity", self.angle_motor_encoder.getVelocity())
-        sd.putNumber(f"Angle PID {int(self.id)} Reference", math.degrees(self.angle_pid_last_reference))
-        # sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
-        # sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment)
+    # def report_to_dashboard(self):
+    #     sd.putNumber(f"Drive {int(self.id)} Position", self.raw_position)
+    #     sd.putNumber(f"Drive {int(self.id)} Velocity", self.velocity)
+    #     sd.putNumber(f"Drive {int(self.id)} Tgt Vel", self._desired_state.speed)
+    #     sd.putNumber(f"Angle {int(self.id)} Position", math.degrees(self.angle_motor_encoder.getPosition()))
+    #     sd.putNumber(f"Angle {int(self.id)} Absolute", math.degrees(self.angle_absolute_encoder.getPosition()))
+    #     sd.putNumber(f"Angle {int(self.id)} Velocity", self.angle_motor_encoder.getVelocity())
+    #     sd.putNumber(f"Angle PID {int(self.id)} Reference", math.degrees(self.angle_pid_last_reference))
+    #     # sd.putNumber(f"Rel to Abs {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_absolute_angle_adjustment))
+    #     # sd.putNumber(f"Rel to Chassis {int(self.id)} adjust", self.radians_to_degrees(self.rel_to_corrected_angle_adjustment)
 
     def initialize(self) -> bool:
         """Returns true if the wheel is in the correct position, false if it needs to be adjusted"""

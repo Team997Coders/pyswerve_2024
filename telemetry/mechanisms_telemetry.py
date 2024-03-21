@@ -18,6 +18,6 @@ def ShowMechansimPIDs(r):
     climber_pid_entry = SparkMaxPIDEntry("Climber PID", r.climber.pid, rev.CANSparkMax.ControlType.kPosition)
 
     #sd.putData("Shooter PID", shooter_pid_entry)
-    sd.putData("Climber PID", climber_pid_entry)
+    # sd.putData("Climber PID", climber_pid_entry)
 
 
