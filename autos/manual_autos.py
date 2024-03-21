@@ -1,27 +1,31 @@
 import commands2
 import commands
 from typing import Sequence
+from autos import auto_calibrations
 
-def shoot_drive_load_backup_auto(robot) -> Sequence[commands2.Command]:
-
+def two_note_auto(robot) -> Sequence[commands2.Command]:
     if robot.shooter is None or robot.indexer is None or robot.intake is None:
         raise ValueError("Robot must have a shooter, indexer, and intake to run this auto")
-
-    cmd = commands2.cmd.ParallelRaceGroup(
-            commands2.cmd.sequence(
-                commands.Shoot(robot.shooter, robot.indexer),
-                commands2.cmd.WaitCommand(
-                    robot.config.shooter_config.default_spinup_delay + robot.config.shooter_config.default_fire_time),
-                commands2.cmd.ParallelCommandGroup(
-                    commands.Load(robot.intake, robot.indexer),
-                    #.cmd.sequence(
-                        # commands.GotoXYTheta(robot.swerve_drive, (2, 0, 0),
-                        #                      robot._x_axis_control, robot._y_axis_control, robot._heading_control),
-                        # commands.GotoXYTheta(robot.swerve_drive, (-2, 0, 0),
-                        #                      robot._x_axis_control, robot._y_axis_control, robot._heading_control),
-                    #),
-                ),
-            ),
-            commands2.cmd.WaitCommand(15)
+    cmd = commands2.cmd.sequence(
+        commands.Shoot(robot.shooter, robot.indexer),
+        commands2.WaitCommand(0.5),
+        commands2.ParallelCommandGroup(
+            auto_calibrations.create_drive_forward_and_back_auto(robot.swerve_drive, 1),
+            commands.Load(robot.intake, robot.indexer)
+        ),
+        commands2.ParallelCommandGroup(
+            auto_calibrations.create_drive_forward_and_back_auto(robot.swerve_drive, -1),
+            commands.Shoot(robot.shooter, robot.indexer)
         )
+    )
+    return cmd
+
+def taxi(robot):
+    if robot.shooter is None or robot.indexer is None or robot.intake is None:
+        raise ValueError("Robot must have a shooter, indexer, and intake to run this auto")
+    cmd = commands2.cmd.sequence(
+        commands.Shoot(robot.shooter, robot.indexer),
+        commands2.WaitCommand(0.5),
+        auto_calibrations.create_drive_forward_and_back_auto(robot.swerve_drive, 1),
+    )
     return cmd

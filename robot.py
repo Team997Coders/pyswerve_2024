@@ -230,12 +230,12 @@ class MyRobot(commands2.TimedCommandRobot):
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-            autos.AutoFactory("Manual Auto>", autos.manual_autos.shoot_drive_load_backup_auto, (self)),
+            autos.AutoFactory("Two Note auto>", autos.manual_autos.two_note_auto(), (self)),
             ]
 
         if robot_config.has_mechanisms:
             self.auto_options.append(
-                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
+                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.two_note_auto,
                                   (self,)))
 
 
@@ -306,19 +306,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.y_axis_telemetry = telemetry.AxisPositionTelemetry("Y", self._y_axis_control)
         self.heading_controller_telemetry = telemetry.ChassisHeadingTelemetry(self._heading_control)
 
-    def report_position_control_to_dashboard(self):
-        self.x_axis_telemetry.report_to_dashboard()
-        self.y_axis_telemetry.report_to_dashboard()
-        self.heading_controller_telemetry.report_to_dashboard()
-
     def robotPeriodic(self) -> None:
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
-        #if self.april_tag_one is not None:
-        #    self.april_tag_one.periodic()
-        #self.field.setRobotPose(self.swerve_drive.pose)
-        #print(f"Estimated position: {self.swerve_drive.estimated_position}")
-        #self.swerve_telemetry.report_to_dashboard()
-        #self.report_position_control_to_dashboard()
         self.mechanism_telemetry_periodic()
         sd.putBoolean("NavX Conected?", self._navx.isConnected())
         sd.putNumber("NavXAngle", self._navx.getAngle())
