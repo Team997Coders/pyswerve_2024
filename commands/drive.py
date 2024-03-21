@@ -125,7 +125,6 @@ class TwinstickHeadingSetter(commands2.Command):
             if x == 0 and y == 0:
                 self.set_heading_goal(heading)
             else:
-
                 if self.is_heading_inverted:
                     self.set_heading_goal(heading + math.pi)
                 else:

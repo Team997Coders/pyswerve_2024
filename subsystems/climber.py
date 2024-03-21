@@ -24,7 +24,7 @@ class Climber(commands2.Subsystem):
         self._logger = logger.getChild("Climber")
         self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self.climber2_motor = rev.CANSparkMax(self.config.climber2_motor.id, rev.CANSparkMax.MotorType.kBrushless)
-        self.climber2_motor.follow(self.climber_motor)
+        self.climber2_motor.follow(self.climber_motor, True)
         self.climber_sensor = DigitalInput(config.climber_sensor_id)
         self.read_climber_state = lambda: not self.climber_sensor.get() if config.climber_sensor_inverted else lambda: self.climber_sensor
         hardware.init_motor(self.climber_motor, config.climber_motor)
