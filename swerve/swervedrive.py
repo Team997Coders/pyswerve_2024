@@ -44,33 +44,6 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     # having to check the physical properties every time the gyro is accessed.\
     __gyro_get_degrees_lambda: lambda: float
 
-    @property
-    def gyro_angle_radians(self) -> wpimath.units.radians:
-        return math.radians(self.gyro_angle_degrees)
-
-    @property
-    def gyro_angle_degrees(self) -> wpimath.units.degrees:
-        return math_help.wrap_angle_degrees(self.__gyro_get_lambda())
-
-    @property
-    def num_modules(self) -> int:
-        return len(self._ordered_modules)
-
-    @property
-    def modules(self) -> dict[ModulePosition, ISwerveModule]:
-        return self._modules
-
-    @property
-    def estimated_position(self) -> geom.Pose2d:
-        """Get the pose estimators best guess about where the robot is"""
-        with self._odemetry_lock:
-            return self._odemetry.getEstimatedPosition()
-
-    @property
-    def ordered_modules(self) -> list[SwerveModule]:
-        """Provides a consistent ordering of modules for use with wpilib swerve functions"""
-        return self._ordered_modules
-
     def __init__(self, gyro: navx.AHRS, swerve_config: dict[ModulePosition, SwerveModuleConfig],
                  physical_config: PhysicalConfig, logger: logging.Logger):
         super().__init__()
@@ -102,12 +75,41 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                                                              geom.Rotation2d.fromDegrees(self.gyro_angle_degrees),
                                                              module_positions,  # type: ignore
                                                              geom.Pose2d(0, 0, geom.Rotation2d(0)))
-
         self.initialize()
 
         # Register the subsystem at the end to ensure periodic is called
 
     #        commands2.CommandScheduler.getInstance().registerSubsystem(self)
+
+#gyro
+    @property
+    def gyro_angle_radians(self) -> wpimath.units.radians:
+        return math.radians(self.gyro_angle_degrees)
+
+    @property
+    def gyro_angle_degrees(self) -> wpimath.units.degrees:
+        return math_help.wrap_angle_degrees(self.__gyro_get_lambda())
+
+#module
+    @property
+    def num_modules(self) -> int:
+        return len(self._ordered_modules)
+
+    @property
+    def modules(self) -> dict[ModulePosition, ISwerveModule]:
+        return self._modules
+
+    @property
+    def estimated_position(self) -> geom.Pose2d:
+        """Get the pose estimators best guess about where the robot is"""
+        with self._odemetry_lock:
+            return self._odemetry.getEstimatedPosition()
+
+    @property
+    def ordered_modules(self) -> list[SwerveModule]:
+        """Provides a consistent ordering of modules for use with wpilib swerve functions"""
+        return self._ordered_modules
+
 
     def initialize(self):
         """Initialize the swerve drive.  Needs to be called repeatedly until it returns True."""
@@ -117,13 +119,6 @@ class SwerveDrive(commands2.subsystem.Subsystem):
             return True
 
         return False
-
-    def periodic(self):
-        """Call periodically to update the odemetry"""
-        self.update_odometry()
-        if __debug__:
-            for m in self._ordered_modules:
-                m.report_to_dashboard()  # type: ignore
 
     def update_odometry(self):
         with self._odemetry_lock:
@@ -148,15 +143,9 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         Drive the robot using cartesian coordinates
         :param run_modules: A set of modules to drive.  If None, all modules will be driven.  This is useful for testing individual modules and ensuring ModulePosition is correct for each module
         """
-
         v_x, v_y = self._scale_velocity_to_drive_speed(v_x, v_y)
-
-        # desired_chasis_speeds = kinematics.ChassisSpeeds.fromRobotRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-        #    -self.gyro_angle_radians))
-
         desired_chasis_speeds = kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(v_x, v_y, rotation, geom.Rotation2d(
-            -self.gyro_angle_radians))  # keep this one
-
+            -self.gyro_angle_radians))
         self.drive_with_chassis_speeds(desired_chasis_speeds, run_modules)
 
     def drive_with_chassis_speeds(self, desired_chasis_speeds: kinematics.ChassisSpeeds,
@@ -170,15 +159,11 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """
         Drive the robot using module states.  Module states must be passed in the same order as self._ordered_modules
         """
-
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._physical_config.max_drive_speed)
-
         for i in range(self.num_modules):
             module = self._ordered_modules[i]
-
             if run_modules is not None and module.id not in run_modules:
                 continue
-
             state = module_states[i]
             module.desired_state = state
 
@@ -198,6 +183,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         self._modules[ModulePosition.back_right].desired_state = kinematics.SwerveModuleState(0, geom.Rotation2d(
             math.pi + quarter_pi))
 
+# pose
     @property
     def pose(self) -> geom.Pose2d:
         """Current pose of the robot"""
@@ -217,6 +203,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                                          self._measured_module_positions,
                                          pose)
 
+# module state
     @property
     def _measured_module_states(self) -> Sequence[kinematics.SwerveModuleState]:
         """Current state of the modules"""
@@ -230,6 +217,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         """Current state of the modules"""
         return tuple([m.position for m in self._ordered_modules])  # type: ignore
 
+# chassis
     @property
     def measured_chassis_speed(self) -> kinematics.ChassisSpeeds:
         """Current chassis speed of the robot"""
