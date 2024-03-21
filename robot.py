@@ -89,6 +89,7 @@ class MyRobot(commands2.TimedCommandRobot):
     _command_scheduler: commands2.CommandScheduler
 
     swerve_drive: SwerveDrive
+
     swerve_telemetry: telemetry.SwerveTelemetry
 
     heading_controller_telemetry: telemetry.ChassisHeadingTelemetry
@@ -121,6 +122,7 @@ class MyRobot(commands2.TimedCommandRobot):
     intake: subsystems.Intake | None = None
     indexer: subsystems.Indexer | None = None
     climber: subsystems.Climber | None = None
+    swerve: swerve
     _heading_control: subsystems.ChassisHeadingControl
     _x_axis_control: subsystems.AxisPositionControl
     _y_axis_control: subsystems.AxisPositionControl
@@ -161,7 +163,6 @@ class MyRobot(commands2.TimedCommandRobot):
         else:
             self._navx = navx.AHRS.create_i2c()
 
-        sd.putBoolean("NavX Calibrating?", self._navx.isConnected())
 
         self.controller = commands2.button.CommandXboxController(0)
         self.joystick_one = commands2.button.CommandJoystick(0)
@@ -211,17 +212,18 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.auto_options = [
             autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
-                              (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
+                              (swerve, 2)),
             autos.AutoFactory("Drive a square", autos.auto_calibrations.drive_a_square_1,
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-            autos.AutoFactory("Manual Auto>", autos.manual_autos.shoot_drive_load_backup_auto, (self)),
+            autos.AutoFactory("2 note Auto>", autos.manual_autos.two_note_auto(self)),
+            autos.AutoFactory("2 note Auto>", autos.manual_autos.taxi(self))
             ]
 
         if robot_config.has_mechanisms:
             self.auto_options.append(
-                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.shoot_drive_load_backup_auto,
+                autos.AutoFactory("2 note auto", autos.manual_autos.two_note_auto,
                                   (self,)))
 
 

@@ -20,4 +20,6 @@ class ClimberTelemetry:
                                           get_value=lambda: self._climber.position,
                                           set_value=self.set_climber_position)
 
-
+    def periodic(self):
+        self._position_entry.periodic()
+        SmartDashboard.putBoolean("Climber Sensor", self._climber.get_climber_sensor_status())
