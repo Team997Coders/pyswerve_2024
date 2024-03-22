@@ -6,12 +6,11 @@ def one_note_auto(robot):
     if robot.shooter is None or robot.indexer is None or robot.intake is None or robot.swerve_drive is None:
         raise ValueError("Robot must have a swerve drive, shooter, indexer, and intake to run this auto")
 
-
-
     return commands2.sequentialcommandgroup.SequentialCommandGroup(
+        commands2.WaitCommand(20)
     #Taxi
-        commands.DeadReckonX(robot.swerve_drive, -1),
-        commands2.WaitCommand(10)
+        # commands.DeadReckonX(robot.swerve_drive, -1),
+        # commands2.WaitCommand(10)
     #One Note
         #commands.Shoot(robot.shooter, robot.indexer),
         #commands2.WaitCommand(1),
