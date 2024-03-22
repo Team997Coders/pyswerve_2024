@@ -14,6 +14,7 @@ class IndexOnIntake(commands2.InstantCommand):
 
     def execute(self):
         self._indexer.speed = self._indexer.config.intake_velocity
+        self._indexer.set_brake_mode()
         # self._indexer.voltage = 5
         print("IndexOn")
 
@@ -30,6 +31,7 @@ class IndexOnShoot(commands2.InstantCommand):
 
     def execute(self):
         self._indexer.speed = self._indexer.config.shoot_velocity
+        self._indexer.set_brake_mode()
         # self._indexer.voltage = 5
         print("IndexOn")
 
@@ -42,5 +44,6 @@ class IndexOff(commands2.InstantCommand):
 
     def execute(self):
         self._indexer._indexer_motor.stopMotor()
+        self._indexer.set_brake_mode()
         self._indexer.clearNoteState()
         print("IndexOff")

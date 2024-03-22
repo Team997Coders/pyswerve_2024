@@ -40,12 +40,9 @@ class Indexer(commands2.Subsystem):
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
         self._indexer_encoder.setVelocityConversionFactor(3 / 10)
 
-    def periodic(self) -> None:
-        super().periodic()
-        self._last_sensor_state = self._read_indexer_state()
-        if self._last_sensor_state:
-            self_latched_sensor_state = True
-        SmartDashboard.putBoolean("Has Note?", self._latched_sensor_state)
+
+    def set_brake_mode(self):
+        self._indexer_motor.setIdleMode(self._indexer_motor.IdleMode.kBrake)
 
     def clearNoteState(self) -> None:
         self._latched_sensor_state = False

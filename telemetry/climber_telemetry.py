@@ -14,8 +14,8 @@ class ClimberTelemetry:
     # def set_outtake_velocity(self, value: float):
     #     self._config.outtake_velocity = value
 
-    def __init__(self, intake_config: config.ClimberConfig):
-        self._config = intake_config
+    def __init__(self, climber_config: config.ClimberConfig):
+        self._config = climber_config
 
         # self._intake_entry = FloatEntry("Intake", "Intake Velocity",
         #                                            get_value=lambda: self._config.intake_velocity,

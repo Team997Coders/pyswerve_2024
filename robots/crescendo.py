@@ -20,7 +20,7 @@ gamepad_controls = DriverControlsConfig(x_deadband=math_help.Range(0.10, 1),
 
 default_angle_pid = PIDConfig(p=.6, i=0.0, d=0.2, wrapping=OptionalRange(min=0, max=math.pi * 2))
 # Be Careful when adding an i value to the drive pid, it can cause the robot to drive very fast
-default_drive_pid = PIDConfig(p=0.4, i=0.0, d=0.05, wrapping=None)
+default_drive_pid = PIDConfig(p=0.6, i=0.0, d=0.05, wrapping=None)
 default_heading_pid = ProfiledPIDConfig(p=.1, i=0, d=0.01,
                                          wrapping=OptionalRange(min=-math.pi, max=math.pi),
                                          profile=VelocityAccelerationConfig(velocity=math.pi * 8, acceleration=math.pi * 4),
@@ -46,7 +46,7 @@ shooter_config = ShooterConfig(left_motor=MotorConfig(id=11, inverted=False),
 indexer_config = IndexerConfig(MotorConfig(id=10, inverted=False), indexer_sensor_id=0, indexer_sensor_inverted=True,
                                intake_velocity=.4, shoot_velocity=1, outtake_velocity=-1)  # fix feeder_sensor_id
 intake_config = IntakeConfig(MotorConfig(id=15, inverted=True), intake_velocity=.5, outtake_velocity=-1)
-climber_config = ClimberConfig(climber_motor=MotorConfig(id=16, inverted=False), climber2_motor=MotorConfig(id=14, inverted=False),
+climber_config = ClimberConfig(climber_motor=MotorConfig(id=16, inverted=False), climber2_motor=MotorConfig(id=14, inverted=True),
                                climber_sensor_id=2, climber_sensor_inverted=False, climber_pid=PIDConfig(p=.2, i=0, d=0, wrapping=None),
                                climber_max=1)
 

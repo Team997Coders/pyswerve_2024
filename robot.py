@@ -156,7 +156,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
-        self.operator_control = commands2.button.CommandXboxController(0)
+        self.operator_control = commands2.button.CommandXboxController(2)
 
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
@@ -193,14 +193,14 @@ class MyRobot(commands2.TimedCommandRobot):
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
             autos.AutoFactory("One note auto", autos.manual_autos.one_note_auto(self), (self)),
-            autos.AutoFactory("Two Note auto>", autos.manual_autos.two_note_auto(self), (self)),
-            autos.AutoFactory("three Note auto>", autos.manual_autos.three_note_auto(self), (self)),
-            autos.AutoFactory("Taxi", autos.manual_autos.taxi(self), (self))
+            # autos.AutoFactory("Two Note auto>", autos.manual_autos.two_note_auto(self), (self)),
+            # autos.AutoFactory("three Note auto>", autos.manual_autos.three_note_auto(self), (self)),
+            # autos.AutoFactory("Taxi", autos.manual_autos.taxi(self), (self))
             ]
 
         if robot_config.has_mechanisms:
             self.auto_options.append(
-                autos.AutoFactory("Two Note auto", autos.manual_autos.two_note_auto,
+                autos.AutoFactory("One Note auto", autos.manual_autos.one_note_auto,
                                   (self,))
             # self.auto_options.append(
             #     autos.AutoFactory("Three Note auto", autos.manual_autos.three_note_auto,
@@ -226,12 +226,11 @@ class MyRobot(commands2.TimedCommandRobot):
 
 # left joystick
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))  # Intake
-            self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))  # Outtake
 # right joystick
             self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))  # Shoot
 # operator xbox controller
-            self.operator_control.leftTrigger().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
-            self.operator_control.rightTrigger().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
+            self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
+            self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:

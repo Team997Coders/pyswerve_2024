@@ -24,16 +24,12 @@ class Climber(commands2.Subsystem):
         self._logger = logger.getChild("Climber")
         self.climber_motor = rev.CANSparkMax(self.config.climber_motor.id, rev.CANSparkMax.MotorType.kBrushless)
         self.climber2_motor = rev.CANSparkMax(self.config.climber2_motor.id, rev.CANSparkMax.MotorType.kBrushless)
-        self.climber2_motor.follow(self.climber_motor, True)
         self.climber_sensor = DigitalInput(config.climber_sensor_id)
         self.read_climber_state = lambda: not self.climber_sensor.get() if config.climber_sensor_inverted else lambda: self.climber_sensor
         hardware.init_motor(self.climber_motor, config.climber_motor)
         hardware.init_motor(self.climber2_motor, config.climber2_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(-1)
-        self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
-        self.climber2_motor.setIdleMode(self.climber2_motor.getIdleMode().kBrake)
-
         self._pid = self.climber_motor.getPIDController()
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
 
@@ -47,12 +43,12 @@ class Climber(commands2.Subsystem):
         return self.climber_encoder.getPosition()
 
     def set_brake_mode(self):
-        self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
-        self.climber2_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)
+        self.climber_motor.setIdleMode(self.climber_motor.IdleMode.kBrake)
+        self.climber2_motor.setIdleMode(self.climber_motor.IdleMode.kBrake)
 
     def set_coast_mode(self):
-        self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kCoast)
-        self.climber2_motor.setIdleMode(self.climber_motor.getIdleMode().kCoast)
+        self.climber_motor.setIdleMode(self.climber_motor.IdleMode.kCoast)
+        self.climber2_motor.setIdleMode(self.climber_motor.IdleMode.kCoast)
     @property
     def position(self):
         return self.climber_encoder.getPosition()
@@ -67,4 +63,5 @@ class Climber(commands2.Subsystem):
 
     @speed.setter
     def speed(self, value: float):
+        self.climber2_motor.set(value)
         self.climber_motor.set(value)
