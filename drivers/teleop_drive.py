@@ -58,6 +58,6 @@ class TeleopDrive(commands2.Command):
             self._swerve_drive.measured_chassis_speed.vx ** 2 + self._swerve_drive.measured_chassis_speed.vy ** 2)
 
         if velocity < 0.1 and theta == 0 and vx == 0 and vx == 0:
-            self._swerve_drive.lock_wheels()
+            self._swerve_drive.drive(0, 0, 0, None)
         else:
             self._swerve_drive.drive(vx, vy, theta, None)

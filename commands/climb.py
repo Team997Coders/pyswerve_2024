@@ -25,9 +25,6 @@ class ClimberDown(commands2.InstantCommand):
     def execute(self):
         self._climber.speed = 0.5   # climb down
         self._climber.set_brake_mode()  # set brake mode
-        # if self._climber.read_climber_state:  # if the sensor is hit
-        #     self._climber.speed = 0  # climber stop
-
 
 
 class ClimberStop(commands2.InstantCommand):
@@ -39,3 +36,5 @@ class ClimberStop(commands2.InstantCommand):
 
     def execute(self):
         self._climber.speed = 0
+
+

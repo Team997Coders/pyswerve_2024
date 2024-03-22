@@ -28,6 +28,7 @@ class Climber(commands2.Subsystem):
         self.climber_sensor = DigitalInput(config.climber_sensor_id)
         self.read_climber_state = lambda: not self.climber_sensor.get() if config.climber_sensor_inverted else lambda: self.climber_sensor
         hardware.init_motor(self.climber_motor, config.climber_motor)
+        hardware.init_motor(self.climber2_motor, config.climber2_motor)
         self.climber_encoder = self.climber_motor.getEncoder()
         self.climber_encoder.setPosition(-1)
         self.climber_motor.setIdleMode(self.climber_motor.getIdleMode().kBrake)

@@ -76,31 +76,15 @@ class TwinStickTeleopDrive:
                 # self._angle_pid.reset(self._swerve_drive.pose.rotation().radians())
                 self._desired_robot_heading = _updated_desired_robot_heading
                 self._angle_pid.setGoal(self._desired_robot_heading)
-
         gyro_radians = math_help.wrap_angle(self._swerve_drive.gyro_angle_radians, -math.pi)
         measured_chassis_speed = self._swerve_drive.measured_chassis_speed
         pid_output = self._angle_pid.calculate(gyro_radians, self._desired_robot_heading)
         chassis_velocity = measured_chassis_speed.omega
         pid_velocity = self._angle_pid.getSetpoint().velocity
         ff_value = self._feedforward.calculate(currentVelocity=chassis_velocity, nextVelocity=pid_velocity, dt=0.02)
-
         theta_change = pid_output
-
-        ff_value = 0
+        # ff_value = 0
         self.send_drive_command(x_output_value, y_output_value, theta_change + ff_value)
-
-        # SmartDashboard.putNumberArray("outputs", [x_output_value, y_output_value, self._desired_robot_heading])
-        # SmartDashboard.putNumber("theta_change", theta_change)
-        # SmartDashboard.putNumber("Feedforward", ff_value)
-        # SmartDashboard.putNumber("desired heading", self._desired_robot_heading)
-        # SmartDashboard.putData("PID controller", self._angle_pid)
-        # SmartDashboard.putBoolean("at goal", self._angle_pid.atGoal())
-        # SmartDashboard.putBoolean("at internal setpoint", self._angle_pid.atSetpoint())
-        # SmartDashboard.putNumber("gyro", self._swerve_drive.gyro_angle_degrees)
-        # SmartDashboard.putNumber("gyro_radians", gyro_radians)
-
-        #pid_value = SmartDashboard.getData("PID controller")  # type: ProfiledPIDController
-        #self._angle_pid.setP(pid_value.)
 
     def send_drive_command(self, vx: float, vy: float, theta: float):
 
@@ -108,6 +92,6 @@ class TwinStickTeleopDrive:
             self._swerve_drive.measured_chassis_speed.vx ** 2 + self._swerve_drive.measured_chassis_speed.vy ** 2)
 
         if velocity < 0.1 and theta == 0 and vx == 0 and vx == 0:
-            self._swerve_drive.lock_wheels()
+            self._swerve_drive.drive(0, 0, 0, None)
         else:
             self._swerve_drive.drive(-vx, -vy, theta, None)

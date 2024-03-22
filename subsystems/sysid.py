@@ -4,6 +4,7 @@ import commands2
 from swerve.swervedrive import SwerveDrive
 from commands.drive import SetSwerveModuleAngles
 
+
 class swerve_system_id(commands2.subsystem.Subsystem):
     """This class is a wrapper for the wpilib.sysid module."""
     _swerve_drive: SwerveDrive

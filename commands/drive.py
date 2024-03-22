@@ -37,7 +37,6 @@ class SetSwerveModuleAngles(commands2.InstantCommand):
         self._swerve_drive.drive_with_module_states(desired_states, None) # type: ignore
 
 
-
 class Drive(commands2.Command):
     _swerve_drive: swerve.SwerveDrive
     _feedforward: wpimath.controller.SimpleMotorFeedforwardMeters
@@ -62,13 +61,12 @@ class Drive(commands2.Command):
         theta = self.get_theta()
         self.send_drive_command(x, y, theta)
 
-
     def send_drive_command(self, vx: float, vy: float, vtheta: float):
         chassis_speeds = self._swerve_drive.measured_chassis_speed
         velocity = math.sqrt(chassis_speeds.vx ** 2 + chassis_speeds.vy ** 2)
 
         if velocity < 0.1 and vtheta == 0 and vx == 0 and vx == 0:
-            self._swerve_drive.lock_wheels()
+            self._swerve_drive.drive(0, 0, 0)
         else:
             self._swerve_drive.drive(vx, vy, vtheta)
 

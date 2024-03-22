@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from config.driver_controls import ControllerType
+from config.driver_controls import ControllerKey
 import wpilib
 
 

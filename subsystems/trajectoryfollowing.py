@@ -34,7 +34,7 @@ class TrajectoryFollowing(Subsystem):
             self._swerve_drive.drive_with_chassis_speeds,
             # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             HolonomicPathFollowerConfig(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(0.2,
+                PIDConstants(0.5,
                              0.0,
                              0.05),  # Translation PID constants
                 PIDConstants(0.18,

@@ -153,10 +153,11 @@ class MyRobot(commands2.TimedCommandRobot):
             self._navx = navx.AHRS.create_spi()
         else:
             self._navx = navx.AHRS.create_i2c()
-        sd.putBoolean("NavX Calibrating?", self._navx.isConnected())
+
         self.joystick_one = commands2.button.CommandJoystick(0)
         self.joystick_two = commands2.button.CommandJoystick(1)
-        self.operator_control = commands2.button.CommandXboxController(0)  # if robot_config.has_mechanisms else None
+        self.operator_control = commands2.button.CommandXboxController(0)
+
         self.swerve_drive = swerve.SwerveDrive(self._navx, robot_config.swerve_modules,
                                                robot_config.physical_properties, self.logger)
         self.swerve_telemetry = telemetry.SwerveTelemetry(self.swerve_drive, robot_config.physical_properties)
@@ -189,18 +190,28 @@ class MyRobot(commands2.TimedCommandRobot):
         self.auto_options = [
             autos.AutoFactory("Drive Forward and backward", autos.auto_calibrations.create_drive_forward_and_back_auto,
                               (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
-            autos.AutoFactory("Drive a square", autos.auto_calibrations.drive_a_square,
-                              (self.swerve_drive, self._x_axis_control, self._y_axis_control, self._heading_control)),
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
-            autos.AutoFactory("Two Note auto>", autos.manual_autos.two_note_auto(), (self)),
+            autos.AutoFactory("One note auto", autos.manual_autos.one_note_auto(self), (self)),
+            autos.AutoFactory("Two Note auto>", autos.manual_autos.two_note_auto(self), (self)),
+            autos.AutoFactory("three Note auto>", autos.manual_autos.three_note_auto(self), (self)),
+            autos.AutoFactory("Taxi", autos.manual_autos.taxi(self), (self))
             ]
 
         if robot_config.has_mechanisms:
             self.auto_options.append(
-                autos.AutoFactory("Shoot, Drive, Load, Backup", autos.manual_autos.two_note_auto,
-                                  (self,)))
-
+                autos.AutoFactory("Two Note auto", autos.manual_autos.two_note_auto,
+                                  (self,))
+            # self.auto_options.append(
+            #     autos.AutoFactory("Three Note auto", autos.manual_autos.three_note_auto,
+            #                       (self,)))
+            # self.auto_options.append(
+            #     autos.AutoFactory("Taxi", autos.manual_autos.one_note_auto,
+            # #                       (self,)))
+            # self.auto_options.append(
+            #     autos.AutoFactory("Taxi", autos.manual_autos.taxi,
+            #                       (self))
+            )
 
     def try_init_mechanisms(self):
         """Initialize mechanisms if they are present in the robot config"""
@@ -219,8 +230,8 @@ class MyRobot(commands2.TimedCommandRobot):
 # right joystick
             self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))  # Shoot
 # operator xbox controller
-            self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
-            self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
+            self.operator_control.leftTrigger().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
+            self.operator_control.rightTrigger().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
@@ -274,8 +285,6 @@ class MyRobot(commands2.TimedCommandRobot):
         super().robotPeriodic()  # This calls the periodic functions of the subsystems
         self.mechanism_telemetry_periodic()
         sd.putBoolean("NavX Connected?", self._navx.isConnected())
-        sd.putNumber("NavXAngle", self._navx.getAngle())
-
 
     def disabledInit(self):
         super().disabledInit()
@@ -285,11 +294,9 @@ class MyRobot(commands2.TimedCommandRobot):
                 commands.SpindownShooter(self.shooter),
                 commands.IntakeOff(self.intake),
                 commands.ClimberStop(self.climber),
-                commands.drive.Drive(self.swerve_drive, 0.0, 0.0, 0.0)
             )
         )
         self._command_scheduler.cancelAll()
-
     def teleopInit(self):
         # driving_command = create_twinstick_tracking_command(self.joystick_one,
         #                                                     self.swerve_drive,
@@ -332,8 +339,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         super().testInit()
         # self.test_driver.testInit()
-        self._command_scheduler.schedule(commands.TestMechanisms(
-            indexer=self.indexer, intake=self.intake, shooter=self.shooter, climber=self.climber))
+        # self._command_scheduler.schedule(commands.TestMechanisms(
+        #     indexer=self.indexer, intake=self.intake, shooter=self.shooter, climber=self.climber))
 
     def testPeriodic(self) -> None:
         super().testPeriodic()
