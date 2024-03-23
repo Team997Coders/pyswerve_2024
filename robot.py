@@ -51,18 +51,18 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
                                       swerve_drive: swerve.SwerveDrive,
                                       heading_control: subsystems.ChassisHeadingControl):
     if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-        x_axis_func = lambda: drivers.map_input(lambda: controller.getRawAxis(1),
+        y_axis_func = lambda: drivers.map_input(lambda: controller.getRawAxis(1),
                                                 robot_config.standard_joystick_drive_axis_config)
 
     else:
-        x_axis_func = lambda: drivers.map_input(lambda: controller.getRawAxis(1),
+        y_axis_func = lambda: drivers.map_input(lambda: -controller.getRawAxis(1),
                                                 robot_config.standard_joystick_drive_axis_config)
 
     return commands.drive.Drive(
         swerve_drive,
-        get_x=x_axis_func,
-        get_y=lambda: drivers.map_input(lambda: -controller.getRawAxis(0),
+        get_x=lambda: drivers.map_input(lambda: -controller.getRawAxis(0),
                                         robot_config.standard_joystick_drive_axis_config),
+        get_y=y_axis_func,
         get_theta=lambda: heading_control.desired_velocity)
 
 
