@@ -187,24 +187,14 @@ class MyRobot(commands2.TimedCommandRobot):
             autos.AutoFactory("SysId: Dynamic", self.sysid.create_dynamic_measurement_command, ()),
             autos.AutoFactory("SysId: Quasistatic", self.sysid.create_quasistatic_measurement_command, ()),
             autos.AutoFactory("One note auto", autos.manual_autos.one_note_auto(self), (self)),
-            # autos.AutoFactory("Two Note auto>", autos.manual_autos.two_note_auto(self), (self)),
-            # autos.AutoFactory("three Note auto>", autos.manual_autos.three_note_auto(self), (self)),
-            # autos.AutoFactory("Taxi", autos.manual_autos.taxi(self), (self))
+
             ]
 
         if robot_config.has_mechanisms:
             self.auto_options.append(
                 autos.AutoFactory("One Note auto", autos.manual_autos.one_note_auto,
                                   (self,))
-            # self.auto_options.append(
-            #     autos.AutoFactory("Three Note auto", autos.manual_autos.three_note_auto,
-            #                       (self,)))
-            # self.auto_options.append(
-            #     autos.AutoFactory("Taxi", autos.manual_autos.one_note_auto,
-            # #                       (self,)))
-            # self.auto_options.append(
-            #     autos.AutoFactory("Taxi", autos.manual_autos.taxi,
-            #                       (self))
+
             )
 
     def try_init_mechanisms(self):
@@ -226,7 +216,7 @@ class MyRobot(commands2.TimedCommandRobot):
 # operator xbox controller
             self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
             self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
-           # self.operator_control.a().toggleOnTrue(swerve.SwerveDrive.reset_gyro(self.swerve_drive))
+            #self.operator_control.a().toggleOnTrue(swerve.SwerveDrive.reset_gyro(self.swerve_drive))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
