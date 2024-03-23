@@ -54,9 +54,10 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
         swerve_drive,
 
         # blue
+
         get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
                                         robot_config.standard_joystick_drive_axis_config),
-        get_y=lambda: drivers.map_input(lambda: -controller.getRawAxis(0),
+        get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
                                         robot_config.standard_joystick_drive_axis_config),
 
         # red
@@ -64,7 +65,6 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
         #                                 robot_config.standard_joystick_drive_axis_config),
         # get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
         #                                 robot_config.standard_joystick_rotation_axis_config),
-
 
         get_theta=lambda: heading_control.desired_velocity)
 
