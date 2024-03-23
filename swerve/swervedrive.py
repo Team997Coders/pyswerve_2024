@@ -33,7 +33,6 @@ class SwerveDrive(commands2.subsystem.Subsystem):
     logger: logging.Logger
 
     _ordered_modules: list[ISwerveModule]
-
     _odemetry: estimator.SwerveDrive4PoseEstimator
 
     _physical_config: PhysicalConfig
@@ -76,19 +75,34 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                                                              module_positions,  # type: ignore
                                                              geom.Pose2d(0, 0, geom.Rotation2d(0)))
         self.initialize()
-
+        self._offset = 0
         # Register the subsystem at the end to ensure periodic is called
 
     #        commands2.CommandScheduler.getInstance().registerSubsystem(self)
 
 #gyro
+
     @property
     def gyro_angle_radians(self) -> wpimath.units.radians:
-        return math.radians(self.gyro_angle_degrees)
+        return math.radians(self.gyro_angle_degrees + self.offset())
 
     @property
     def gyro_angle_degrees(self) -> wpimath.units.degrees:
-        return math_help.wrap_angle_degrees(self.__gyro_get_lambda())
+        return math_help.wrap_angle_degrees(self.__gyro_get_lambda() + self.offset() * (180/math.pi))
+
+    def offset(self):
+        return self._offset
+
+    def set_offset(self):
+        self._offset = -self.gyro_angle_radians
+
+    def reset_gyro(self):
+        self.set_offset()
+
+
+
+
+
 
 #module
     @property
