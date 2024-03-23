@@ -9,13 +9,15 @@ def one_note_auto(robot):
     return commands2.sequentialcommandgroup.SequentialCommandGroup(
         commands2.WaitCommand(20)
     #Taxi
-        # commands.DeadReckonX(robot.swerve_drive, -1),
+        # commands.DeadReckonX(robot.swerve_drive, -15),
+        # commands.DeadReckonY(robot.swerve_drive, 0),
         # commands2.WaitCommand(10)
     #One Note
-        #commands.Shoot(robot.shooter, robot.indexer),
-        #commands2.WaitCommand(1),
-        #commands.DeadReckonX(robot.swerve_drive, -1),
-        #commands2.WaitCommand(10)
+        # commands.Shoot(robot.shooter, robot.indexer),
+        # commands2.WaitCommand(1),
+        # commands.DeadReckonX(robot.swerve_drive, -1),
+        # commands.DeadReckonY(robot.swerve_drive, 0),
+        # commands2.WaitCommand(10)
     #Two Note
         #commands.Shoot(robot.shooter, robot.indexer),
         #commands2.WaitCommand(0.5),
