@@ -52,21 +52,12 @@ def create_twinstick_tracking_command(controller: commands2.button.CommandGeneri
                                       heading_control: subsystems.ChassisHeadingControl):
     return commands.drive.Drive(
         swerve_drive,
-
-        # blue
-
         get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
                                         robot_config.standard_joystick_drive_axis_config),
         get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
                                         robot_config.standard_joystick_drive_axis_config),
-
-        # red
-        # get_x=lambda: drivers.map_input(lambda: controller.getRawAxis(1),
-        #                                 robot_config.standard_joystick_drive_axis_config),
-        # get_y=lambda: drivers.map_input(lambda: controller.getRawAxis(0),
-        #                                 robot_config.standard_joystick_rotation_axis_config),
-
-        get_theta=lambda: heading_control.desired_velocity)
+        get_theta=lambda: heading_control.desired_velocity
+    )
 
 
 def create_3dof_command(controller: commands2.button.CommandGenericHID,
@@ -185,7 +176,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.driving_command.requirements = {self.swerve_drive}
         self.heading_command.requirements = {self._heading_control}
         self.try_init_mechanisms()
-        self.joystick_one.button(2).toggleOnTrue(self.heading_command)
         self.define_autonomous_modes()
         self.auto_chooser = telemetry.create_selector("Autos", [auto.name for auto in self.auto_options])
 
@@ -230,6 +220,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
 # left joystick
             self.joystick_one.button(1).toggleOnTrue(commands.Load(self.intake, self.indexer))  # Intake
+            self.joystick_one.button(2).toggleOnTrue(commands.Outtake(self.intake, self.indexer))  # Outtake
 # right joystick
             self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))  # Shoot
 # operator xbox controller

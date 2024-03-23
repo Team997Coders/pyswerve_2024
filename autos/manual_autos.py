@@ -11,7 +11,7 @@ def one_note_auto(robot):
 
     if wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed:
         return commands2.sequentialcommandgroup.SequentialCommandGroup(
-            # commands2.WaitCommand(20)
+            commands2.WaitCommand(20)
 # Taxi
 #             commands.DeadReckonX(robot.swerve_drive, -2),
 #             commands.DeadReckonY(robot.swerve_drive, 0),
@@ -59,19 +59,19 @@ def one_note_auto(robot):
         )
     else:
         return commands2.sequentialcommandgroup.SequentialCommandGroup(
-            # commands2.WaitCommand(20)
+            commands2.WaitCommand(20)
 # Taxi
             # commands.DeadReckonX(robot.swerve_drive, 2),
             # commands.DeadReckonY(robot.swerve_drive, 0),
             # commands2.WaitCommand(10)
 # One Note
-        commands.Shoot(robot.shooter, robot.indexer),
-        commands2.WaitCommand(1),
-        commands2.ParallelCommandGroup(
-                commands.DeadReckonX(robot.swerve_drive, 2),
-                commands.DeadReckonY(robot.swerve_drive, 0),
-                commands2.WaitCommand(10)
-        )
+#         commands.Shoot(robot.shooter, robot.indexer),
+#         commands2.WaitCommand(1),
+#         commands2.ParallelCommandGroup(
+#                 commands.DeadReckonX(robot.swerve_drive, 2),
+#                 commands.DeadReckonY(robot.swerve_drive, 0),
+#                 commands2.WaitCommand(10)
+#         )
 
 # Two Note
             # commands.Shoot(robot.shooter, robot.indexer),
