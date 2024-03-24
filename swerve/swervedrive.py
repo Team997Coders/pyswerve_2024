@@ -76,7 +76,7 @@ class SwerveDrive(commands2.subsystem.Subsystem):
                                                              geom.Pose2d(0, 0, geom.Rotation2d(0)))
         self.initialize()
 
-        # self._offset = 0
+        self.gyro = gyro
 
         # Register the subsystem at the end to ensure periodic is called
 
@@ -93,14 +93,8 @@ class SwerveDrive(commands2.subsystem.Subsystem):
         # return math_help.wrap_angle_degrees(self.__gyro_get_lambda() + self.offset() * 180 / math.pi)
         return math_help.wrap_angle_degrees(self.__gyro_get_lambda())
 
-    # def offset(self):
-    #     return self._offset
-    #
-    # def set_offset(self):
-    #     self._offset = -self.gyro_angle_radians
-    #
-    # def reset_gyro(self):
-    #     self.set_offset()
+    def gyro_reset(self):
+        self.gyro.reset()
 
 
 

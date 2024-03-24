@@ -216,7 +216,7 @@ class MyRobot(commands2.TimedCommandRobot):
 # operator xbox controller
             self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
             self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
-            #self.operator_control.a().toggleOnTrue(swerve.SwerveDrive.reset_gyro(self.swerve_drive))
+            self.operator_control.a().toggleOnTrue(swerve.SwerveDrive.gyro_reset(self.swerve_drive))
 
     def init_mechanism_telemetry(self):
         if robot_config.has_mechanisms:
