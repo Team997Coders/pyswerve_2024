@@ -45,6 +45,8 @@ class Indexer(commands2.Subsystem):
             SmartDashboard.putBoolean("Has Note", True)
             if wpilib.Timer.get() >3:
                 SmartDashboard.putBoolean("Has Note", False)
+        else:
+            SmartDashboard.putBoolean("Has Note", False)
 
     def set_brake_mode(self):
         self._indexer_motor.setIdleMode(self._indexer_motor.IdleMode.kBrake)
