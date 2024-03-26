@@ -214,8 +214,11 @@ class MyRobot(commands2.TimedCommandRobot):
 # right joystick
             self.joystick_two.button(1).whileTrue(commands.Shoot(self.shooter, self.indexer))  # Shoot
 # operator xbox controller
-            self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
-            self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
+            if self.climber.get_climber_sensor_status():
+                self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
+            else:
+                self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
+                self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
             self.operator_control.a().toggleOnTrue(swerve.SwerveDrive.gyro_reset(self.swerve_drive))
 
     def init_mechanism_telemetry(self):
