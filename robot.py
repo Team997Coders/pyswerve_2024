@@ -219,6 +219,9 @@ class MyRobot(commands2.TimedCommandRobot):
             else:
                 self.operator_control.leftBumper().onTrue(commands.ClimberUp(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber up
                 self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
+            if self.climber.position is 0:
+                self.operator_control.rightBumper().onTrue(commands.ClimberDown(self.climber)).onFalse(commands.ClimberStop(self.climber))  # climber down
+
             self.operator_control.a().toggleOnTrue(swerve.SwerveDrive.gyro_reset(self.swerve_drive))
 
     def init_mechanism_telemetry(self):
