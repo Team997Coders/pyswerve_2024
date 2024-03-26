@@ -40,4 +40,4 @@ class IndexerTelemetry:
         self._velocity_entry.periodic()
         self._shoot_entry.periodic()
         self._outtake_entry.periodic()
-        sd.putBoolean("Intake Sensor", self._indexer.last_sensor_state)
+        sd.putBoolean("Intake Sensor", self._indexer.get_sensor_status())

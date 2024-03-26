@@ -2,7 +2,6 @@ import rev
 import wpilib
 import commands2
 from typing import Callable
-
 import hardware
 import logging
 from wpilib import SmartDashboard
@@ -40,6 +39,12 @@ class Indexer(commands2.Subsystem):
         self._indexer_encoder.setPositionConversionFactor(3 / 10)
         self._indexer_encoder.setVelocityConversionFactor(3 / 10)
 
+    def get_sensor_status(self):
+        if self._read_indexer_state:
+            wpilib.Timer.start()
+            SmartDashboard.putBoolean("Has Note", True)
+            if wpilib.Timer.get() >3:
+                SmartDashboard.putBoolean("Has Note", False)
 
     def set_brake_mode(self):
         self._indexer_motor.setIdleMode(self._indexer_motor.IdleMode.kBrake)
