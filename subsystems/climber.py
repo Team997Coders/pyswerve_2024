@@ -34,7 +34,7 @@ class Climber(commands2.Subsystem):
         hardware.init_pid(self._pid, self.config.climber_pid, self.climber_encoder)
 
     def get_climber_sensor_status(self):
-        self.climber_sensor.get()
+        return self.climber_sensor.get()
 
     def set_climber_motor_voltage(self, voltage: float):
         self.climber_motor.setVoltage(voltage)

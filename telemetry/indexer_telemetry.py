@@ -40,4 +40,4 @@ class IndexerTelemetry:
         self._velocity_entry.periodic()
         self._shoot_entry.periodic()
         self._outtake_entry.periodic()
-        self._indexer.get_sensor_status()
+        sd.putBoolean("Has Note?", self._indexer.get_sensor_status())
